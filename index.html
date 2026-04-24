@@ -1160,18 +1160,33 @@
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        // =======================================================================
+        // 🔥 MASUKKAN CONFIG FIREBASE KAMU DI SINI (Ganti tulisan di dalam tanda kutip)
+        // =======================================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq_zB0KHCqVKgouKBLUw1obq6KU0HZHvc",
+            authDomain: "ailabs-6f8b1.firebaseapp.com",
+            projectId: "ailabs-6f8b1",
+            storageBucket: "ailabs-6f8b1.firebasestorage.app",
+            messagingSenderId: "290208256362",
+            appId: "1:290208256362:web:b5022be8bd57311f9cd513",
+            measurementId: "G-4QQCLCWJF0"
+        };
         
         let app, auth, db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const appId = "ailabs-app"; // Tidak perlu diganti
         const provider = new GoogleAuthProvider();
         
-        // NEW: Variabel global untuk menyimpan state kredit user
+        // Variabel global untuk menyimpan state kredit user
         window.currentUserCredits = 0;
         window.currentUserId = null;
         let creditUnsubscribe = null;
 
-        if (firebaseConfig && Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
+        // FITUR PENGAMAN: Paksa tombol Login Muncul walau config kosong
+        window.updateAuthUI(false); 
+
+        // Pengecekan apakah config sudah diisi atau belum
+        if (firebaseConfig.apiKey !== "GANTI_DENGAN_API_KEY_KAMU" && firebaseConfig.apiKey !== "") {
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
@@ -1185,20 +1200,14 @@
 
             const initAuth = async () => {
                 try {
-                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                        await signInWithCustomToken(auth, __initial_auth_token);
-                    } else {
-                         await signInAnonymously(auth);
-                    }
+                    await signInAnonymously(auth);
                 } catch(e) {
                     console.error("Init Auth error:", e);
                 }
             };
             
-            // Panggil inisialisasi dulu
             initAuth();
 
-            // Dengarkan perubahan status setelah inisialisasi
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     window.currentUserId = user.uid;
@@ -1207,26 +1216,25 @@
                     
                     if (window.updateAuthUI) window.updateAuthUI(true, photo);
 
-                    // PERBAIKAN ERROR PERMISSION: Path mutlak harus begini untuk lolos security rules Sandbox
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
                     try {
                         const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
-                            // Buat default profil jika belum ada (KREDIT DIMULAI DARI 0 SEKARANG)
+                            // Buat default profil jika belum ada (KREDIT DIMULAI DARI 0)
                             await setDoc(userRef, {
                                 uid: user.uid,
                                 email: user.email || 'Anonim',
                                 name: user.displayName || 'User',
                                 isAnon: isAnon,
-                                credits: 0, // <-- BERUBAH: Modal awal 0
+                                credits: 0, 
                                 isPro: false,
-                                hasRedeemed: false, // <-- Menandai apakah sudah pakai kode VIP awal
+                                hasRedeemed: false, 
                                 lastResetDate: new Date().toISOString()
                             });
                         }
                     } catch (err) {
-                        console.error("Gagal init db (Abaikan jika di Sandbox tanpa kunci api sendiri):", err);
+                        console.error("Gagal init db:", err);
                     }
 
                     // Listen perubahan data kredit
@@ -1278,10 +1286,10 @@
             };
 
         } else {
-            console.warn("Firebase Sandbox Kosong: Kunci API tidak ada. Mengabaikan fitur login agar web tidak crash.");
+            console.warn("Kunci API Firebase Belum Diisi!");
             
             window.signInWithGoogle = async () => {
-                window.showCustomAlert("Mode Sandbox: Database Firebase belum disambungkan.");
+                window.showCustomAlert("Firebase belum dikonfigurasi. Masukkan config di dalam file index.html terlebih dahulu.");
             };
             window.signOutUser = async () => {
                 if (window.updateAuthUI) window.updateAuthUI(false);
