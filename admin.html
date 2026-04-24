@@ -30,6 +30,8 @@
         .active-tab { background: #059669 !important; color: white !important; border-color: #10b981 !important; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        
+        .glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
     </style>
 </head>
 <body class="font-sans antialiased min-h-screen">
@@ -39,24 +41,30 @@
         <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center border-t border-emerald-500/30">
             <i class="fas fa-shield-alt text-4xl text-emerald-400 mb-6"></i>
             <h1 class="text-2xl font-bold mb-8">Ailabs Command Center</h1>
-            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:border-emerald-500 outline-none mb-4" placeholder="Kode Rahasia Admin">
-            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all">Masuk Sistem</button>
+            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:border-emerald-500 outline-none mb-4" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
+            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg">Masuk Sistem</button>
         </div>
     </div>
 
     <!-- VIEW 2: DASHBOARD -->
-    <div id="dashboard-view" class="hidden min-h-screen opacity-0 transition-opacity duration-500">
-        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4">
+    <div id="dashboard-view" class="hidden min-h-screen opacity-0 transition-opacity duration-500 flex flex-col">
+        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4 border-b border-white/5">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black">AL</div>
-                    <h2 class="font-bold text-lg">Ailabs Control Panel</h2>
+                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black shadow-lg">AL</div>
+                    <h2 class="font-bold text-lg tracking-tight">Ailabs Control Panel</h2>
                 </div>
-                <button onclick="location.reload()" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+                <button onclick="location.reload()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-2 font-medium">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </button>
             </div>
             <div class="flex gap-2">
-                <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold active-tab">Pengguna & Saldo</button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">Stok Kode VIP</button>
+                <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition active-tab">
+                    <i class="fas fa-users mr-2"></i> Pengguna & Saldo
+                </button>
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition">
+                    <i class="fas fa-ticket-alt mr-2"></i> Stok Kode VIP
+                </button>
             </div>
         </header>
 
@@ -64,46 +72,69 @@
             <!-- STATS CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-users"></i></div>
-                    <div><p class="text-xs text-gray-400">Total User</p><h3 class="text-xl font-bold" id="stat-total-users">0</h3></div>
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl"><i class="fas fa-users"></i></div>
+                    <div><p class="text-xs text-gray-400 font-medium">Total Pengguna</p><h3 class="text-2xl font-bold" id="stat-total-users">0</h3></div>
                 </div>
                 <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400"><i class="fas fa-bolt"></i></div>
-                    <div><p class="text-xs text-gray-400">Total Kredit User</p><h3 class="text-xl font-bold" id="stat-total-credits">0</h3></div>
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
+                    <div><p class="text-xs text-gray-400 font-medium">Kredit Beredar</p><h3 class="text-2xl font-bold" id="stat-total-credits">0</h3></div>
                 </div>
-                <!-- SALDO KIE AI (DARI API) -->
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center gap-4 bg-cyan-500/5">
-                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fas fa-server"></i></div>
-                    <div><p class="text-xs text-gray-400">Saldo Kie AI (Master)</p><h3 class="text-xl font-bold text-cyan-300" id="stat-server-balance">Menghubungkan...</h3></div>
+                <!-- SALDO MASTER KIE AI (DARI API SINKRON) -->
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center gap-4 bg-cyan-500/5 glow-cyan">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl"><i class="fas fa-server"></i></div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Saldo Kie AI (Master)</p>
+                        <h3 class="text-2xl font-bold text-cyan-300" id="stat-server-balance">Menghubungkan...</h3>
+                    </div>
                 </div>
             </div>
 
-            <div id="section-users" class="glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col">
+            <!-- SECTION USER -->
+            <div id="section-users" class="glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col border border-white/5">
                 <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
-                    <h3 class="font-bold">Manajemen Pengguna</h3>
-                    <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white outline-none focus:border-emerald-500" placeholder="Cari user...">
+                    <h3 class="font-bold flex items-center gap-2"><i class="fas fa-list text-emerald-400"></i> Manajemen Klien</h3>
+                    <div class="flex items-center gap-3">
+                         <button onclick="loadUsers()" class="p-2 hover:bg-white/10 rounded-lg transition text-gray-400" title="Refresh Data"><i class="fas fa-sync-alt"></i></button>
+                         <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white outline-none focus:border-emerald-500 w-48 md:w-64" placeholder="Cari nama/email...">
+                    </div>
                 </div>
-                <div class="overflow-y-auto flex-1">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-black/80 text-gray-400 sticky top-0">
-                            <tr><th class="px-6 py-4">User</th><th class="px-6 py-4 text-center">Kredit</th><th class="px-6 py-4 text-center">Akses Video</th><th class="px-6 py-4 text-right">Aksi</th></tr>
+                <div class="overflow-y-auto flex-1 custom-scrollbar">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead class="bg-black/80 text-gray-400 sticky top-0 z-10 border-b border-white/5">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest">Detail User</th>
+                                <th class="px-6 py-4 text-center font-semibold uppercase text-[10px] tracking-widest">Kredit Saat Ini</th>
+                                <th class="px-6 py-4 text-center font-semibold uppercase text-[10px] tracking-widest">Akses Video</th>
+                                <th class="px-6 py-4 text-right font-semibold uppercase text-[10px] tracking-widest">Tindakan Admin</th>
+                            </tr>
                         </thead>
-                        <tbody id="users-tbody" class="divide-y divide-white/5"></tbody>
+                        <tbody id="users-tbody" class="divide-y divide-white/5">
+                            <!-- Dimuat via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
             
-            <div id="section-referrals" class="hidden glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col">
+            <!-- SECTION REFERRAL -->
+            <div id="section-referrals" class="hidden glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col border border-white/5">
                  <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
-                    <h3 class="font-bold">Monitoring Kode VIP</h3>
-                    <button onclick="loadReferrals()" class="text-xs text-cyan-400 hover:underline">Refresh List</button>
+                    <h3 class="font-bold flex items-center gap-2"><i class="fas fa-key text-cyan-400"></i> Monitoring Kode VIP</h3>
+                    <button onclick="loadReferrals()" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
+                        <i class="fas fa-sync-alt"></i> REFRESH STOK
+                    </button>
                 </div>
-                <div class="overflow-y-auto flex-1">
+                <div class="overflow-y-auto flex-1 custom-scrollbar">
                     <table class="w-full text-left text-sm">
-                        <thead class="bg-black/80 text-gray-400 sticky top-0">
-                            <tr><th class="px-6 py-4">Kode</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-right">Aksi</th></tr>
+                        <thead class="bg-black/80 text-gray-400 sticky top-0 z-10 border-b border-white/5">
+                            <tr>
+                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest">Kode Voucher</th>
+                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest text-center">Status Pemanfaatan</th>
+                                <th class="px-6 py-4 text-right font-semibold uppercase text-[10px] tracking-widest">Aksi</th>
+                            </tr>
                         </thead>
-                        <tbody id="ref-tbody" class="divide-y divide-white/5"></tbody>
+                        <tbody id="ref-tbody" class="divide-y divide-white/5">
+                            <!-- Dimuat via JS -->
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -122,12 +153,12 @@
                 document.getElementById('dashboard-view').classList.remove('hidden');
                 setTimeout(() => document.getElementById('dashboard-view').style.opacity = '1', 10);
                 loadUsers();
-            } else { alert('Sandi Salah!'); }
+            } else { alert('Maaf, Kode Rahasia Admin Salah!'); }
         }
 
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-16 text-center text-emerald-400"><i class="fas fa-spinner fa-spin text-2xl mb-3 block mx-auto"></i> Menghubungkan ke Vercel Server & Kie AI...</td></tr>';
             try {
                 const res = await fetch('/api/admin/users', {
                     method: 'POST',
@@ -138,29 +169,115 @@
                 if(data.success) {
                     document.getElementById('stat-total-users').innerText = data.users.length;
                     document.getElementById('stat-total-credits').innerText = data.users.reduce((s,u)=>s+(u.credits||0),0).toLocaleString();
-                    // UPDATE SALDO MASTER KIE AI
-                    document.getElementById('stat-server-balance').innerText = typeof data.serverBalance === 'number' ? data.serverBalance.toLocaleString() : data.serverBalance;
                     
+                    // UPDATE SALDO MASTER KIE AI SECARA OTOMATIS
+                    const balanceEl = document.getElementById('stat-server-balance');
+                    balanceEl.innerText = typeof data.serverBalance === 'number' ? data.serverBalance.toLocaleString() : data.serverBalance;
+                    
+                    if (data.users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada pengguna terdaftar.</td></tr>';
+                        return;
+                    }
+
                     tbody.innerHTML = data.users.map(u => `
-                        <tr class="hover:bg-white/5">
-                            <td class="px-6 py-4"><div class="flex flex-col"><span class="font-bold">${u.name}</span><span class="text-[10px] text-gray-500">${u.email}</span></div></td>
-                            <td class="px-6 py-4 text-center"><span class="text-yellow-400 font-bold">${u.credits} ⚡</span></td>
+                        <tr class="hover:bg-white/[0.03] transition-colors border-b border-white/5">
+                            <td class="px-6 py-4">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-white text-sm">${u.name}</span>
+                                    <span class="text-[10px] text-emerald-400 font-mono">${u.email}</span>
+                                    <span class="text-[9px] text-gray-600 font-mono mt-1">ID: ${u.uid}</span>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 text-center">
-                                <button onclick="toggleVideo('${u.uid}', ${u.videoAccess !== false})" class="px-3 py-1 rounded text-[10px] font-bold ${u.videoAccess !== false ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
-                                    ${u.videoAccess !== false ? 'ON' : 'OFF'}
+                                <div class="inline-block px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 font-black text-sm shadow-inner">
+                                    ${u.credits.toLocaleString()} ⚡
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="toggleVideo('${u.uid}', ${u.videoAccess !== false})" class="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all shadow-md ${u.videoAccess !== false ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
+                                    ${u.videoAccess !== false ? 'AKTIF (ON)' : 'MATI (OFF)'}
                                 </button>
                             </td>
                             <td class="px-6 py-4 text-right">
-                                <div class="flex justify-end gap-1">
-                                    <input type="number" id="in-${u.uid}" class="w-12 bg-black border border-white/10 rounded px-1 text-xs" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}', 'add')" class="bg-emerald-600 px-2 py-1 rounded text-xs">+</button>
-                                    <button onclick="changeCredit('${u.uid}', 'sub')" class="bg-red-600 px-2 py-1 rounded text-xs">-</button>
+                                <div class="flex justify-end items-center gap-2">
+                                    <div class="relative">
+                                        <input type="number" id="in-${u.uid}" class="w-20 bg-black/60 border border-white/10 rounded-lg pl-2 pr-1 py-2 text-xs text-center focus:border-emerald-500 outline-none transition-all shadow-inner" placeholder="Jumlah">
+                                        <div class="absolute -top-2 -right-2 text-[8px] bg-gray-700 text-white px-1 rounded">ADD</div>
+                                    </div>
+                                    <button onclick="changeCredit('${u.uid}', 'add')" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all flex items-center justify-center shadow-lg hover:scale-105 active:scale-95"><i class="fas fa-plus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}', 'sub')" class="w-8 h-8 bg-red-600 hover:bg-red-500 rounded-lg transition-all flex items-center justify-center shadow-lg hover:scale-105 active:scale-95"><i class="fas fa-minus text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>
                     `).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl">Error: ${data.error}</td></tr>`;
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Error: Gagal Sinkronisasi.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Gagal terhubung ke Vercel API. Periksa logs Vercel!</td></tr>'; }
+        }
+
+        async function loadReferrals() {
+            const tbody = document.getElementById('ref-tbody');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2"></i> Sinkronisasi database kode...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/referrals', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    tbody.innerHTML = data.codes.map(c => `
+                        <tr class="hover:bg-white/[0.02] border-b border-white/5 transition-colors">
+                            <td class="px-6 py-4 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
+                            <td class="px-6 py-4 text-center">
+                                ${c.used ? 
+                                    `<div class="flex flex-col items-center"><span class="px-3 py-1 rounded-full bg-red-500/20 text-red-500 text-[9px] font-bold uppercase border border-red-500/20">TERPAKAI</span><span class="text-[8px] text-gray-500 mt-1">${c.usedBy || ''}</span></div>` : 
+                                    '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-[9px] font-bold uppercase border border-emerald-500/20">READY</span>'
+                                }
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${!c.used ? `
+                                    <button onclick="copyToClipboard('${c.code}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-4 py-2 rounded-lg border border-emerald-500/30 transition-all text-xs font-black shadow-sm">
+                                        <i class="fas fa-copy mr-1"></i> SALIN
+                                    </button>
+                                ` : '<span class="text-xs text-gray-700 font-bold italic">HANGUS</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Error memuat stok.</td></tr>'; }
+        }
+
+        async function changeCredit(uid, act) {
+            const el = document.getElementById(`in-${uid}`);
+            const v = parseInt(el.value);
+            if(!v || v <= 0) return alert('Masukkan angka jumlah token yang benar!');
+            const amount = act === 'add' ? v : -v;
+            try {
+                const res = await fetch('/api/admin/topup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
+                });
+                const data = await res.json();
+                if(data.success) { 
+                    el.value = '';
+                    loadUsers(); 
+                } else { alert('Error: ' + data.error); }
+            } catch(e) { alert('Gagal update saldo!'); }
+        }
+
+        async function toggleVideo(uid, curr) {
+            try {
+                const res = await fetch('/api/admin/toggle-access', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: !curr })
+                });
+                const data = await res.json();
+                if(data.success) { loadUsers(); }
+            } catch(e) { alert('Gagal update akses video!'); }
         }
 
         function switchTab(tab) {
@@ -169,27 +286,17 @@
             document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
             document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
             if(tab === 'referrals') loadReferrals();
+            if(tab === 'users') loadUsers();
         }
 
-        async function changeCredit(uid, act) {
-            const v = parseInt(document.getElementById(`in-${uid}`).value);
-            if(!v) return;
-            const amount = act === 'add' ? v : -v;
-            const res = await fetch('/api/admin/topup', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
-            });
-            if((await res.json()).success) loadUsers();
-        }
-
-        async function toggleVideo(uid, curr) {
-            const res = await fetch('/api/admin/toggle-access', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: !curr })
-            });
-            if((await res.json()).success) loadUsers();
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            alert('Kode VIP ' + text + ' berhasil disalin ke clipboard!');
         }
 
         function filterTable(tid, iid) {
