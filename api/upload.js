@@ -1,11 +1,12 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
-
+  
   const apiKey = process.env.KIE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'KIE_API_KEY belum dipasang di environment Vercel!' });
 
   try {
     const { base64Data, uploadPath, fileName } = req.body;
+    
     if (!base64Data) return res.status(400).json({ error: 'Data base64 tidak ditemukan' });
 
     const response = await fetch('https://kieai.redpandaai.co/api/file-base64-upload', {
@@ -21,10 +22,17 @@ export default async function handler(req, res) {
       })
     });
 
+    // Pengaman ekstra: Pastikan responsnya JSON
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Gagal mengunggah, respons server KIE bukan JSON.");
+    }
+
     const data = await response.json();
     res.status(response.status).json(data);
 
   } catch (error) {
+    console.error("Error di upload.js:", error);
     res.status(500).json({ error: 'Gagal mengunggah ke Kie AI', message: error.message });
   }
 }
