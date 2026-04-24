@@ -256,13 +256,13 @@
 </head>
 <body class="font-sans antialiased selection:bg-white selection:text-black min-h-screen">
 
-    <!-- Global Custom Alert (Pengganti window.alert) -->
+    <!-- Global Custom Alert -->
     <div id="global-custom-alert" class="hidden fixed top-10 left-1/2 -translate-x-1/2 z-[9999] glass-card px-6 py-4 rounded-xl flex items-center gap-3 transition-all duration-300 transform -translate-y-10 opacity-0 pointer-events-none max-w-md w-[90%] shadow-2xl border-red-500/30 bg-black/90 backdrop-blur-md">
         <i class="fas fa-exclamation-circle text-red-400 text-xl shrink-0"></i>
         <span id="global-alert-message" class="text-white text-sm font-medium leading-tight"></span>
     </div>
 
-    <!-- Global Toast (Pengganti window.alert sukses) -->
+    <!-- Global Toast -->
     <div id="global-toast" class="fixed bottom-6 right-6 glass-card px-6 py-4 rounded-xl flex items-center gap-3 opacity-0 pointer-events-none transition-opacity duration-300 z-[9999] bg-black/90 backdrop-blur-md border border-emerald-500/30 shadow-2xl">
         <i class="fas fa-check-circle text-emerald-400 text-xl shrink-0"></i>
         <span id="global-toast-message" class="text-white text-sm font-medium">Berhasil!</span>
@@ -446,9 +446,8 @@
 
                 <!-- AUTH SECTION (DASHBOARD) -->
                 <div id="auth-section-dashboard" class="flex items-center gap-3 border-l border-gray-700 pl-3 md:pl-4">
-                    <!-- HAPUS KELAS HIDDEN AGAR TOMBOL LOGIN MUNCUL -->
-                    <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition">
-                        Login
+                    <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-2">
+                        <i class="fa-brands fa-google text-red-500"></i> Login
                     </button>
                     
                     <div id="user-profile-dashboard" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-dashboard')">
@@ -681,9 +680,8 @@
                 <button class="hover:text-white transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-3 pl-3 border-l border-gray-700 ml-2">
-                     <!-- HAPUS KELAS HIDDEN AGAR TOMBOL LOGIN MUNCUL -->
-                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition">
-                        Login
+                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-2">
+                        <i class="fa-brands fa-google text-red-500"></i> Login
                     </button>
                     
                     <div id="user-profile-editor" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-editor')">
@@ -1159,7 +1157,7 @@
     <!-- Firebase SDK Imports (Modular version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =======================================================================
@@ -1200,9 +1198,12 @@
             window.fsSetDoc = setDoc;
             window.fsDeleteDoc = deleteDoc;
 
+            // Memulai sesi anonim agar pengguna langsung bisa memakai canvas walau belum login Google
             const initAuth = async () => {
                 try {
-                    await signInAnonymously(auth);
+                    if (!auth.currentUser) {
+                        await signInAnonymously(auth);
+                    }
                 } catch(e) {
                     console.error("Init Auth error:", e);
                 }
@@ -1216,7 +1217,7 @@
                     const isAnon = user.isAnonymous;
                     const photo = isAnon ? null : (user.photoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`);
                     
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo);
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
@@ -1263,14 +1264,38 @@
 
             window.signInWithGoogle = async () => {
                 try {
-                    await signInWithPopup(auth, provider);
+                    // Jika saat ini login anonim, tautkan (link) akun Google ke sesi anonim ini
+                    if (auth.currentUser && auth.currentUser.isAnonymous) {
+                        try {
+                            const result = await linkWithPopup(auth.currentUser, provider);
+                            window.showToast("Berhasil menautkan dan login dengan Google!");
+                            if (window.updateAuthUI) window.updateAuthUI(true, result.user.photoURL, false);
+                        } catch (linkError) {
+                            // Jika akun google ternyata sudah ada di database firebase (credential-already-in-use)
+                            if (linkError.code === 'auth/credential-already-in-use') {
+                                await signInWithPopup(auth, provider);
+                                window.showToast("Berhasil login dengan akun Google kamu!");
+                            } else {
+                                throw linkError;
+                            }
+                        }
+                    } else {
+                        await signInWithPopup(auth, provider);
+                        window.showToast("Berhasil login dengan Google!");
+                    }
                 } catch (error) {
-                    console.warn("Popup Google diblokir. Mengalihkan ke Anonim...");
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (anonError) {
-                        console.error("Gagal login otomatis:", anonError);
-                        if (window.updateAuthUI) window.updateAuthUI(true);
+                    console.warn("Popup Google diblokir / Error:", error);
+                    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                        window.showCustomAlert("Gagal login dengan Google: " + error.message);
+                    }
+                    
+                    if (!auth.currentUser) {
+                        try {
+                            await signInAnonymously(auth);
+                        } catch (anonError) {
+                            console.error("Gagal login otomatis:", anonError);
+                            if (window.updateAuthUI) window.updateAuthUI(false);
+                        }
                     }
                 }
             };
@@ -1278,10 +1303,12 @@
             window.signOutUser = async () => {
                 try {
                     await signOut(auth);
+                    await signInAnonymously(auth); // Otomatis buat sesi Guest baru pasca logout
                     const ddDash = document.getElementById('dropdown-dashboard');
                     if(ddDash) ddDash.classList.add('hidden');
                     const ddEd = document.getElementById('dropdown-editor');
                     if(ddEd) ddEd.classList.add('hidden');
+                    window.showToast("Berhasil log out.");
                 } catch (error) {
                     console.error("Error saat log out:", error);
                 }
@@ -1349,7 +1376,8 @@
         }
         // --------------------------------------------------------
 
-        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null) {
+        // Tambahan Parameter isAnon
+        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null, isAnon = false) {
             const loginBtnDashboard = document.getElementById('login-btn-dashboard');
             const userProfileDashboard = document.getElementById('user-profile-dashboard');
             const avatarImgDashboard = document.getElementById('user-avatar-dashboard');
@@ -1361,7 +1389,15 @@
             const creditDisplayEditor = document.getElementById('credit-display-editor');
 
             if (isLoggedIn) {
-                if(loginBtnDashboard) loginBtnDashboard.classList.add('hidden');
+                // Jika sedang login tapi masih anonim (Guest), maka JANGAN sembunyikan tombol Login Google
+                if(loginBtnDashboard) {
+                    if (isAnon) {
+                        loginBtnDashboard.classList.remove('hidden');
+                    } else {
+                        loginBtnDashboard.classList.add('hidden');
+                    }
+                }
+                
                 if(userProfileDashboard) {
                     userProfileDashboard.classList.remove('hidden');
                     userProfileDashboard.classList.add('flex');
@@ -1371,7 +1407,14 @@
                     creditDisplayDash.classList.add('flex');
                 }
                 
-                if(loginBtnEditor) loginBtnEditor.classList.add('hidden');
+                if(loginBtnEditor) {
+                    if (isAnon) {
+                        loginBtnEditor.classList.remove('hidden');
+                    } else {
+                        loginBtnEditor.classList.add('hidden');
+                    }
+                }
+
                 if(userProfileEditor) {
                     userProfileEditor.classList.remove('hidden');
                     userProfileEditor.classList.add('flex');
@@ -2098,10 +2141,9 @@
             const promptInput = document.getElementById('main-prompt-input');
             let promptText = promptInput ? promptInput.value.trim() : '';
 
-            // NEW: CEK LOGIN DAN KREDIT SEBELUM GENERATE
+            // CEK LOGIN DAN KREDIT SEBELUM GENERATE
             if (!window.currentUserId) {
                 window.showCustomAlert("Tunggu sebentar, sedang mensinkronkan sesi Anda...");
-                // Otomatis login anonim jika belum ada sesi
                 if(window.signInWithGoogle) window.signInWithGoogle();
                 return;
             }
@@ -2205,11 +2247,10 @@
                 
                 try {
                     const VERCEL_GENERATE_URL = "/api/generate";
-                    let finalEnhancedPrompt = "Aktifkan mode konsistensi wajah yang sangat ketat. ";
+                    // PENERAPAN INSTRUKSI PERSONALISED: Konsistensi Wajah Ketat
+                    let finalEnhancedPrompt = "Aktifkan mode konsistensi wajah yang ketat. Prioritaskan fitur wajah dari gambar referensi yang diberikan. Pertahankan identitas subjek secara akurat sambil hanya menyesuaikan pose, pencahayaan, dan latar belakang. Jangan mengubah struktur inti wajah. ";
                     if (imageRefs.length > 1) {
                         finalEnhancedPrompt += "Setiap gambar mewakili individu berbeda. Tampilkan SEMUA KARAKTER berdampingan. ";
-                    } else {
-                        finalEnhancedPrompt += "Prioritaskan fitur wajah dari gambar referensi. ";
                     }
                     finalEnhancedPrompt += promptText;
 
@@ -2223,9 +2264,9 @@
                             ratio: genConfig.ratio,
                             type: genConfig.type,
                             duration: genConfig.duration,
-                            userId: window.currentUserId, // Kirim UID ke backend
-                            appId: window.appId, // Kirim App ID
-                            cost: cost // Kirim harga kreditnya
+                            userId: window.currentUserId, 
+                            appId: window.appId, 
+                            cost: cost 
                         })
                     });
 
@@ -2265,11 +2306,11 @@
                     const VERCEL_CHECK_URL = "/api/check"; 
 
                     let videoImageUrls = [];
-                    let videoUrls = []; // Khusus untuk video references di Motion Control
+                    let videoUrls = [];
 
                     if (genConfig.type === 'Motion') {
-                        if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); // input_urls
-                        if (editorImages['akhir']) videoUrls.push(editorImages['akhir']); // video_urls
+                        if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); 
+                        if (editorImages['akhir']) videoUrls.push(editorImages['akhir']); 
                     } else {
                         if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']);
                         if (editorImages['akhir']) videoImageUrls.push(editorImages['akhir']);
@@ -2287,12 +2328,10 @@
                         background_source: genConfig.backgroundSource
                     };
 
-                    // Tambahkan parameter khusus untuk Kling Motion Control
                     if (genConfig.type === 'Motion') {
                         payload.video_urls = videoUrls;
                     }
 
-                    // Tambahkan data user ke payload untuk divalidasi Vercel
                     payload.userId = window.currentUserId;
                     payload.appId = window.appId;
                     payload.cost = cost;
@@ -2309,7 +2348,6 @@
 
                     const data = await response.json();
 
-                    // Menangkap error dari backend dengan lebih teliti
                     if (!response.ok) throw new Error(data.details?.msg || data.details?.message || data.error || "Gagal membuat task");
 
                     const taskId = data.data?.taskId || data.taskId || data.task_id;
@@ -2354,7 +2392,6 @@
                         const checkData = await checkRes.json();
 
                         let statusRaw = checkData.data?.status || checkData.status || checkData.data?.state || checkData.state;
-                        // Penanganan khusus Veo 3.1 successFlag (Angka 0, 1, 2, 3)
                         if (statusRaw === undefined && checkData.data?.successFlag !== undefined) statusRaw = checkData.data.successFlag;
                         if (statusRaw === undefined && checkData.successFlag !== undefined) statusRaw = checkData.successFlag;
                         
@@ -2375,7 +2412,6 @@
                                     }
                                 } else if (typeof node === 'object') {
                                     for (let key in node) {
-                                        // PENTING: Jangan telusuri key yang merupakan "echo" request dari user!
                                         if (key === 'request' || key === 'original_request' || key === 'image_urls' || key === 'video_urls') continue;
                                         search(node[key], key);
                                     }
@@ -2389,8 +2425,8 @@
                                 !u.includes('localhost') && 
                                 !u.includes('w3.org') && 
                                 !u.includes('ui-avatars') &&
-                                !videoImageUrls.includes(u) && // <-- CEGAH GAMBAR REFERENSI KETARIK
-                                !videoUrls.includes(u)         // <-- CEGAH VIDEO REFERENSI KETARIK
+                                !videoImageUrls.includes(u) && 
+                                !videoUrls.includes(u)         
                             );
                             
                             if (validUrls.length === 0) return null;
@@ -2398,7 +2434,7 @@
                             let tempfileUrl = validUrls.find(u => u.includes('tempfile'));
                             if (tempfileUrl) return tempfileUrl;
                             
-                            let mediaUrl = validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)); // Prioritaskan ekstensi video
+                            let mediaUrl = validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)); 
                             if (mediaUrl) return mediaUrl;
                             
                             return validUrls[0];
@@ -2419,7 +2455,6 @@
 
                     if (!finalMediaUrl) throw new Error("Waktu habis atau Gagal Ekstrak URL!");
 
-                    // SIMPAN DATA TASK UNTUK VEO ACTIONS
                     window.lastGenData.taskId = taskId;
                     window.lastGenData.engine = genConfig.engine;
 
@@ -2427,7 +2462,6 @@
                     setTimeout(() => {
                         if(outputLoading) outputLoading.classList.add('hidden');
                         
-                        // CEK APAKAH INI ENGINE VEO, KALAU IYA TAMPILKAN PANEL ACTIONS
                         const veoPanel = document.getElementById('veo-actions-panel');
                         if (veoPanel) {
                             if (genConfig.engine && genConfig.engine.toLowerCase().includes('veo')) {
@@ -2507,7 +2541,6 @@
 
             if (!urlToDownload || urlToDownload.trim() === "" || urlToDownload.includes('w3schools')) return;
 
-            // BROW: Ambil currentTarget SEBELUM await supaya tidak jadi null di dalam blok catch
             const btn = e ? e.currentTarget : null;
             const icon = btn ? btn.querySelector('i') : null;
 
@@ -2529,8 +2562,6 @@
                     if (icon) icon.className = "fa-solid fa-download text-white text-2xl"; 
                 }, 1000);
             } catch (error) {
-                // Kena blokir CORS R2 Cloudflare (Error 1 log) -> Larinya kesini
-                // Fallback: Buka video di tab baru untuk disave manual tanpa error.
                 window.open(urlToDownload, '_blank');
                 if (icon) icon.className = "fa-solid fa-download text-white text-2xl";
             }
@@ -2687,10 +2718,7 @@
             }
         }
 
-        // ==========================================
-        // NEW: TAB MANAJEMEN PENGGUNA & TOKEN 
-        // ==========================================
-        let currentAdminSessionCode = ''; // Menyimpan token verifikasi admin
+        let currentAdminSessionCode = ''; 
         
         window.switchManageTab = function(tabName) {
             const tabProfiles = document.getElementById('tab-content-profiles');
@@ -2715,7 +2743,6 @@
                 btnTokens.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition border border-emerald-500/30";
                 btnProfiles.className = "px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white hover:bg-white/10 transition border border-transparent";
                 
-                // Ambil data users saat membuka tab ini
                 loadAllUsersForAdmin();
             }
         }
@@ -2766,7 +2793,6 @@
             const input = document.getElementById(`topup-val-${uid}`);
             const amount = parseInt(input.value);
             
-            // Kita izinkan "0" atau minus jika admin ingin mereset/mengurangi token.
             if (isNaN(amount)) {
                 window.showCustomAlert("Masukkan angka jumlah token yang benar.");
                 return;
@@ -2793,7 +2819,7 @@
                 if (data.success) {
                     window.showToast(amount >= 0 ? "Token berhasil ditambahkan!" : "Token berhasil dikurangi!");
                     input.value = '';
-                    loadAllUsersForAdmin(); // Refresh data otomatis
+                    loadAllUsersForAdmin(); 
                 } else {
                     window.showCustomAlert(data.error || "Gagal mengubah token.");
                 }
@@ -2828,9 +2854,8 @@
             const input = document.getElementById('manage-admin-code-input');
             if (!input) return;
             const code = input.value;
-            // Gunakan satu password yang sama untuk mengamankan backend
             if (code === 'admin123' || code === 'Kr333wol') {
-                currentAdminSessionCode = code; // Simpan kode ini untuk dikirim ke Vercel API
+                currentAdminSessionCode = code; 
                 closeManageAdminAuth(); 
                 openManageAdminModal(); 
                 window.showCustomAlert("Akses Kelola Terbuka!");
@@ -2845,7 +2870,7 @@
             const manageModal = document.getElementById('manage-admin-modal');
             if(manageModal) {
                 manageModal.classList.remove('hidden'); 
-                switchManageTab('profiles'); // Default ke Tab Profiles
+                switchManageTab('profiles');
                 setTimeout(() => { manageModal.classList.remove('opacity-0'); }, 10);
             }
         }
@@ -3282,7 +3307,6 @@
                 window.showCustomAlert("Terjadi masalah:\n" + error.message);
             }
         };
-
     </script>
 </body>
 </html>
