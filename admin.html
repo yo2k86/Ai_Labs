@@ -4,21 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ailabs Admin - Control Panel</title>
+    
+    <!-- Import Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Import FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: { darkbg: '#0a0a0a', panelbg: '#121212' }
+                    colors: {
+                        darkbg: '#0a0a0a',
+                        panelbg: '#121212',
+                    }
                 }
             }
         }
     </script>
+
     <style>
         body { background-color: #0a0a0a; color: #fff; }
         .glass-panel {
@@ -27,37 +38,60 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
         }
-        .active-tab { background: #059669 !important; color: white !important; border-color: #10b981 !important; }
-        ::-webkit-scrollbar { width: 6px; }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #111; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
         
-        .glow-cyan { box-shadow: 0 0 15px rgba(6, 182, 212, 0.2); }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .active-tab {
+            background: #059669 !important;
+            color: white !important;
+            border-color: #10b981 !important;
+        }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen">
+<body class="font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Global Toast Notifikasi -->
+    <div id="toast" class="fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 opacity-0 pointer-events-none transition-opacity duration-300 z-[999] border-l-4 border-emerald-500">
+        <i id="toast-icon" class="fas fa-info-circle text-emerald-400"></i>
+        <span id="toast-msg" class="text-sm font-medium">Notifikasi</span>
+    </div>
 
     <!-- VIEW 1: LOGIN ADMIN -->
-    <div id="login-view" class="fixed inset-0 z-[100] bg-darkbg flex flex-col items-center justify-center p-4">
+    <div id="login-view" class="fixed inset-0 z-[100] bg-darkbg flex flex-col items-center justify-center p-4 transition-opacity duration-500">
         <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center border-t border-emerald-500/30">
-            <i class="fas fa-shield-alt text-4xl text-emerald-400 mb-6"></i>
-            <h1 class="text-2xl font-bold mb-8">Ailabs Command Center</h1>
-            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:border-emerald-500 outline-none mb-4" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
-            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg">Masuk Sistem</button>
+            <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
+                <i class="fas fa-shield-alt text-2xl text-emerald-400"></i>
+            </div>
+            <h1 class="text-2xl font-bold mb-2">Ailabs Command Center</h1>
+            <p class="text-sm text-gray-400 mb-8">Masukkan kode rahasia admin.</p>
+            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-emerald-500 transition-colors mb-4" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
+            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Masuk Sistem</button>
         </div>
     </div>
 
-    <!-- VIEW 2: DASHBOARD -->
-    <div id="dashboard-view" class="hidden min-h-screen opacity-0 transition-opacity duration-500 flex flex-col">
+    <!-- VIEW 2: DASHBOARD ADMIN -->
+    <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500">
+        
+        <!-- Header & Nav -->
         <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4 border-b border-white/5">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black shadow-lg">AL</div>
-                    <h2 class="font-bold text-lg tracking-tight">Ailabs Control Panel</h2>
+                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black">AL</div>
+                    <h2 class="font-bold text-lg">Ailabs Control Panel</h2>
                 </div>
-                <button onclick="location.reload()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-2 font-medium">
+                <button onclick="logoutAdmin()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-2">
                     <i class="fas fa-sign-out-alt"></i> Keluar
                 </button>
             </div>
+
+            <!-- Tab Navigation -->
             <div class="flex gap-2">
                 <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition active-tab">
                     <i class="fas fa-users mr-2"></i> Pengguna & Saldo
@@ -68,76 +102,84 @@
             </div>
         </header>
 
-        <main class="p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
-            <!-- STATS CARDS -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl"><i class="fas fa-users"></i></div>
-                    <div><p class="text-xs text-gray-400 font-medium">Total Pengguna</p><h3 class="text-2xl font-bold" id="stat-total-users">0</h3></div>
+        <!-- Content Area -->
+        <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+            
+            <!-- SECTION 1: MANAJEMEN USER -->
+            <div id="section-users" class="flex flex-col gap-6">
+                <!-- Statistik -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl"><i class="fas fa-users"></i></div>
+                        <div><p class="text-sm text-gray-400">Total Pengguna</p><h3 class="text-2xl font-bold" id="stat-total-users">0</h3></div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
+                        <div><p class="text-sm text-gray-400">Total Sisa Kredit</p><h3 class="text-2xl font-bold" id="stat-total-credits">0</h3></div>
+                    </div>
                 </div>
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
-                    <div><p class="text-xs text-gray-400 font-medium">Kredit Beredar</p><h3 class="text-2xl font-bold" id="stat-total-credits">0</h3></div>
-                </div>
-                <!-- SALDO MASTER KIE AI (DARI API SINKRON) -->
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center gap-4 bg-cyan-500/5 glow-cyan">
-                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl"><i class="fas fa-server"></i></div>
-                    <div>
-                        <p class="text-xs text-gray-400 font-medium">Saldo Kie AI (Master)</p>
-                        <h3 class="text-2xl font-bold text-cyan-300" id="stat-server-balance">Menghubungkan...</h3>
+
+                <!-- Tabel User -->
+                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
+                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
+                        <h3 class="font-bold text-lg">Daftar Klien Ailabs</h3>
+                        <div class="flex items-center gap-3">
+                            <button onclick="loadUsers()" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-1.5 rounded-lg border border-white/10 transition flex items-center">
+                                <i class="fas fa-sync-alt mr-1"></i> Refresh
+                            </button>
+                            <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500 w-56" placeholder="Cari user...">
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-6 py-4">Profil & ID</th>
+                                    <th class="px-6 py-4 text-center">Sisa Kredit</th>
+                                    <th class="px-6 py-4 text-center">Akses Video</th>
+                                    <th class="px-6 py-4 text-right">Top-up Manual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody" class="text-sm divide-y divide-white/5"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- SECTION USER -->
-            <div id="section-users" class="glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col border border-white/5">
-                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
-                    <h3 class="font-bold flex items-center gap-2"><i class="fas fa-list text-emerald-400"></i> Manajemen Klien</h3>
-                    <div class="flex items-center gap-3">
-                         <button onclick="loadUsers()" class="p-2 hover:bg-white/10 rounded-lg transition text-gray-400" title="Refresh Data"><i class="fas fa-sync-alt"></i></button>
-                         <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white outline-none focus:border-emerald-500 w-48 md:w-64" placeholder="Cari nama/email...">
+            <!-- SECTION 2: STOK KODE REFERRAL -->
+            <div id="section-referrals" class="hidden flex flex-col gap-6">
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl"><i class="fas fa-key"></i></div>
+                        <div><p class="text-sm text-gray-400">Total Stok Kode VIP</p><h3 class="text-2xl font-bold" id="stat-total-refs">300</h3></div>
                     </div>
+                    <button onclick="loadReferrals()" class="bg-white/10 hover:bg-white/20 text-xs px-4 py-2 rounded-lg border border-white/10 transition flex items-center shadow-lg">
+                        <i class="fas fa-sync-alt mr-1"></i> Refresh Status Kode
+                    </button>
                 </div>
-                <div class="overflow-y-auto flex-1 custom-scrollbar">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead class="bg-black/80 text-gray-400 sticky top-0 z-10 border-b border-white/5">
-                            <tr>
-                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest">Detail User</th>
-                                <th class="px-6 py-4 text-center font-semibold uppercase text-[10px] tracking-widest">Kredit Saat Ini</th>
-                                <th class="px-6 py-4 text-center font-semibold uppercase text-[10px] tracking-widest">Akses Video</th>
-                                <th class="px-6 py-4 text-right font-semibold uppercase text-[10px] tracking-widest">Tindakan Admin</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-tbody" class="divide-y divide-white/5">
-                            <!-- Dimuat via JS -->
-                        </tbody>
-                    </table>
+
+                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
+                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
+                        <h3 class="font-bold text-lg">Monitoring & Distribusi Kode</h3>
+                        <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 w-64" placeholder="Cari kode...">
+                    </div>
+                    <div class="overflow-y-auto flex-1 custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
+                                <tr>
+                                    <th class="px-6 py-4">Kode Referral (200 ⚡)</th>
+                                    <th class="px-6 py-4">Status & Pemakai</th>
+                                    <th class="px-6 py-4 text-right w-32">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ref-tbody" class="text-sm divide-y divide-white/5">
+                                <!-- Data dimuat via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             
-            <!-- SECTION REFERRAL -->
-            <div id="section-referrals" class="hidden glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col border border-white/5">
-                 <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
-                    <h3 class="font-bold flex items-center gap-2"><i class="fas fa-key text-cyan-400"></i> Monitoring Kode VIP</h3>
-                    <button onclick="loadReferrals()" class="text-xs font-bold text-cyan-400 hover:text-cyan-300 flex items-center gap-1">
-                        <i class="fas fa-sync-alt"></i> REFRESH STOK
-                    </button>
-                </div>
-                <div class="overflow-y-auto flex-1 custom-scrollbar">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-black/80 text-gray-400 sticky top-0 z-10 border-b border-white/5">
-                            <tr>
-                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest">Kode Voucher</th>
-                                <th class="px-6 py-4 font-semibold uppercase text-[10px] tracking-widest text-center">Status Pemanfaatan</th>
-                                <th class="px-6 py-4 text-right font-semibold uppercase text-[10px] tracking-widest">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ref-tbody" class="divide-y divide-white/5">
-                            <!-- Dimuat via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </main>
     </div>
 
@@ -145,20 +187,44 @@
         let currentAdminSessionCode = '';
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
 
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toast-icon');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            
+            toast.className = `fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 transition-opacity duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-emerald-500' : 'border-red-500'}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-red-400'}`;
+
+            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3000);
+        }
+
         function loginAdmin() {
             const code = document.getElementById('admin-password').value;
             if (code === 'admin123' || code === 'Kr333wol') {
                 currentAdminSessionCode = code;
                 document.getElementById('login-view').classList.add('hidden');
                 document.getElementById('dashboard-view').classList.remove('hidden');
-                setTimeout(() => document.getElementById('dashboard-view').style.opacity = '1', 10);
+                void document.getElementById('dashboard-view').offsetWidth;
+                document.getElementById('dashboard-view').style.opacity = '1';
                 loadUsers();
-            } else { alert('Maaf, Kode Rahasia Admin Salah!'); }
+            } else { showToast('Kode salah!', 'error'); }
+        }
+
+        function logoutAdmin() { location.reload(); }
+
+        function switchTab(tab) {
+            document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
+            document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
+            document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
+            document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
+            if(tab === 'referrals') loadReferrals();
+            if(tab === 'users') loadUsers();
         }
 
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-16 text-center text-emerald-400"><i class="fas fa-spinner fa-spin text-2xl mb-3 block mx-auto"></i> Menghubungkan ke Vercel Server & Kie AI...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data user dari Vercel...</td></tr>';
             try {
                 const res = await fetch('/api/admin/users', {
                     method: 'POST',
@@ -170,55 +236,113 @@
                     document.getElementById('stat-total-users').innerText = data.users.length;
                     document.getElementById('stat-total-credits').innerText = data.users.reduce((s,u)=>s+(u.credits||0),0).toLocaleString();
                     
-                    // UPDATE SALDO MASTER KIE AI SECARA OTOMATIS
-                    const balanceEl = document.getElementById('stat-server-balance');
-                    balanceEl.innerText = typeof data.serverBalance === 'number' ? data.serverBalance.toLocaleString() : data.serverBalance;
-                    
                     if (data.users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada pengguna terdaftar.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
                         return;
                     }
 
-                    tbody.innerHTML = data.users.map(u => `
-                        <tr class="hover:bg-white/[0.03] transition-colors border-b border-white/5">
+                    tbody.innerHTML = data.users.map(u => {
+                        // Menangani default videoAccess (jika tidak false, berarti true/ON)
+                        const isVideoOn = u.videoAccess !== false;
+                        
+                        return `
+                        <tr class="hover:bg-white/5 border-b border-white/5">
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-white text-sm">${u.name}</span>
-                                    <span class="text-[10px] text-emerald-400 font-mono">${u.email}</span>
-                                    <span class="text-[9px] text-gray-600 font-mono mt-1">ID: ${u.uid}</span>
+                                    <span class="font-bold text-white text-sm flex items-center gap-2">
+                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
+                                    </span>
+                                    <span class="text-[10px] text-emerald-400/70 font-mono mt-0.5">${u.email}</span>
+                                    <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <div class="inline-block px-3 py-1.5 rounded-lg bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 font-black text-sm shadow-inner">
-                                    ${u.credits.toLocaleString()} ⚡
-                                </div>
+                                <span class="px-4 py-1.5 rounded bg-black/60 font-black text-yellow-400 border border-yellow-500/20 shadow-inner">${u.credits} ⚡</span>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <button onclick="toggleVideo('${u.uid}', ${u.videoAccess !== false})" class="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest transition-all shadow-md ${u.videoAccess !== false ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}">
-                                    ${u.videoAccess !== false ? 'AKTIF (ON)' : 'MATI (OFF)'}
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition shadow-lg w-20 flex justify-center items-center gap-1.5 ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
+                                    <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
+                                    ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
-                                    <div class="relative">
-                                        <input type="number" id="in-${u.uid}" class="w-20 bg-black/60 border border-white/10 rounded-lg pl-2 pr-1 py-2 text-xs text-center focus:border-emerald-500 outline-none transition-all shadow-inner" placeholder="Jumlah">
-                                        <div class="absolute -top-2 -right-2 text-[8px] bg-gray-700 text-white px-1 rounded">ADD</div>
-                                    </div>
-                                    <button onclick="changeCredit('${u.uid}', 'add')" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 rounded-lg transition-all flex items-center justify-center shadow-lg hover:scale-105 active:scale-95"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}', 'sub')" class="w-8 h-8 bg-red-600 hover:bg-red-500 rounded-lg transition-all flex items-center justify-center shadow-lg hover:scale-105 active:scale-95"><i class="fas fa-minus text-xs"></i></button>
+                                    <input type="number" id="in-${u.uid}" class="w-16 bg-black/50 border border-white/10 rounded px-2 py-1.5 text-center text-xs focus:border-emerald-500 outline-none" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-plus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-600 hover:bg-red-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-minus text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>
-                    `).join('');
+                    `}).join('');
                 } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400 border border-red-500/20 bg-red-500/5 rounded-xl">Error: ${data.error}</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">${data.error || 'Gagal memuat API Vercel.'}</td></tr>`;
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Gagal terhubung ke Vercel API. Periksa logs Vercel!</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Gagal terhubung ke Vercel API.</td></tr>'; }
+        }
+
+        async function toggleVideoAccess(uid, currentStatus) {
+            const newStatus = !currentStatus; // Balikkan status
+            const btn = document.getElementById(`btn-toggle-${uid}`);
+            const originalHtml = btn.innerHTML;
+            const originalClass = btn.className;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/toggle-access', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        adminCode: currentAdminSessionCode, 
+                        appId: appId, 
+                        targetUid: uid, 
+                        videoAccess: newStatus 
+                    })
+                });
+                
+                const data = await res.json();
+                if(data.success) {
+                    showToast(`Akses video berhasil ${newStatus ? 'diaktifkan' : 'dimatikan'}!`);
+                    loadUsers(); // Muat ulang tabel untuk update tampilan terbaru
+                } else {
+                    showToast(data.error || 'Gagal mengubah akses.', 'error');
+                    btn.innerHTML = originalHtml;
+                    btn.className = originalClass;
+                    btn.disabled = false;
+                }
+            } catch(e) { 
+                showToast('Kesalahan jaringan server.', 'error');
+                btn.innerHTML = originalHtml;
+                btn.className = originalClass;
+                btn.disabled = false;
+            }
+        }
+
+        async function changeCredit(uid, action) {
+            const el = document.getElementById(`in-${uid}`);
+            const val = parseInt(el.value);
+            if(!val || val <= 0) return showToast('Isi angka jumlah token yang benar!', 'error');
+            const amount = action === 'add' ? val : -val;
+            try {
+                const res = await fetch('/api/admin/topup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
+                });
+                if((await res.json()).success) { 
+                    showToast('Saldo berhasil diupdate!'); 
+                    el.value = '';
+                    loadUsers(); 
+                } else {
+                    showToast('Gagal update saldo dari backend.', 'error');
+                }
+            } catch(e) { showToast('Gagal update saldo! Periksa koneksi.', 'error'); }
         }
 
         async function loadReferrals() {
             const tbody = document.getElementById('ref-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2"></i> Sinkronisasi database kode...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi stok kode...</td></tr>';
             try {
                 const res = await fetch('/api/admin/referrals', {
                     method: 'POST',
@@ -228,65 +352,28 @@
                 const data = await res.json();
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
-                        <tr class="hover:bg-white/[0.02] border-b border-white/5 transition-colors">
+                        <tr class="hover:bg-white/5 border-b border-white/5">
                             <td class="px-6 py-4 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
-                            <td class="px-6 py-4 text-center">
+                            <td class="px-6 py-4">
                                 ${c.used ? 
-                                    `<div class="flex flex-col items-center"><span class="px-3 py-1 rounded-full bg-red-500/20 text-red-500 text-[9px] font-bold uppercase border border-red-500/20">TERPAKAI</span><span class="text-[8px] text-gray-500 mt-1">${c.usedBy || ''}</span></div>` : 
-                                    '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-[9px] font-bold uppercase border border-emerald-500/20">READY</span>'
+                                    '<span class="px-3 py-1 rounded-full bg-red-500/20 text-red-500 text-[10px] font-bold uppercase border border-red-500/30 shadow-inner">Terpakai</span>' : 
+                                    '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase border border-emerald-500/30 shadow-inner">Tersedia (Ready)</span>'
                                 }
+                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] font-medium">${c.used ? `User: <span class="text-gray-300">${(c.usedBy || 'Unknown')}</span>` : ''}</div>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 ${!c.used ? `
-                                    <button onclick="copyToClipboard('${c.code}')" class="bg-emerald-600/20 hover:bg-emerald-600 text-emerald-400 hover:text-white px-4 py-2 rounded-lg border border-emerald-500/30 transition-all text-xs font-black shadow-sm">
-                                        <i class="fas fa-copy mr-1"></i> SALIN
+                                    <button onclick="copyToClipboard('${c.code}')" class="bg-white/10 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg border border-white/20 transition-all flex items-center justify-center gap-2 text-xs ml-auto shadow-md font-bold">
+                                        <i class="fas fa-copy"></i> Salin
                                     </button>
-                                ` : '<span class="text-xs text-gray-700 font-bold italic">HANGUS</span>'}
+                                ` : `
+                                    <span class="inline-block px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-500/50 rounded-lg text-xs font-bold uppercase ml-auto">Hangus</span>
+                                `}
                             </td>
                         </tr>
                     `).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Error memuat stok.</td></tr>'; }
-        }
-
-        async function changeCredit(uid, act) {
-            const el = document.getElementById(`in-${uid}`);
-            const v = parseInt(el.value);
-            if(!v || v <= 0) return alert('Masukkan angka jumlah token yang benar!');
-            const amount = act === 'add' ? v : -v;
-            try {
-                const res = await fetch('/api/admin/topup', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
-                });
-                const data = await res.json();
-                if(data.success) { 
-                    el.value = '';
-                    loadUsers(); 
-                } else { alert('Error: ' + data.error); }
-            } catch(e) { alert('Gagal update saldo!'); }
-        }
-
-        async function toggleVideo(uid, curr) {
-            try {
-                const res = await fetch('/api/admin/toggle-access', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: !curr })
-                });
-                const data = await res.json();
-                if(data.success) { loadUsers(); }
-            } catch(e) { alert('Gagal update akses video!'); }
-        }
-
-        function switchTab(tab) {
-            document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
-            document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
-            document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
-            document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
-            if(tab === 'referrals') loadReferrals();
-            if(tab === 'users') loadUsers();
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Gagal memuat stok.</td></tr>'; }
         }
 
         function copyToClipboard(text) {
@@ -296,13 +383,16 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            alert('Kode VIP ' + text + ' berhasil disalin ke clipboard!');
+            showToast('Kode ' + text + ' berhasil disalin!');
         }
 
-        function filterTable(tid, iid) {
-            const f = document.getElementById(iid).value.toLowerCase();
-            const r = document.getElementById(tid).getElementsByTagName('tr');
-            for(let row of r) { row.style.display = row.innerText.toLowerCase().includes(f) ? '' : 'none'; }
+        function filterTable(tbodyId, inputId) {
+            const filter = document.getElementById(inputId).value.toLowerCase();
+            const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+            for (let row of rows) {
+                const txt = row.innerText.toLowerCase();
+                row.style.display = txt.includes(filter) ? '' : 'none';
+            }
         }
     </script>
 </body>
