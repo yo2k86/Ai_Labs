@@ -6,6 +6,7 @@ export default async function handler(req, res) {
 
   try {
     const { fileUrl, uploadPath, fileName } = req.body;
+
     if (!fileUrl) return res.status(400).json({ error: 'URL file tidak ditemukan' });
 
     // Endpoint Redpanda untuk meneruskan URL langsung
@@ -22,10 +23,17 @@ export default async function handler(req, res) {
       })
     });
 
+    // --- PENGAMAN EXTRA: Pastikan respons JSON ---
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Gagal import URL, respons server KIE bukan JSON.");
+    }
+
     const data = await response.json();
     res.status(response.status).json(data);
 
   } catch (error) {
+    console.error("Error di upload-url.js:", error);
     res.status(500).json({ error: 'Gagal import URL ke Kie AI', message: error.message });
   }
 }
