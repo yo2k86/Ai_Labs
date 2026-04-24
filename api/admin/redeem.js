@@ -1,399 +1,116 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ailabs Admin - Control Panel</title>
-    
-    <!-- Import Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Import Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Import FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+const admin = require('firebase-admin');
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        darkbg: '#0a0a0a',
-                        panelbg: '#121212',
-                    }
-                }
+// Inisialisasi Firebase Admin dengan kredensial dari Environment Variables
+if (!admin.apps.length) {
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
+            })
+        });
+    } catch (error) {
+        console.error('Firebase admin error', error);
+    }
+}
+const db = admin.firestore();
+
+module.exports = async function handler(req, res) {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
+    const { userId, appId, code } = req.body;
+
+    // Validasi input dasar
+    if (!userId || !appId || !code) {
+        return res.status(400).json({ error: "Data tidak lengkap (userId, appId, atau kode kosong)" });
+    }
+
+    // DAFTAR LENGKAP 300 KODE VIP (Wajib sinkron dengan referrals.js)
+    const validCodes = [
+        "AL-9A2X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
+        "AL-2L7C", "AL-8M4D", "AL-3N9F", "AL-5P6G", "AL-7Q2H", "AL-1R8J", "AL-6T5K", "AL-4V1L", "AL-9W3M", "AL-2X7N",
+        "AL-8Y4P", "AL-3Z9Q", "AL-5A6R", "AL-7B2T", "AL-1C8V", "AL-6D5W", "AL-4E1X", "AL-9F3Y", "AL-2G7Z", "AL-8H4A",
+        "VIP-A1X9", "VIP-B2Y8", "VIP-C3Z7", "VIP-D4A6", "VIP-E5B5", "VIP-F6C4", "VIP-G7D3", "VIP-H8E2", "VIP-J9F1", "VIP-K1G9",
+        "VIP-L2H8", "VIP-M3J7", "VIP-N4K6", "VIP-P5L5", "VIP-Q6M4", "VIP-R7N3", "VIP-T8P2", "VIP-V9Q1", "VIP-W1R9", "VIP-X2T8",
+        "VIP-Y3V7", "VIP-Z4W6", "VIP-A5X5", "VIP-B6Y4", "VIP-C7Z3", "VIP-D8A2", "VIP-E9B1", "VIP-F1C9", "VIP-G2D8", "VIP-H3E7",
+        "PRO-1A2B", "PRO-3C4D", "PRO-5E6F", "PRO-7G8H", "PRO-9J1K", "PRO-2L3M", "PRO-4N5P", "PRO-6Q7R", "PRO-8T9V", "PRO-1W2X",
+        "PRO-3Y4Z", "PRO-5A6C", "PRO-7E8G", "PRO-9J1L", "PRO-2N3Q", "PRO-4T5W", "PRO-6Y7A", "PRO-8D9F", "PRO-1H2K", "PRO-3M4P",
+        "PRO-5R6T", "PRO-7V8X", "PRO-9Z1B", "PRO-2C3E", "PRO-4G5J", "PRO-6L7N", "PRO-8Q9S", "PRO-1U2W", "PRO-3Y4A", "PRO-5C6D",
+        "GEN-9Z8Y", "GEN-7X6W", "GEN-5V4T", "GEN-3R2Q", "GEN-1P9N", "GEN-8M7L", "GEN-6K5J", "GEN-4H3G", "GEN-2F1E", "GEN-9D8C",
+        "GEN-7B6A", "GEN-5Z4Y", "GEN-3X2W", "GEN-1V9T", "GEN-8R7Q", "GEN-6P5N", "GEN-4M3L", "GEN-2K1J", "GEN-9H8G", "GEN-7F6E",
+        "GEN-5D4C", "GEN-3B2A", "GEN-1Z9Y", "GEN-8X7W", "GEN-6V5T", "GEN-4R3Q", "GEN-2P1N", "GEN-9M8L", "GEN-7K6J", "GEN-5H4G",
+        "NANO-A111", "NANO-B222", "NANO-C333", "NANO-D444", "NANO-E555", "NANO-F666", "NANO-G777", "NANO-H888", "NANO-J999", "NANO-K101",
+        "NANO-L202", "NANO-M303", "NANO-N404", "NANO-P505", "NANO-Q606", "NANO-R707", "NANO-T808", "NANO-V909", "NANO-W121", "NANO-X232",
+        "NANO-Y343", "NANO-Z454", "NANO-A565", "NANO-B676", "NANO-C787", "NANO-D898", "NANO-E909", "NANO-F131", "NANO-G242", "NANO-H353",
+        "ART-1X1A", "ART-2X2B", "ART-3X3C", "ART-4X4D", "ART-5X5E", "ART-6X6F", "ART-7X7G", "ART-8X8H", "ART-9X9J", "ART-1Y1K",
+        "ART-2Y2L", "ART-3Y3M", "ART-4Y4N", "ART-5Y5P", "ART-6Y6Q", "ART-7Y7R", "ART-8Y8T", "ART-9Y9V", "ART-1Z1W", "ART-2Z2X",
+        "ART-3Z3Y", "ART-4Z4Z", "ART-5A5A", "ART-6A6B", "ART-7A7C", "ART-8A8D", "ART-9A9E", "ART-1B1F", "ART-2B2G", "ART-3B3H",
+        "AILABS-001", "AILABS-002", "AILABS-003", "AILABS-004", "AILABS-005", "AILABS-006", "AILABS-007", "AILABS-008", "AILABS-009", "AILABS-010",
+        "AILABS-011", "AILABS-012", "AILABS-013", "AILABS-014", "AILABS-015", "AILABS-016", "AILABS-017", "AILABS-018", "AILABS-019", "AILABS-020",
+        "AILABS-021", "AILABS-022", "AILABS-023", "AILABS-024", "AILABS-025", "AILABS-026", "AILABS-027", "AILABS-028", "AILABS-029", "AILABS-030",
+        "AILABS-031", "AILABS-032", "AILABS-033", "AILABS-034", "AILABS-035", "AILABS-036", "AILABS-037", "AILABS-038", "AILABS-039", "AILABS-040",
+        "AILABS-041", "AILABS-042", "AILABS-043", "AILABS-044", "AILABS-045", "AILABS-046", "AILABS-047", "AILABS-048", "AILABS-049", "AILABS-050",
+        "AILABS-051", "AILABS-052", "AILABS-053", "AILABS-054", "AILABS-055", "AILABS-056", "AILABS-057", "AILABS-058", "AILABS-059", "AILABS-060",
+        "VEO-9A1", "VEO-8B2", "VEO-7C3", "VEO-6D4", "VEO-5E5", "VEO-4F6", "VEO-3G7", "VEO-2H8", "VEO-1J9", "VEO-9K1",
+        "VEO-8L2", "VEO-7M3", "VEO-6N4", "VEO-5P5", "VEO-4Q6", "VEO-3R7", "VEO-2T8", "VEO-1V9", "VEO-9W1", "VEO-8X2",
+        "VEO-7Y3", "VEO-6Z4", "VEO-5A5", "VEO-4B6", "VEO-3C7", "VEO-2D8", "VEO-1E9", "VEO-9F1", "VEO-8G2", "VEO-7H3",
+        "GROK-12A", "GROK-34B", "GROK-56C", "GROK-78D", "GROK-90E", "GROK-21F", "GROK-43G", "GROK-65H", "GROK-87J", "GROK-09K",
+        "GROK-13L", "GROK-24M", "GROK-35N", "GROK-46P", "GROK-57Q", "GROK-68R", "GROK-79T", "GROK-80V", "GROK-91W", "GROK-02X",
+        "GROK-14Y", "GROK-25Z", "GROK-36A", "GROK-47B", "GROK-58C", "GROK-69D", "GROK-70E", "GROK-81F", "GROK-92G", "GROK-03H"
+    ];
+
+    const inputCode = code.toUpperCase();
+
+    // 1. Cek apakah kode ada di daftar valid
+    if (!validCodes.includes(inputCode)) {
+        return res.status(400).json({ success: false, error: "Kode tidak valid! Periksa kembali penulisan kodenya." });
+    }
+
+    try {
+        const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
+        
+        // Gunakan transaksi Firestore agar proses pengecekan dan penambahan saldo aman
+        const result = await db.runTransaction(async (t) => {
+            const userDoc = await t.get(userRef);
+            if (!userDoc.exists) {
+                throw new Error("Data user belum diinisialisasi di database.");
             }
-        }
-    </script>
-
-    <style>
-        body { background-color: #0a0a0a; color: #fff; }
-        .glass-panel {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
-        }
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
-        
-        input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
-
-        .active-tab {
-            background: #059669 !important;
-            color: white !important;
-            border-color: #10b981 !important;
-        }
-    </style>
-</head>
-<body class="font-sans antialiased min-h-screen flex flex-col">
-
-    <!-- Global Toast Notifikasi -->
-    <div id="toast" class="fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 opacity-0 pointer-events-none transition-opacity duration-300 z-[999] border-l-4 border-emerald-500">
-        <i id="toast-icon" class="fas fa-info-circle text-emerald-400"></i>
-        <span id="toast-msg" class="text-sm font-medium">Notifikasi</span>
-    </div>
-
-    <!-- VIEW 1: LOGIN ADMIN -->
-    <div id="login-view" class="fixed inset-0 z-[100] bg-darkbg flex flex-col items-center justify-center p-4 transition-opacity duration-500">
-        <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center border-t border-emerald-500/30">
-            <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
-                <i class="fas fa-shield-alt text-2xl text-emerald-400"></i>
-            </div>
-            <h1 class="text-2xl font-bold mb-2">Ailabs Command Center</h1>
-            <p class="text-sm text-gray-400 mb-8">Masukkan kode rahasia admin.</p>
-            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-emerald-500 transition-colors mb-4" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
-            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Masuk Sistem</button>
-        </div>
-    </div>
-
-    <!-- VIEW 2: DASHBOARD ADMIN -->
-    <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500">
-        
-        <!-- Header & Nav -->
-        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4 border-b border-white/5">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black">AL</div>
-                    <h2 class="font-bold text-lg">Ailabs Control Panel</h2>
-                </div>
-                <button onclick="logoutAdmin()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-2">
-                    <i class="fas fa-sign-out-alt"></i> Keluar
-                </button>
-            </div>
-
-            <!-- Tab Navigation -->
-            <div class="flex gap-2">
-                <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition active-tab">
-                    <i class="fas fa-users mr-2"></i> Pengguna & Saldo
-                </button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition">
-                    <i class="fas fa-ticket-alt mr-2"></i> Stok Kode VIP
-                </button>
-            </div>
-        </header>
-
-        <!-- Content Area -->
-        <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
             
-            <!-- SECTION 1: MANAJEMEN USER -->
-            <div id="section-users" class="flex flex-col gap-6">
-                <!-- Statistik -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl"><i class="fas fa-users"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Pengguna</p><h3 class="text-2xl font-bold" id="stat-total-users">0</h3></div>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Sisa Kredit</p><h3 class="text-2xl font-bold" id="stat-total-credits">0</h3></div>
-                    </div>
-                </div>
-
-                <!-- Tabel User -->
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
-                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
-                        <h3 class="font-bold text-lg">Daftar Klien Ailabs</h3>
-                        <div class="flex items-center gap-3">
-                            <button onclick="loadUsers()" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-1.5 rounded-lg border border-white/10 transition flex items-center">
-                                <i class="fas fa-sync-alt mr-1"></i> Refresh
-                            </button>
-                            <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500 w-56" placeholder="Cari user...">
-                        </div>
-                    </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-4">Profil & ID</th>
-                                    <th class="px-6 py-4 text-center">Sisa Kredit</th>
-                                    <th class="px-6 py-4 text-center">Akses Video</th>
-                                    <th class="px-6 py-4 text-right">Top-up Manual</th>
-                                </tr>
-                            </thead>
-                            <tbody id="users-tbody" class="text-sm divide-y divide-white/5"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <!-- SECTION 2: STOK KODE REFERRAL -->
-            <div id="section-referrals" class="hidden flex flex-col gap-6">
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl"><i class="fas fa-key"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Stok Kode VIP</p><h3 class="text-2xl font-bold" id="stat-total-refs">300</h3></div>
-                    </div>
-                    <button onclick="loadReferrals()" class="bg-white/10 hover:bg-white/20 text-xs px-4 py-2 rounded-lg border border-white/10 transition flex items-center shadow-lg">
-                        <i class="fas fa-sync-alt mr-1"></i> Refresh Status Kode
-                    </button>
-                </div>
-
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
-                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
-                        <h3 class="font-bold text-lg">Monitoring & Distribusi Kode</h3>
-                        <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 w-64" placeholder="Cari kode...">
-                    </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
-                                <tr>
-                                    <th class="px-6 py-4">Kode Referral (200 ⚡)</th>
-                                    <th class="px-6 py-4">Status & Pemakai</th>
-                                    <th class="px-6 py-4 text-right w-32">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="ref-tbody" class="text-sm divide-y divide-white/5">
-                                <!-- Data dimuat via JS -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+            const userData = userDoc.data();
             
-        </main>
-    </div>
+            // 2. Cek apakah user ini sudah pernah klaim kode apapun sebelumnya
+            if (userData.hasRedeemed) {
+                throw new Error("Kamu sudah pernah mengklaim kode VIP sebelumnya. Jatah klaim hanya 1x per akun.");
+            }
 
-    <script>
-        let currentAdminSessionCode = '';
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
+            // 3. Cek apakah kode ini sudah dipakai oleh orang lain (global check)
+            // Note: Kita mencari di seluruh koleksi user apakah ada yang punya redeemedCode yang sama
+            const usersSnapshot = await t.get(db.collection('artifacts').doc(appId).collection('users'));
             
-            toast.className = `fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 transition-opacity duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-emerald-500' : 'border-red-500'}`;
-            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-red-400'}`;
-
-            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3000);
-        }
-
-        function loginAdmin() {
-            const code = document.getElementById('admin-password').value;
-            if (code === 'admin123' || code === 'Kr333wol') {
-                currentAdminSessionCode = code;
-                document.getElementById('login-view').classList.add('hidden');
-                document.getElementById('dashboard-view').classList.remove('hidden');
-                void document.getElementById('dashboard-view').offsetWidth;
-                document.getElementById('dashboard-view').style.opacity = '1';
-                loadUsers();
-            } else { showToast('Kode salah!', 'error'); }
-        }
-
-        function logoutAdmin() { location.reload(); }
-
-        function switchTab(tab) {
-            document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
-            document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
-            document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
-            document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
-            if(tab === 'referrals') loadReferrals();
-            if(tab === 'users') loadUsers();
-        }
-
-        async function loadUsers() {
-            const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data user dari Vercel...</td></tr>';
-            try {
-                const res = await fetch('/api/admin/users', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    document.getElementById('stat-total-users').innerText = data.users.length;
-                    document.getElementById('stat-total-credits').innerText = data.users.reduce((s,u)=>s+(u.credits||0),0).toLocaleString();
-                    
-                    if (data.users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
-                        return;
-                    }
-
-                    tbody.innerHTML = data.users.map(u => {
-                        // Menangani default videoAccess (jika tidak false, berarti true/ON)
-                        const isVideoOn = u.videoAccess !== false;
-                        
-                        return `
-                        <tr class="hover:bg-white/5 border-b border-white/5">
-                            <td class="px-6 py-4">
-                                <div class="flex flex-col">
-                                    <span class="font-bold text-white text-sm flex items-center gap-2">
-                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
-                                    </span>
-                                    <span class="text-[10px] text-emerald-400/70 font-mono mt-0.5">${u.email}</span>
-                                    <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-4 py-1.5 rounded bg-black/60 font-black text-yellow-400 border border-yellow-500/20 shadow-inner">${u.credits} ⚡</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition shadow-lg w-20 flex justify-center items-center gap-1.5 ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
-                                    <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
-                                    ${isVideoOn ? 'ON' : 'OFF'}
-                                </button>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex justify-end items-center gap-2">
-                                    <input type="number" id="in-${u.uid}" class="w-16 bg-black/50 border border-white/10 rounded px-2 py-1.5 text-center text-xs focus:border-emerald-500 outline-none" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-600 hover:bg-red-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-minus text-xs"></i></button>
-                                </div>
-                            </td>
-                        </tr>
-                    `}).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">${data.error || 'Gagal memuat API Vercel.'}</td></tr>`;
-                }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Gagal terhubung ke Vercel API.</td></tr>'; }
-        }
-
-        async function toggleVideoAccess(uid, currentStatus) {
-            const newStatus = !currentStatus; // Balikkan status
-            const btn = document.getElementById(`btn-toggle-${uid}`);
-            const originalHtml = btn.innerHTML;
-            const originalClass = btn.className;
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
-            try {
-                const res = await fetch('/api/admin/toggle-access', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        adminCode: currentAdminSessionCode, 
-                        appId: appId, 
-                        targetUid: uid, 
-                        videoAccess: newStatus 
-                    })
-                });
+            for (const doc of usersSnapshot.docs) {
+                const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(doc.id).collection('profile').doc('data');
+                const profileSnap = await t.get(profileRef);
                 
-                const data = await res.json();
-                if(data.success) {
-                    showToast(`Akses video berhasil ${newStatus ? 'diaktifkan' : 'dimatikan'}!`);
-                    loadUsers(); // Muat ulang tabel untuk update tampilan terbaru
-                } else {
-                    showToast(data.error || 'Gagal mengubah akses.', 'error');
-                    btn.innerHTML = originalHtml;
-                    btn.className = originalClass;
-                    btn.disabled = false;
+                if (profileSnap.exists && profileSnap.data().redeemedCode === inputCode) {
+                    throw new Error("Maaf, kode ini sudah digunakan oleh orang lain.");
                 }
-            } catch(e) { 
-                showToast('Kesalahan jaringan server.', 'error');
-                btn.innerHTML = originalHtml;
-                btn.className = originalClass;
-                btn.disabled = false;
             }
-        }
 
-        async function changeCredit(uid, action) {
-            const el = document.getElementById(`in-${uid}`);
-            const val = parseInt(el.value);
-            if(!val || val <= 0) return showToast('Isi angka jumlah token yang benar!', 'error');
-            const amount = action === 'add' ? val : -val;
-            try {
-                const res = await fetch('/api/admin/topup', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
-                });
-                if((await res.json()).success) { 
-                    showToast('Saldo berhasil diupdate!'); 
-                    el.value = '';
-                    loadUsers(); 
-                } else {
-                    showToast('Gagal update saldo dari backend.', 'error');
-                }
-            } catch(e) { showToast('Gagal update saldo! Periksa koneksi.', 'error'); }
-        }
+            // Jika semua lolos, tambahkan kredit
+            const currentCredits = userData.credits || 0;
+            t.update(userRef, { 
+                credits: currentCredits + 200, 
+                hasRedeemed: true, 
+                redeemedCode: inputCode 
+            });
+            
+            return true;
+        });
 
-        async function loadReferrals() {
-            const tbody = document.getElementById('ref-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi stok kode...</td></tr>';
-            try {
-                const res = await fetch('/api/admin/referrals', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    tbody.innerHTML = data.codes.map(c => `
-                        <tr class="hover:bg-white/5 border-b border-white/5">
-                            <td class="px-6 py-4 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
-                            <td class="px-6 py-4">
-                                ${c.used ? 
-                                    '<span class="px-3 py-1 rounded-full bg-red-500/20 text-red-500 text-[10px] font-bold uppercase border border-red-500/30 shadow-inner">Terpakai</span>' : 
-                                    '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase border border-emerald-500/30 shadow-inner">Tersedia (Ready)</span>'
-                                }
-                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] font-medium">${c.used ? `User: <span class="text-gray-300">${(c.usedBy || 'Unknown')}</span>` : ''}</div>
-                            </td>
-                            <td class="px-6 py-4 text-right">
-                                ${!c.used ? `
-                                    <button onclick="copyToClipboard('${c.code}')" class="bg-white/10 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg border border-white/20 transition-all flex items-center justify-center gap-2 text-xs ml-auto shadow-md font-bold">
-                                        <i class="fas fa-copy"></i> Salin
-                                    </button>
-                                ` : `
-                                    <span class="inline-block px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-500/50 rounded-lg text-xs font-bold uppercase ml-auto">Hangus</span>
-                                `}
-                            </td>
-                        </tr>
-                    `).join('');
-                }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Gagal memuat stok.</td></tr>'; }
-        }
+        res.status(200).json({ success: true, message: "Selamat! 200 Kredit berhasil ditambahkan ke akunmu." });
 
-        function copyToClipboard(text) {
-            const el = document.createElement('textarea');
-            el.value = text;
-            document.body.appendChild(el);
-            el.select();
-            document.execCommand('copy');
-            document.body.removeChild(el);
-            showToast('Kode ' + text + ' berhasil disalin!');
-        }
-
-        function filterTable(tbodyId, inputId) {
-            const filter = document.getElementById(inputId).value.toLowerCase();
-            const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
-            for (let row of rows) {
-                const txt = row.innerText.toLowerCase();
-                row.style.display = txt.includes(filter) ? '' : 'none';
-            }
-        }
-    </script>
-</body>
-</html>
+    } catch (e) {
+        console.error("Redeem Error:", e.message);
+        res.status(400).json({ success: false, error: e.message });
+    }
+}
