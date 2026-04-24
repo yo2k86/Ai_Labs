@@ -451,11 +451,32 @@
                     </button>
                     
                     <div id="user-profile-dashboard" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-dashboard')">
+                        <!-- Credit Display -->
+                        <div id="credit-display-dashboard" class="hidden items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/30 px-2.5 py-0.5 rounded-full mr-1">
+                            <i class="fas fa-bolt text-yellow-400 text-[10px]"></i>
+                            <span id="credit-amount-dashboard" class="text-xs font-bold text-yellow-100 font-mono">--</span>
+                        </div>
+
                         <span class="bg-gray-800 border border-gray-600 text-[0.65rem] px-2 py-0.5 rounded text-gray-200 font-bold tracking-wider shadow-sm">PRO</span>
                         <img id="user-avatar-dashboard" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600">
                         
-                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-12 w-48 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
-                            <button onclick="signOutUser()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition">Log out</button>
+                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                            <div class="px-4 py-2 border-b border-gray-700 mb-1">
+                                <p class="text-xs text-gray-400">Sisa Kredit</p>
+                                <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-dashboard">0</span> ⚡</p>
+                            </div>
+                            
+                            <button onclick="openRedeemModal()" class="w-full text-left px-4 py-2.5 text-sm text-cyan-400 hover:bg-white/10 transition flex items-center gap-2 font-semibold">
+                                <i class="fas fa-key w-4 text-center"></i> Aktivasi Kode VIP
+                            </button>
+                            
+                            <button onclick="openAdminHelpModal()" class="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-cart-plus w-4 text-center"></i> Beli Kredit / Topup
+                            </button>
+
+                            <button onclick="signOutUser()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition mt-1 border-t border-gray-700 pt-2">
+                                <i class="fas fa-sign-out-alt mr-1"></i> Log out
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -529,7 +550,6 @@
             </div>
 
             <!-- Project Grid -->
-            <!-- 10 GAMBAR GALERI TELAH DIKEMBALIKAN UTUH! -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-8">
                 <!-- Project Item 1 -->
                 <div class="flex flex-col gap-2.5 group cursor-pointer">
@@ -665,11 +685,32 @@
                     </button>
                     
                     <div id="user-profile-editor" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-editor')">
+                        <!-- Credit Display Editor -->
+                        <div id="credit-display-editor" class="hidden items-center gap-1.5 bg-yellow-500/10 border border-yellow-500/30 px-2.5 py-0.5 rounded-full mr-1">
+                            <i class="fas fa-bolt text-yellow-400 text-[10px]"></i>
+                            <span id="credit-amount-editor" class="text-xs font-bold text-yellow-100 font-mono">--</span>
+                        </div>
+
                         <span class="bg-gray-800 border border-gray-600 text-[0.65rem] px-2 py-0.5 rounded text-gray-200 font-bold tracking-wider shadow-sm">PRO</span>
                         <img id="user-avatar-editor" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600">
 
-                        <div id="dropdown-editor" class="hidden absolute right-0 top-12 w-48 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
-                            <button onclick="signOutUser()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition">Log out</button>
+                        <div id="dropdown-editor" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                            <div class="px-4 py-2 border-b border-gray-700 mb-1">
+                                <p class="text-xs text-gray-400">Sisa Kredit</p>
+                                <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-editor">0</span> ⚡</p>
+                            </div>
+                            
+                            <button onclick="openRedeemModal()" class="w-full text-left px-4 py-2.5 text-sm text-cyan-400 hover:bg-white/10 transition flex items-center gap-2 font-semibold">
+                                <i class="fas fa-key w-4 text-center"></i> Aktivasi Kode VIP
+                            </button>
+                            
+                            <button onclick="openAdminHelpModal()" class="w-full text-left px-4 py-2.5 text-sm text-emerald-400 hover:bg-white/10 transition flex items-center gap-2">
+                                <i class="fas fa-cart-plus w-4 text-center"></i> Beli Kredit / Topup
+                            </button>
+
+                            <button onclick="signOutUser()" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-white/10 transition mt-1 border-t border-gray-700 pt-2">
+                                <i class="fas fa-sign-out-alt mr-1"></i> Log out
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -958,6 +999,22 @@
             </div>
         </div>
     </div>
+    
+    <!-- Redeem Code Modal -->
+    <div id="redeem-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-sm p-6 rounded-2xl border-t border-cyan-500/30">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white"><i class="fas fa-key text-cyan-400 mr-2"></i>Aktivasi Kode</h3>
+                <button onclick="closeRedeemModal()" class="text-gray-400 hover:text-white"><i class="fas fa-times"></i></button>
+            </div>
+            <p class="text-xs text-gray-400 mb-4">Masukkan kode rahasia / referral yang diberikan oleh admin untuk mendapatkan <span class="text-yellow-400 font-bold">200 Kredit awal</span>.</p>
+            <input type="text" id="redeem-code-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-cyan-500 transition-colors mb-4 uppercase font-mono tracking-widest" placeholder="KODE-RAHASIA">
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeRedeemModal()" class="px-4 py-2 rounded-lg text-gray-400 hover:bg-white/5 border border-white/10 transition text-sm">Batal</button>
+                <button onclick="submitRedeemCode()" id="btn-submit-redeem" class="px-4 py-2 rounded-lg bg-cyan-600 text-white font-bold hover:bg-cyan-500 transition text-sm shadow-lg w-32 flex justify-center">Klaim</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ========================================== -->
     <!-- VIEW 4: PROMPTS GALLERY                    -->
@@ -1097,81 +1154,22 @@
         </div>
     </div>
 
-    <div id="manage-admin-auth-modal" class="hidden fixed inset-0 z-[260] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="glass-card w-full max-w-sm p-6 rounded-2xl text-center shadow-[0_0_50px_rgba(255,255,255,0.1)] border-t border-white/20">
-            <h3 class="text-xl font-bold text-white mb-4"><i class="fas fa-lock mr-2"></i>Sandi Kelola Admin</h3>
-            <input type="password" id="manage-admin-code-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-emerald-500/50 text-center mb-4" placeholder="Masukkan sandi">
-            <div class="flex gap-2 justify-center">
-                <button onclick="closeManageAdminAuth()" class="px-4 py-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition border border-white/10">Batal</button>
-                <button onclick="verifyManageAdminAuth()" class="px-6 py-2 rounded-lg bg-emerald-600 text-white font-bold hover:bg-emerald-500 transition shadow-lg">Login</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="manage-admin-modal" class="hidden fixed inset-0 z-[250] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="glass-card w-full max-w-2xl p-6 rounded-2xl relative max-h-[95vh] flex flex-col shadow-[0_0_50px_rgba(255,255,255,0.1)] border-t border-white/20">
-            <div class="flex justify-between items-center mb-4 border-b border-white/10 pb-4">
-                <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-users-gear text-emerald-400"></i> Kelola Profil Admin
-                </h3>
-                <button onclick="closeManageAdminModal()" class="text-gray-400 hover:text-white transition w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-
-            <div class="flex flex-col md:flex-row gap-6 overflow-hidden">
-                <div class="w-full md:w-1/2 flex flex-col gap-3 overflow-y-auto custom-scrollbar pr-2">
-                    <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-2" id="manage-form-title">Tambah Admin Baru</h4>
-                    <input type="hidden" id="admin-id-input">
-                    
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Nama Admin</label>
-                        <input type="text" id="admin-name-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500/50 text-sm" placeholder="Contoh: Bangpro">
-                    </div>
-                    
-                    <div>
-                        <div class="flex justify-between items-end mb-1">
-                            <label class="block text-xs text-gray-400">Link Foto (ImgBB)</label>
-                        </div>
-                        <input type="url" id="admin-photo-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500/50 text-sm" placeholder="https://i.ibb.co/.../foto.jpg">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Nomor WhatsApp</label>
-                        <input type="text" id="admin-wa-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500/50 text-sm" placeholder="Contoh: 628123456789">
-                    </div>
-
-                    <div>
-                        <label class="block text-xs text-gray-400 mb-1">Link Facebook</label>
-                        <input type="url" id="admin-fb-input" class="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-emerald-500/50 text-sm" placeholder="https://facebook.com/...">
-                    </div>
-
-                    <div class="flex gap-2 mt-2">
-                        <button onclick="resetAdminForm()" class="flex-1 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-medium transition border border-white/10">Batal</button>
-                        <button onclick="saveAdmin()" class="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold transition" id="admin-save-btn">Simpan</button>
-                    </div>
-                </div>
-
-                <div class="w-full md:w-1/2 flex flex-col border-t md:border-t-0 md:border-l border-white/10 pt-4 md:pt-0 md:pl-6 overflow-y-auto custom-scrollbar h-[40vh] md:h-[50vh]">
-                    <h4 class="text-sm font-bold text-gray-300 uppercase tracking-wider mb-3">Daftar Admin</h4>
-                    <div id="manage-admin-list" class="flex flex-col gap-2">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Firebase SDK Imports (Modular version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         
         let app, auth, db;
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const provider = new GoogleAuthProvider();
+        
+        // NEW: Variabel global untuk menyimpan state kredit user
+        window.currentUserCredits = 0;
+        window.currentUserId = null;
+        let creditUnsubscribe = null;
 
         if (firebaseConfig && Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
             app = initializeApp(firebaseConfig);
@@ -1196,13 +1194,59 @@
                     console.error("Init Auth error:", e);
                 }
             };
+            
+            // Panggil inisialisasi dulu
             initAuth();
 
-            onAuthStateChanged(auth, (user) => {
-                if (user && !user.isAnonymous) {
-                    const photo = user.photoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`;
+            // Dengarkan perubahan status setelah inisialisasi
+            onAuthStateChanged(auth, async (user) => {
+                if (user) {
+                    window.currentUserId = user.uid;
+                    const isAnon = user.isAnonymous;
+                    const photo = isAnon ? null : (user.photoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`);
+                    
                     if (window.updateAuthUI) window.updateAuthUI(true, photo);
+
+                    // PERBAIKAN ERROR PERMISSION: Path mutlak harus begini untuk lolos security rules Sandbox
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    
+                    try {
+                        const docSnap = await getDoc(userRef);
+                        if (!docSnap.exists()) {
+                            // Buat default profil jika belum ada (KREDIT DIMULAI DARI 0 SEKARANG)
+                            await setDoc(userRef, {
+                                uid: user.uid,
+                                email: user.email || 'Anonim',
+                                name: user.displayName || 'User',
+                                isAnon: isAnon,
+                                credits: 0, // <-- BERUBAH: Modal awal 0
+                                isPro: false,
+                                hasRedeemed: false, // <-- Menandai apakah sudah pakai kode VIP awal
+                                lastResetDate: new Date().toISOString()
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Gagal init db (Abaikan jika di Sandbox tanpa kunci api sendiri):", err);
+                    }
+
+                    // Listen perubahan data kredit
+                    if (creditUnsubscribe) creditUnsubscribe();
+                    try {
+                        creditUnsubscribe = onSnapshot(userRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.data();
+                                window.currentUserCredits = data.credits || 0;
+                                window.updateCreditUI(window.currentUserCredits);
+                            }
+                        }, (error) => {
+                            console.error("Error Snapshot:", error.message);
+                        });
+                    } catch(e) {}
+
                 } else {
+                    window.currentUserId = null;
+                    window.currentUserCredits = 0;
+                    if (creditUnsubscribe) { creditUnsubscribe(); creditUnsubscribe = null; }
                     if (window.updateAuthUI) window.updateAuthUI(false);
                 }
             });
@@ -1299,10 +1343,12 @@
             const loginBtnDashboard = document.getElementById('login-btn-dashboard');
             const userProfileDashboard = document.getElementById('user-profile-dashboard');
             const avatarImgDashboard = document.getElementById('user-avatar-dashboard');
+            const creditDisplayDash = document.getElementById('credit-display-dashboard');
             
             const loginBtnEditor = document.getElementById('login-btn-editor');
             const userProfileEditor = document.getElementById('user-profile-editor');
             const avatarImgEditor = document.getElementById('user-avatar-editor');
+            const creditDisplayEditor = document.getElementById('credit-display-editor');
 
             if (isLoggedIn) {
                 if(loginBtnDashboard) loginBtnDashboard.classList.add('hidden');
@@ -1310,11 +1356,19 @@
                     userProfileDashboard.classList.remove('hidden');
                     userProfileDashboard.classList.add('flex');
                 }
+                if(creditDisplayDash) {
+                    creditDisplayDash.classList.remove('hidden');
+                    creditDisplayDash.classList.add('flex');
+                }
                 
                 if(loginBtnEditor) loginBtnEditor.classList.add('hidden');
                 if(userProfileEditor) {
                     userProfileEditor.classList.remove('hidden');
                     userProfileEditor.classList.add('flex');
+                }
+                if(creditDisplayEditor) {
+                    creditDisplayEditor.classList.remove('hidden');
+                    creditDisplayEditor.classList.add('flex');
                 }
 
                 const avatarUrl = userPhotoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`;
@@ -1333,6 +1387,19 @@
                     userProfileEditor.classList.remove('flex');
                 }
             }
+        };
+
+        // NEW: Fungsi untuk update angka kredit di UI
+        window.updateCreditUI = function(amount) {
+            const elAmountDash = document.getElementById('credit-amount-dashboard');
+            const elDropDash = document.getElementById('credit-dropdown-dashboard');
+            const elAmountEditor = document.getElementById('credit-amount-editor');
+            const elDropEditor = document.getElementById('credit-dropdown-editor');
+
+            if(elAmountDash) elAmountDash.innerText = amount;
+            if(elDropDash) elDropDash.innerText = amount;
+            if(elAmountEditor) elAmountEditor.innerText = amount;
+            if(elDropEditor) elDropEditor.innerText = amount;
         };
 
         function toggleDropdown(dropdownId) {
@@ -1366,6 +1433,68 @@
             const fbDashDrop = document.getElementById('fb-dropdown-dashboard');
             if (fbDashDrop && fbDashBtn && !fbDashDrop.contains(e.target) && !fbDashBtn.contains(e.target)) fbDashDrop.classList.add('hidden');
         });
+
+        // --- NEW: REDEEM CODE MODAL LOGIC ---
+        window.openRedeemModal = function() {
+            const dropdowns = document.querySelectorAll('[id^="dropdown-"]');
+            dropdowns.forEach(d => d.classList.add('hidden')); // Tutup menu profil
+            const modal = document.getElementById('redeem-modal');
+            if(modal) modal.classList.remove('hidden');
+        }
+
+        window.closeRedeemModal = function() {
+            const modal = document.getElementById('redeem-modal');
+            const input = document.getElementById('redeem-code-input');
+            if(modal) modal.classList.add('hidden');
+            if(input) input.value = '';
+        }
+
+        window.submitRedeemCode = async function() {
+            const codeInput = document.getElementById('redeem-code-input');
+            const code = codeInput ? codeInput.value.trim().toUpperCase() : '';
+            
+            if(!code) {
+                window.showCustomAlert("Kode tidak boleh kosong!");
+                return;
+            }
+            if(!window.currentUserId) {
+                window.showCustomAlert("Tunggu sinkronisasi profil Anda...");
+                if(window.signInWithGoogle) window.signInWithGoogle();
+                return;
+            }
+
+            const btn = document.getElementById('btn-submit-redeem');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
+
+            try {
+                // Memanggil endpoint Vercel khusus aktivasi kode
+                const res = await fetch('/api/redeem', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        userId: window.currentUserId, 
+                        appId: window.appId, 
+                        code: code 
+                    })
+                });
+                
+                const data = await res.json();
+                
+                if (data.success) {
+                    window.showToast("Berhasil! Anda mendapatkan 200 Kredit ⚡");
+                    window.closeRedeemModal();
+                } else {
+                    window.showCustomAlert(data.error || "Kode tidak valid atau sudah digunakan.");
+                }
+            } catch(e) {
+                window.showCustomAlert("Terjadi kesalahan jaringan/sistem.");
+            }
+            
+            btn.innerHTML = originalText; 
+            btn.disabled = false;
+        }
 
         function hideAllViews() {
             ['view-landing', 'view-dashboard', 'view-editor', 'view-prompts'].forEach(id => {
@@ -1959,6 +2088,26 @@
             const promptInput = document.getElementById('main-prompt-input');
             let promptText = promptInput ? promptInput.value.trim() : '';
 
+            // NEW: CEK LOGIN DAN KREDIT SEBELUM GENERATE
+            if (!window.currentUserId) {
+                window.showCustomAlert("Tunggu sebentar, sedang mensinkronkan sesi Anda...");
+                // Otomatis login anonim jika belum ada sesi
+                if(window.signInWithGoogle) window.signInWithGoogle();
+                return;
+            }
+
+            // Misal: Video/Motion butuh 5 kredit, Gambar butuh 1 kredit
+            const cost = (genConfig.type === 'Video' || genConfig.type === 'Motion') ? 5 : 1;
+            
+            if (window.currentUserCredits < cost) {
+                if (window.currentUserCredits === 0) {
+                     window.showCustomAlert("Saldo 0. Gunakan 'Aktivasi Kode VIP' dari menu profil untuk mendapatkan modal kredit.");
+                } else {
+                     window.showCustomAlert(`Kredit tidak cukup! Butuh ${cost} ⚡, sisa kredit Anda ${window.currentUserCredits} ⚡. Hubungi admin untuk topup.`);
+                }
+                return;
+            }
+
             if (genConfig.type === 'Gambar' && !promptText && imageRefs.length === 0) {
                 window.showCustomAlert("Harap masukkan prompt atau unggah gambar referensi terlebih dahulu!"); return;
             } else if (genConfig.type === 'Motion' && (!editorImages['mulai'] || !editorImages['akhir'])) {
@@ -2063,7 +2212,10 @@
                             engine: genConfig.engine,
                             ratio: genConfig.ratio,
                             type: genConfig.type,
-                            duration: genConfig.duration
+                            duration: genConfig.duration,
+                            userId: window.currentUserId, // Kirim UID ke backend
+                            appId: window.appId, // Kirim App ID
+                            cost: cost // Kirim harga kreditnya
                         })
                     });
 
@@ -2130,6 +2282,11 @@
                         payload.video_urls = videoUrls;
                     }
 
+                    // Tambahkan data user ke payload untuk divalidasi Vercel
+                    payload.userId = window.currentUserId;
+                    payload.appId = window.appId;
+                    payload.cost = cost;
+
                     const response = await fetch(VERCEL_GENERATE_URL, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
@@ -2142,7 +2299,7 @@
 
                     const data = await response.json();
 
-                    // PERBAIKAN: Menangkap error dari backend dengan lebih teliti
+                    // Menangkap error dari backend dengan lebih teliti
                     if (!response.ok) throw new Error(data.details?.msg || data.details?.message || data.error || "Gagal membuat task");
 
                     const taskId = data.data?.taskId || data.taskId || data.task_id;
@@ -2239,14 +2396,12 @@
 
                         let mediaUrl = temukanUrlMedia(checkData);
 
-                        // PERBAIKAN: Tambahkan status === '99' karena Kling sering pakai kode ini saat selesai
                         if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === 'SUCCEEDED' || status === '100' || status === '99' || status === '1' || mediaUrl.includes('tempfile'))) {
                             if(loadingText) loadingText.innerText = "Mengonversi link unduhan...";
                             finalMediaUrl = await resolveKieUrl(mediaUrl);
                             if (finalMediaUrl.match(/\.(jpg|jpeg|png|webp|gif)$/i)) isResultVideo = false;
                             else if (finalMediaUrl.match(/\.(mp4|webm|mov)$/i)) isResultVideo = true;
                             break;
-                        // PERBAIKAN: Tangkap lebih banyak kode error Kling KIE AI (Contoh: 89)
                         } else if (status === 'FAIL' || status === 'FAILED' || status === 'ERROR' || status === '2' || status === '3' || status === '89') {
                             throw new Error(checkData.errorMessage || checkData.msg || "Sistem AI gagal memproses tugas.");
                         }
@@ -2395,7 +2550,8 @@
         };
 
         function formatWA(number) {
-            let num = number.replace(/\D/g,'');
+            if (number === undefined || number === null) return '';
+            let num = String(number).replace(/\D/g,'');
             if (num.startsWith('0')) return '62' + num.substring(1);
             if (!num.startsWith('62')) return '62' + num;
             return num;
@@ -2414,7 +2570,7 @@
                         <span class="text-white font-bold text-sm text-center line-clamp-1">${admin.name}</span>
                     </div>
                     <div class="flex flex-col justify-center gap-3 w-2/3 pl-5 border-l border-white/10 h-full">
-                        <a href="https://wa.me/${admin.wa}" target="_blank" class="flex items-center justify-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/40 border border-[#25D366]/50 text-[#25D366] px-4 py-3 rounded-xl text-base md:text-lg font-bold transition-all shadow-[0_0_15px_rgba(37,211,102,0.3)]">
+                        <a href="https://wa.me/${formatWA(admin.wa)}" target="_blank" class="flex items-center justify-center gap-2 bg-[#25D366]/20 hover:bg-[#25D366]/40 border border-[#25D366]/50 text-[#25D366] px-4 py-3 rounded-xl text-base md:text-lg font-bold transition-all shadow-[0_0_15px_rgba(37,211,102,0.3)]">
                             <i class="fa-brands fa-whatsapp text-xl md:text-2xl"></i> Chat WA
                         </a>
                         <a href="${admin.fb}" target="_blank" class="flex items-center justify-center gap-2 bg-[#1877F2]/20 hover:bg-[#1877F2]/40 border border-[#1877F2]/50 text-[#1877F2] px-4 py-3 rounded-xl text-base md:text-lg font-bold transition-all shadow-[0_0_15px_rgba(24,119,242,0.3)]">
@@ -2521,6 +2677,124 @@
             }
         }
 
+        // ==========================================
+        // NEW: TAB MANAJEMEN PENGGUNA & TOKEN 
+        // ==========================================
+        let currentAdminSessionCode = ''; // Menyimpan token verifikasi admin
+        
+        window.switchManageTab = function(tabName) {
+            const tabProfiles = document.getElementById('tab-content-profiles');
+            const tabTokens = document.getElementById('tab-content-tokens');
+            const btnProfiles = document.getElementById('tab-btn-profiles');
+            const btnTokens = document.getElementById('tab-btn-tokens');
+
+            if (tabName === 'profiles') {
+                tabProfiles.classList.remove('hidden');
+                tabProfiles.classList.add('flex');
+                tabTokens.classList.add('hidden');
+                tabTokens.classList.remove('flex');
+                
+                btnProfiles.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition";
+                btnTokens.className = "px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white hover:bg-white/10 transition border border-transparent";
+            } else {
+                tabProfiles.classList.add('hidden');
+                tabProfiles.classList.remove('flex');
+                tabTokens.classList.remove('hidden');
+                tabTokens.classList.add('flex');
+                
+                btnTokens.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition border border-emerald-500/30";
+                btnProfiles.className = "px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white hover:bg-white/10 transition border border-transparent";
+                
+                // Ambil data users saat membuka tab ini
+                loadAllUsersForAdmin();
+            }
+        }
+
+        window.loadAllUsersForAdmin = async function() {
+            const container = document.getElementById('admin-users-list');
+            if(!container) return;
+            
+            container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs italic"><i class="fas fa-spinner fa-spin text-emerald-500 mb-2 text-lg block"></i> Menghubungi database Vercel...</div>';
+            
+            try {
+                const res = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId })
+                });
+                
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                const data = await res.json();
+                
+                if(data.users && data.users.length > 0) {
+                    container.innerHTML = data.users.map((u, i) => `
+                        <div class="flex justify-between items-center bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-colors group">
+                            <div class="flex flex-col overflow-hidden w-[45%]">
+                                <span class="text-xs font-bold ${u.isAnon ? 'text-gray-400' : 'text-white'} truncate" title="${u.name}">${u.name} ${u.isAnon ? '(Anonim)' : ''}</span>
+                                <span class="text-[10px] text-emerald-500/80 font-mono truncate" title="${u.uid}">${u.email}</span>
+                            </div>
+                            <div class="flex items-center gap-2 w-[55%] justify-end">
+                                <div class="bg-black/60 px-2 py-1 rounded text-center border border-white/5 min-w-[3.5rem]">
+                                    <span class="text-xs font-black ${u.credits > 0 ? 'text-yellow-400' : 'text-red-400'}">${u.credits}</span>
+                                </div>
+                                <input type="number" id="topup-val-${u.uid}" class="w-14 bg-black/80 border border-emerald-500/30 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-emerald-500 placeholder-gray-600" placeholder="+Jml">
+                                <button onclick="topUpUser('${u.uid}')" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded transition shadow font-bold">SET</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else if (data.users && data.users.length === 0) {
+                    container.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs italic">Belum ada pengguna terdaftar.</div>';
+                } else {
+                    container.innerHTML = `<div class="text-center py-10 text-red-400 text-xs italic">Gagal memuat. ${data.error || 'Endpoint Vercel belum siap.'}</div>`;
+                }
+            } catch(e) {
+                container.innerHTML = '<div class="text-center py-10 text-red-400 text-xs italic">Gagal menghubungi Vercel. Pastikan endpoint `/api/admin/users` sudah dipasang.</div>';
+            }
+        }
+
+        window.topUpUser = async function(uid) {
+            const input = document.getElementById(`topup-val-${uid}`);
+            const amount = parseInt(input.value);
+            
+            // Kita izinkan "0" atau minus jika admin ingin mereset/mengurangi token.
+            if (isNaN(amount)) {
+                window.showCustomAlert("Masukkan angka jumlah token yang benar.");
+                return;
+            }
+
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; 
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/admin/topup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        adminCode: currentAdminSessionCode, 
+                        appId: window.appId, 
+                        targetUid: uid, 
+                        amount: amount 
+                    })
+                });
+                
+                const data = await res.json();
+                if (data.success) {
+                    window.showToast(amount >= 0 ? "Token berhasil ditambahkan!" : "Token berhasil dikurangi!");
+                    input.value = '';
+                    loadAllUsersForAdmin(); // Refresh data otomatis
+                } else {
+                    window.showCustomAlert(data.error || "Gagal mengubah token.");
+                }
+            } catch(e) {
+                window.showCustomAlert("Terjadi kesalahan sistem/jaringan.");
+            }
+            
+            btn.innerText = originalText; 
+            btn.disabled = false;
+        }
+
         document.addEventListener('click', function(e) {
             const target = e.target.closest('#admin-help-title');
             if (target && e.detail === 3) {
@@ -2544,9 +2818,15 @@
             const input = document.getElementById('manage-admin-code-input');
             if (!input) return;
             const code = input.value;
-            if (code === 'admin123') {
-                closeManageAdminAuth(); openManageAdminModal(); window.showCustomAlert("Akses Kelola Admin Terbuka!");
-            } else { window.showCustomAlert("Sandi Salah!"); }
+            // Gunakan satu password yang sama untuk mengamankan backend
+            if (code === 'admin123' || code === 'Kr333wol') {
+                currentAdminSessionCode = code; // Simpan kode ini untuk dikirim ke Vercel API
+                closeManageAdminAuth(); 
+                openManageAdminModal(); 
+                window.showCustomAlert("Akses Kelola Terbuka!");
+            } else { 
+                window.showCustomAlert("Sandi Salah!"); 
+            }
         }
 
         window.openManageAdminModal = function() {
@@ -2555,7 +2835,7 @@
             const manageModal = document.getElementById('manage-admin-modal');
             if(manageModal) {
                 manageModal.classList.remove('hidden'); 
-                renderManageAdminList();
+                switchManageTab('profiles'); // Default ke Tab Profiles
                 setTimeout(() => { manageModal.classList.remove('opacity-0'); }, 10);
             }
         }
