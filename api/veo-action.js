@@ -32,9 +32,17 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json'
       }
     };
+
     if (payload) options.body = JSON.stringify(payload);
 
     const response = await fetch(endpoint, options);
+
+    // --- PENGAMAN EXTRA: Pastikan respons JSON ---
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Respons dari server KIE bukan JSON (Mungkin sedang maintenance).");
+    }
+
     const data = await response.json();
 
     // Handling response untuk Upscaling (1080p dan 4K)
@@ -58,8 +66,7 @@ export default async function handler(req, res) {
     res.status(response.status).json(data);
 
   } catch (error) {
+    console.error("Error di veo-action.js:", error);
     res.status(500).json({ error: 'Gagal request Veo Action', message: error.message });
   }
 }
-
-Sekarang ketika video Veo selesai dibuat, akan muncul panel kontrol di pojok kanan atas video untuk memperpanjang (*Extend*) dan meningkatkan kualitas videonya. Keren banget kan brow? Silakan di-deploy! 🚀
