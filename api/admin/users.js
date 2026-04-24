@@ -1,61 +1,202 @@
-import admin from 'firebase-admin';
-
-// Inisialisasi Firebase Admin
-if (!admin.apps.length) {
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            })
-        });
-    } catch (error) {
-        console.error('Firebase admin error', error);
-    }
-}
-const db = admin.firestore();
-
-export default async function handler(req, res) {
-    // Pastikan metode POST
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
-    const { adminCode, appId } = req.body;
-
-    // Validasi Password Admin
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
-
-    if (!appId) {
-        return res.status(400).json({ error: "appId diperlukan" });
-    }
-
-    try {
-        // Ambil semua data pengguna dari koleksi root users
-        const usersSnapshot = await db.collection('artifacts').doc(appId).collection('users').get();
-        let usersList = [];
-
-        // Loop satu per satu untuk mengambil profil masing-masing user
-        for (const userDoc of usersSnapshot.docs) {
-            const profileDataRef = db.collection('artifacts').doc(appId).collection('users').doc(userDoc.id).collection('profile').doc('data');
-            const profileDoc = await profileDataRef.get();
-            
-            if (profileDoc.exists) {
-                const data = profileDoc.data();
-                usersList.push({
-                    uid: userDoc.id,
-                    name: data.name || 'User',
-                    email: data.email || 'Anonim',
-                    isAnon: data.isAnon || false,
-                    credits: data.credits || 0,
-                    videoAccess: data.videoAccess !== false // Jika tidak ada field videoAccess, anggap true (ON)
-                });
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ailabs Admin - Control Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { darkbg: '#0a0a0a', panelbg: '#121212' }
+                }
             }
         }
+    </script>
+    <style>
+        body { background-color: #0a0a0a; color: #fff; }
+        .glass-panel {
+            background: rgba(20, 20, 20, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .active-tab { background: #059669 !important; color: white !important; border-color: #10b981 !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen">
 
-        res.status(200).json({ success: true, users: usersList });
-    } catch (error) {
-        console.error("Users Sync Error:", error);
-        res.status(500).json({ error: "Gagal mengambil data user: " + error.message });
-    }
-}
+    <!-- VIEW 1: LOGIN ADMIN -->
+    <div id="login-view" class="fixed inset-0 z-[100] bg-darkbg flex flex-col items-center justify-center p-4">
+        <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center border-t border-emerald-500/30">
+            <i class="fas fa-shield-alt text-4xl text-emerald-400 mb-6"></i>
+            <h1 class="text-2xl font-bold mb-8">Ailabs Command Center</h1>
+            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:border-emerald-500 outline-none mb-4" placeholder="Kode Rahasia Admin">
+            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all">Masuk Sistem</button>
+        </div>
+    </div>
+
+    <!-- VIEW 2: DASHBOARD -->
+    <div id="dashboard-view" class="hidden min-h-screen opacity-0 transition-opacity duration-500">
+        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black">AL</div>
+                    <h2 class="font-bold text-lg">Ailabs Control Panel</h2>
+                </div>
+                <button onclick="location.reload()" class="text-red-400 hover:text-red-300 text-sm"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+            </div>
+            <div class="flex gap-2">
+                <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold active-tab">Pengguna & Saldo</button>
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold">Stok Kode VIP</button>
+            </div>
+        </header>
+
+        <main class="p-6 max-w-7xl mx-auto w-full flex flex-col gap-6">
+            <!-- STATS CARDS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fas fa-users"></i></div>
+                    <div><p class="text-xs text-gray-400">Total User</p><h3 class="text-xl font-bold" id="stat-total-users">0</h3></div>
+                </div>
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400"><i class="fas fa-bolt"></i></div>
+                    <div><p class="text-xs text-gray-400">Total Kredit User</p><h3 class="text-xl font-bold" id="stat-total-credits">0</h3></div>
+                </div>
+                <!-- SALDO KIE AI (DARI API) -->
+                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center gap-4 bg-cyan-500/5">
+                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400"><i class="fas fa-server"></i></div>
+                    <div><p class="text-xs text-gray-400">Saldo Kie AI (Master)</p><h3 class="text-xl font-bold text-cyan-300" id="stat-server-balance">Menghubungkan...</h3></div>
+                </div>
+            </div>
+
+            <div id="section-users" class="glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col">
+                <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
+                    <h3 class="font-bold">Manajemen Pengguna</h3>
+                    <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white outline-none focus:border-emerald-500" placeholder="Cari user...">
+                </div>
+                <div class="overflow-y-auto flex-1">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-black/80 text-gray-400 sticky top-0">
+                            <tr><th class="px-6 py-4">User</th><th class="px-6 py-4 text-center">Kredit</th><th class="px-6 py-4 text-center">Akses Video</th><th class="px-6 py-4 text-right">Aksi</th></tr>
+                        </thead>
+                        <tbody id="users-tbody" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div id="section-referrals" class="hidden glass-panel rounded-2xl overflow-hidden h-[60vh] flex flex-col">
+                 <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/40">
+                    <h3 class="font-bold">Monitoring Kode VIP</h3>
+                    <button onclick="loadReferrals()" class="text-xs text-cyan-400 hover:underline">Refresh List</button>
+                </div>
+                <div class="overflow-y-auto flex-1">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-black/80 text-gray-400 sticky top-0">
+                            <tr><th class="px-6 py-4">Kode</th><th class="px-6 py-4">Status</th><th class="px-6 py-4 text-right">Aksi</th></tr>
+                        </thead>
+                        <tbody id="ref-tbody" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentAdminSessionCode = '';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        function loginAdmin() {
+            const code = document.getElementById('admin-password').value;
+            if (code === 'admin123' || code === 'Kr333wol') {
+                currentAdminSessionCode = code;
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                setTimeout(() => document.getElementById('dashboard-view').style.opacity = '1', 10);
+                loadUsers();
+            } else { alert('Sandi Salah!'); }
+        }
+
+        async function loadUsers() {
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin"></i> Menghubungkan ke API...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/users', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    document.getElementById('stat-total-users').innerText = data.users.length;
+                    document.getElementById('stat-total-credits').innerText = data.users.reduce((s,u)=>s+(u.credits||0),0).toLocaleString();
+                    // UPDATE SALDO MASTER KIE AI
+                    document.getElementById('stat-server-balance').innerText = typeof data.serverBalance === 'number' ? data.serverBalance.toLocaleString() : data.serverBalance;
+                    
+                    tbody.innerHTML = data.users.map(u => `
+                        <tr class="hover:bg-white/5">
+                            <td class="px-6 py-4"><div class="flex flex-col"><span class="font-bold">${u.name}</span><span class="text-[10px] text-gray-500">${u.email}</span></div></td>
+                            <td class="px-6 py-4 text-center"><span class="text-yellow-400 font-bold">${u.credits} ⚡</span></td>
+                            <td class="px-6 py-4 text-center">
+                                <button onclick="toggleVideo('${u.uid}', ${u.videoAccess !== false})" class="px-3 py-1 rounded text-[10px] font-bold ${u.videoAccess !== false ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                                    ${u.videoAccess !== false ? 'ON' : 'OFF'}
+                                </button>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <div class="flex justify-end gap-1">
+                                    <input type="number" id="in-${u.uid}" class="w-12 bg-black border border-white/10 rounded px-1 text-xs" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}', 'add')" class="bg-emerald-600 px-2 py-1 rounded text-xs">+</button>
+                                    <button onclick="changeCredit('${u.uid}', 'sub')" class="bg-red-600 px-2 py-1 rounded text-xs">-</button>
+                                </div>
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Error: Gagal Sinkronisasi.</td></tr>'; }
+        }
+
+        function switchTab(tab) {
+            document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
+            document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
+            document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
+            document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
+            if(tab === 'referrals') loadReferrals();
+        }
+
+        async function changeCredit(uid, act) {
+            const v = parseInt(document.getElementById(`in-${uid}`).value);
+            if(!v) return;
+            const amount = act === 'add' ? v : -v;
+            const res = await fetch('/api/admin/topup', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
+            });
+            if((await res.json()).success) loadUsers();
+        }
+
+        async function toggleVideo(uid, curr) {
+            const res = await fetch('/api/admin/toggle-access', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: !curr })
+            });
+            if((await res.json()).success) loadUsers();
+        }
+
+        function filterTable(tid, iid) {
+            const f = document.getElementById(iid).value.toLowerCase();
+            const r = document.getElementById(tid).getElementsByTagName('tr');
+            for(let row of r) { row.style.display = row.innerText.toLowerCase().includes(f) ? '' : 'none'; }
+        }
+    </script>
+</body>
+</html>
