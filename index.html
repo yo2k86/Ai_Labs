@@ -1206,9 +1206,10 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     window.currentUserId = user.uid;
+                    const isAnon = user.isAnonymous;
                     const photo = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=10b981&color=fff&rounded=true&bold=true`;
                     
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo, false);
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
@@ -1220,7 +1221,7 @@
                                 uid: user.uid,
                                 email: user.email || 'Tidak ada email',
                                 name: user.displayName || 'Google User',
-                                isAnon: false,
+                                isAnon: isAnon,
                                 credits: 0, 
                                 isPro: false,
                                 hasRedeemed: false, 
@@ -1228,11 +1229,13 @@
                             });
                         } else {
                             // Selalu perbarui nama dan email agar sinkron dengan Google
-                            await setDoc(userRef, {
-                                email: user.email || docSnap.data().email || 'Tidak ada email',
-                                name: user.displayName || docSnap.data().name || 'Google User',
-                                isAnon: false
-                            }, { merge: true });
+                            if (!isAnon) {
+                                await setDoc(userRef, {
+                                    email: user.email || docSnap.data().email || 'Tidak ada email',
+                                    name: user.displayName || docSnap.data().name || 'Google User',
+                                    isAnon: false
+                                }, { merge: true });
+                            }
                         }
                     } catch (err) {
                         console.error("Gagal init db:", err);
