@@ -458,12 +458,10 @@
                         </div>
 
                         <span class="bg-gray-800 border border-gray-600 text-[0.65rem] px-2 py-0.5 rounded text-gray-200 font-bold tracking-wider shadow-sm">PRO</span>
-                        <img id="user-avatar-dashboard" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
+                        <img id="user-avatar-dashboard" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
                         
                         <div id="dropdown-dashboard" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
-                            <div class="px-4 py-2 border-b border-gray-700 mb-2">
-                                <p id="user-name-display-dashboard" class="text-sm font-bold text-white truncate">User</p>
-                                <p id="user-email-display-dashboard" class="text-[10px] text-gray-400 truncate mb-2">user@gmail.com</p>
+                            <div class="px-4 py-2 border-b border-gray-700 mb-1">
                                 <p class="text-xs text-gray-400">Sisa Kredit</p>
                                 <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-dashboard">0</span> ⚡</p>
                             </div>
@@ -694,12 +692,10 @@
                         </div>
 
                         <span class="bg-gray-800 border border-gray-600 text-[0.65rem] px-2 py-0.5 rounded text-gray-200 font-bold tracking-wider shadow-sm">PRO</span>
-                        <img id="user-avatar-editor" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" referrerpolicy="no-referrer" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
+                        <img id="user-avatar-editor" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
 
                         <div id="dropdown-editor" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
-                            <div class="px-4 py-2 border-b border-gray-700 mb-2">
-                                <p id="user-name-display-editor" class="text-sm font-bold text-white truncate">User</p>
-                                <p id="user-email-display-editor" class="text-[10px] text-gray-400 truncate mb-2">user@gmail.com</p>
+                            <div class="px-4 py-2 border-b border-gray-700 mb-1">
                                 <p class="text-xs text-gray-400">Sisa Kredit</p>
                                 <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-editor">0</span> ⚡</p>
                             </div>
@@ -1161,7 +1157,7 @@
     <!-- Firebase SDK Imports (Modular version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =======================================================================
@@ -1206,12 +1202,6 @@
             // Memulai sesi anonim agar pengguna langsung bisa memakai canvas walau belum login Google
             const initAuth = async () => {
                 try {
-                    // Tangkap hasil jika baru saja login menggunakan redirect (mode aman popup)
-                    const redirectResult = await getRedirectResult(auth);
-                    if (redirectResult) {
-                        window.showToast("Berhasil login Google!");
-                    }
-
                     if (!auth.currentUser) {
                         await signInAnonymously(auth);
                     }
@@ -1226,10 +1216,9 @@
                 if (user) {
                     window.currentUserId = user.uid;
                     const isAnon = user.isAnonymous;
-                    const safeName = encodeURIComponent(user.displayName || 'User');
-                    const photo = isAnon ? null : (user.photoURL || `https://ui-avatars.com/api/?name=${safeName}&background=10b981&color=fff&rounded=true&bold=true`);
+                    const photo = isAnon ? null : (user.photoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`);
                     
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon, user.displayName, user.email);
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
@@ -1285,11 +1274,8 @@
                         } catch (linkError) {
                             // Jika akun google ternyata sudah ada di database firebase (credential-already-in-use)
                             if (linkError.code === 'auth/credential-already-in-use') {
-                                window.showCustomAlert("Akun sudah terdaftar. Mengalihkan ke login...");
-                                await signInWithRedirect(auth, provider);
-                            } else if (linkError.code === 'auth/popup-blocked') {
-                                window.showCustomAlert("Popup diblokir browser. Mengalihkan halaman...");
-                                await signInWithRedirect(auth, provider);
+                                await signInWithPopup(auth, provider);
+                                window.showToast("Berhasil login dengan akun Google kamu!");
                             } else {
                                 throw linkError;
                             }
@@ -1300,11 +1286,7 @@
                     }
                 } catch (error) {
                     console.warn("Popup Google diblokir / Error:", error);
-                    
-                    if (error.code === 'auth/popup-blocked') {
-                        window.showCustomAlert("Popup diblokir oleh browser. Mengalihkan halaman...");
-                        await signInWithRedirect(auth, provider);
-                    } else if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                         window.showCustomAlert("Gagal login dengan Google: " + error.message);
                     }
                     
@@ -1396,7 +1378,7 @@
         // --------------------------------------------------------
 
         // Tambahan Parameter isAnon
-        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null, isAnon = false, userName = 'User', userEmail = '') {
+        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null, isAnon = false) {
             const loginBtnDashboard = document.getElementById('login-btn-dashboard');
             const userProfileDashboard = document.getElementById('user-profile-dashboard');
             const avatarImgDashboard = document.getElementById('user-avatar-dashboard');
@@ -1443,20 +1425,9 @@
                     creditDisplayEditor.classList.add('flex');
                 }
 
-                const safeName = encodeURIComponent(userName || 'User');
-                const avatarUrl = userPhotoURL || `https://ui-avatars.com/api/?name=${safeName}&background=10b981&color=fff&rounded=true&bold=true`;
+                const avatarUrl = userPhotoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`;
                 if(avatarImgDashboard) avatarImgDashboard.src = avatarUrl;
                 if(avatarImgEditor) avatarImgEditor.src = avatarUrl;
-                
-                const nameDash = document.getElementById('user-name-display-dashboard');
-                const emailDash = document.getElementById('user-email-display-dashboard');
-                const nameEd = document.getElementById('user-name-display-editor');
-                const emailEd = document.getElementById('user-email-display-editor');
-                
-                if (nameDash) nameDash.innerText = isAnon ? 'Pengguna Anonim' : (userName || 'Pengguna');
-                if (emailDash) emailDash.innerText = isAnon ? 'Belum login dengan akun' : (userEmail || '');
-                if (nameEd) nameEd.innerText = isAnon ? 'Pengguna Anonim' : (userName || 'Pengguna');
-                if (emailEd) emailEd.innerText = isAnon ? 'Belum login dengan akun' : (userEmail || '');
             } else {
                 if(loginBtnDashboard) loginBtnDashboard.classList.remove('hidden');
                 if(userProfileDashboard) {
