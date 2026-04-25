@@ -115,7 +115,13 @@
                     </div>
                     <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
                         <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Sisa Kredit</p><h3 class="text-2xl font-bold" id="stat-total-credits">0</h3></div>
+                        <div>
+                            <p class="text-sm text-gray-400 flex items-center gap-2">
+                                Kredit (Kie.ai) 
+                                <button onclick="loadKieBalance()" class="hover:text-white transition"><i class="fas fa-sync-alt text-[10px]"></i></button>
+                            </p>
+                            <h3 class="text-2xl font-bold text-yellow-400" id="stat-total-credits">...</h3>
+                        </div>
                     </div>
                 </div>
 
@@ -223,10 +229,35 @@
             if(tab === 'users') loadUsers();
         }
 
+        // FUNGSI BARU: Mengecek sisa kredit API langsung ke Kie.ai via Vercel
+        async function loadKieBalance() {
+            const el = document.getElementById('stat-total-credits');
+            el.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
+            try {
+                const res = await fetch('/api/admin/kie-balance', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    el.innerText = data.balance.toLocaleString() + ' ⚡';
+                } else {
+                    el.innerText = 'Error';
+                    console.error("Gagal cek saldo Kie.ai:", data.error);
+                }
+            } catch(e) {
+                el.innerText = 'Offline';
+            }
+        }
+
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
             tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data user dari Vercel...</td></tr>';
             try {
+                // Muat saldo API dari server Kie.ai setiap kali me-refresh halaman/user
+                loadKieBalance();
+
                 const res = await fetch('/api/admin/users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -235,7 +266,7 @@
                 const data = await res.json();
                 if(data.success) {
                     document.getElementById('stat-total-users').innerText = data.users.length;
-                    document.getElementById('stat-total-credits').innerText = data.users.reduce((s,u)=>s+(u.credits||0),0).toLocaleString();
+                    // Hapus baris kalkulasi total kredit lokal (data.users.reduce...) karena sudah digantikan loadKieBalance()
                     
                     if (data.users.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
