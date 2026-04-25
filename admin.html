@@ -185,7 +185,8 @@
 
     <script>
         let currentAdminSessionCode = '';
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        // PERBAIKAN: Menyamakan appId dengan yang ada di index.html agar terhubung ke database yang tepat
+        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
