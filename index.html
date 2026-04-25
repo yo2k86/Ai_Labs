@@ -446,8 +446,9 @@
 
                 <!-- AUTH SECTION (DASHBOARD) -->
                 <div id="auth-section-dashboard" class="flex items-center gap-3 border-l border-gray-700 pl-3 md:pl-4">
+                    <!-- Tombol Login hanya muncul jika belum login -->
                     <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-brands fa-google text-red-500"></i> Login
+                        <i class="fa-brands fa-google text-red-500"></i> Login Google
                     </button>
                     
                     <div id="user-profile-dashboard" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-dashboard')">
@@ -680,8 +681,9 @@
                 <button class="hover:text-white transition"><i class="fa-solid fa-ellipsis-vertical"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-3 pl-3 border-l border-gray-700 ml-2">
+                     <!-- Tombol Login -->
                      <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-4 py-1.5 rounded-full text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-2">
-                        <i class="fa-brands fa-google text-red-500"></i> Login
+                        <i class="fa-brands fa-google text-red-500"></i> Login Google
                     </button>
                     
                     <div id="user-profile-editor" class="hidden items-center gap-2 cursor-pointer hover:opacity-80 transition relative" onclick="toggleDropdown('dropdown-editor')">
@@ -1157,7 +1159,7 @@
     <!-- Firebase SDK Imports (Modular version) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, signInWithCustomToken, signInAnonymously, linkWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // =======================================================================
@@ -1175,7 +1177,7 @@
         
         let app, auth, db;
         // Menggunakan environment variabel yang sudah standar agar sinkron dengan Admin Vercel
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id'; 
+        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
         const provider = new GoogleAuthProvider();
         
         // Variabel global untuk menyimpan state kredit user
@@ -1199,43 +1201,36 @@
             window.fsSetDoc = setDoc;
             window.fsDeleteDoc = deleteDoc;
 
-            // Memulai sesi anonim agar pengguna langsung bisa memakai canvas walau belum login Google
-            const initAuth = async () => {
-                try {
-                    if (!auth.currentUser) {
-                        await signInAnonymously(auth);
-                    }
-                } catch(e) {
-                    console.error("Init Auth error:", e);
-                }
-            };
-            
-            initAuth();
-
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     window.currentUserId = user.uid;
-                    const isAnon = user.isAnonymous;
-                    const photo = isAnon ? null : (user.photoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`);
+                    const photo = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=10b981&color=fff&rounded=true&bold=true`;
                     
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon);
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, false);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
                     try {
                         const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
-                            // Buat default profil jika belum ada (KREDIT DIMULAI DARI 0)
+                            // Buat profil jika belum ada
                             await setDoc(userRef, {
                                 uid: user.uid,
-                                email: user.email || 'Anonim',
-                                name: user.displayName || 'User',
-                                isAnon: isAnon,
+                                email: user.email || 'Tidak ada email',
+                                name: user.displayName || 'Google User',
+                                isAnon: false,
                                 credits: 0, 
                                 isPro: false,
                                 hasRedeemed: false, 
                                 lastResetDate: new Date().toISOString()
                             });
+                        } else {
+                            // Selalu perbarui nama dan email agar sinkron dengan Google
+                            await setDoc(userRef, {
+                                email: user.email || docSnap.data().email || 'Tidak ada email',
+                                name: user.displayName || docSnap.data().name || 'Google User',
+                                isAnon: false
+                            }, { merge: true });
                         }
                     } catch (err) {
                         console.error("Gagal init db:", err);
@@ -1265,38 +1260,25 @@
 
             window.signInWithGoogle = async () => {
                 try {
-                    // Jika saat ini login anonim, tautkan (link) akun Google ke sesi anonim ini
-                    if (auth.currentUser && auth.currentUser.isAnonymous) {
-                        try {
-                            const result = await linkWithPopup(auth.currentUser, provider);
-                            window.showToast("Berhasil menautkan dan login dengan Google!");
-                            if (window.updateAuthUI) window.updateAuthUI(true, result.user.photoURL, false);
-                        } catch (linkError) {
-                            // Jika akun google ternyata sudah ada di database firebase (credential-already-in-use)
-                            if (linkError.code === 'auth/credential-already-in-use') {
-                                await signInWithPopup(auth, provider);
-                                window.showToast("Berhasil login dengan akun Google kamu!");
-                            } else {
-                                throw linkError;
-                            }
-                        }
-                    } else {
-                        await signInWithPopup(auth, provider);
-                        window.showToast("Berhasil login dengan Google!");
+                    const result = await signInWithPopup(auth, provider);
+                    const signedInUser = result.user;
+                    window.showToast("Berhasil login dengan Google!");
+
+                    // Memaksa update nama dan email asli ke database
+                    if (signedInUser) {
+                        const userRef = doc(db, 'artifacts', appId, 'users', signedInUser.uid, 'profile', 'data');
+                        await setDoc(userRef, {
+                            email: signedInUser.email || 'Tidak ada email',
+                            name: signedInUser.displayName || 'Google User',
+                            isAnon: false
+                        }, { merge: true });
+                        
+                        if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false);
                     }
                 } catch (error) {
                     console.warn("Popup Google diblokir / Error:", error);
                     if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
                         window.showCustomAlert("Gagal login dengan Google: " + error.message);
-                    }
-                    
-                    if (!auth.currentUser) {
-                        try {
-                            await signInAnonymously(auth);
-                        } catch (anonError) {
-                            console.error("Gagal login otomatis:", anonError);
-                            if (window.updateAuthUI) window.updateAuthUI(false);
-                        }
                     }
                 }
             };
@@ -1304,7 +1286,6 @@
             window.signOutUser = async () => {
                 try {
                     await signOut(auth);
-                    await signInAnonymously(auth); // Otomatis buat sesi Guest baru pasca logout
                     const ddDash = document.getElementById('dropdown-dashboard');
                     if(ddDash) ddDash.classList.add('hidden');
                     const ddEd = document.getElementById('dropdown-editor');
@@ -1390,14 +1371,8 @@
             const creditDisplayEditor = document.getElementById('credit-display-editor');
 
             if (isLoggedIn) {
-                // Jika sedang login tapi masih anonim (Guest), maka JANGAN sembunyikan tombol Login Google
-                if(loginBtnDashboard) {
-                    if (isAnon) {
-                        loginBtnDashboard.classList.remove('hidden');
-                    } else {
-                        loginBtnDashboard.classList.add('hidden');
-                    }
-                }
+                // Selalu sembunyikan tombol login jika sudah login (karena tidak ada sesi anonim lagi)
+                if(loginBtnDashboard) loginBtnDashboard.classList.add('hidden');
                 
                 if(userProfileDashboard) {
                     userProfileDashboard.classList.remove('hidden');
@@ -1408,13 +1383,7 @@
                     creditDisplayDash.classList.add('flex');
                 }
                 
-                if(loginBtnEditor) {
-                    if (isAnon) {
-                        loginBtnEditor.classList.remove('hidden');
-                    } else {
-                        loginBtnEditor.classList.add('hidden');
-                    }
-                }
+                if(loginBtnEditor) loginBtnEditor.classList.add('hidden');
 
                 if(userProfileEditor) {
                     userProfileEditor.classList.remove('hidden');
@@ -2159,8 +2128,19 @@
                 return;
             }
 
-            // Misal: Video/Motion butuh 5 kredit, Gambar butuh 1 kredit
-            const cost = (genConfig.type === 'Video' || genConfig.type === 'Motion') ? 5 : 1;
+            // --- PERBAIKAN SISTEM BIAYA KREDIT ---
+            // Sesuaikan harga berdasarkan engine atau tipe yang dipilih
+            let cost = 1; // Default harga
+            
+            if (genConfig.type === 'Gambar') {
+                cost = 1; // Biaya generate gambar
+            } else if (genConfig.engine.toLowerCase() === 'grok') {
+                cost = 18; // Biaya khusus Grok
+            } else if (genConfig.engine.toLowerCase().includes('kling')) {
+                cost = 10; // Biaya khusus Kling
+            } else if (genConfig.type === 'Video' || genConfig.type === 'Motion') {
+                cost = 5;  // Biaya default video lainnya (misal: Veo)
+            }
             
             if (window.currentUserCredits < cost) {
                 if (window.currentUserCredits === 0) {
