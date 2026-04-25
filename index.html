@@ -462,7 +462,13 @@
                         <!-- REFERRER POLICY FIX FOR GOOGLE AVATAR -->
                         <img id="user-avatar-dashboard" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
                         
-                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50 overflow-hidden">
+                            <!-- Akun Info -->
+                            <div class="px-4 py-3 border-b border-gray-700 bg-white/5">
+                                <p id="user-name-dashboard" class="text-sm font-bold text-white truncate">User Name</p>
+                                <p id="user-email-dashboard" class="text-[10px] text-gray-400 truncate">email@example.com</p>
+                            </div>
+                            
                             <div class="px-4 py-2 border-b border-gray-700 mb-1">
                                 <p class="text-xs text-gray-400">Sisa Kredit</p>
                                 <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-dashboard">0</span> ⚡</p>
@@ -698,7 +704,13 @@
                         <!-- REFERRER POLICY FIX FOR GOOGLE AVATAR -->
                         <img id="user-avatar-editor" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-9 h-9 rounded-full border border-gray-600" onerror="this.src='https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true'">
 
-                        <div id="dropdown-editor" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50">
+                        <div id="dropdown-editor" class="hidden absolute right-0 top-12 w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50 overflow-hidden">
+                            <!-- Akun Info -->
+                            <div class="px-4 py-3 border-b border-gray-700 bg-white/5">
+                                <p id="user-name-editor" class="text-sm font-bold text-white truncate">User Name</p>
+                                <p id="user-email-editor" class="text-[10px] text-gray-400 truncate">email@example.com</p>
+                            </div>
+
                             <div class="px-4 py-2 border-b border-gray-700 mb-1">
                                 <p class="text-xs text-gray-400">Sisa Kredit</p>
                                 <p class="text-sm font-bold text-yellow-400"><span id="credit-dropdown-editor">0</span> ⚡</p>
@@ -1209,7 +1221,8 @@
                     const isAnon = user.isAnonymous;
                     const photo = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=10b981&color=fff&rounded=true&bold=true`;
                     
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon);
+                    // PERUBAHAN: Teruskan display name dan email
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon, user.displayName, user.email);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
@@ -1278,7 +1291,8 @@
                             isAnon: false
                         }, { merge: true });
                         
-                        if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false);
+                        // PERUBAHAN: Teruskan display name dan email
+                        if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false, signedInUser.displayName, signedInUser.email);
                     }
                 } catch (error) {
                     console.warn("Popup Google diblokir / Error:", error);
@@ -1363,17 +1377,21 @@
         }
         // --------------------------------------------------------
 
-        // Tambahan Parameter isAnon
-        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null, isAnon = false) {
+        // Tambahan Parameter isAnon dan info User (Nama/Email)
+        window.updateAuthUI = function(isLoggedIn, userPhotoURL = null, isAnon = false, userName = 'User', userEmail = '') {
             const loginBtnDashboard = document.getElementById('login-btn-dashboard');
             const userProfileDashboard = document.getElementById('user-profile-dashboard');
             const avatarImgDashboard = document.getElementById('user-avatar-dashboard');
             const creditDisplayDash = document.getElementById('credit-display-dashboard');
+            const nameElDash = document.getElementById('user-name-dashboard');
+            const emailElDash = document.getElementById('user-email-dashboard');
             
             const loginBtnEditor = document.getElementById('login-btn-editor');
             const userProfileEditor = document.getElementById('user-profile-editor');
             const avatarImgEditor = document.getElementById('user-avatar-editor');
             const creditDisplayEditor = document.getElementById('credit-display-editor');
+            const nameElEd = document.getElementById('user-name-editor');
+            const emailElEd = document.getElementById('user-email-editor');
 
             if (isLoggedIn) {
                 // Tampilkan tombol login JIKA masih anonim
@@ -1411,9 +1429,17 @@
                     creditDisplayEditor.classList.add('flex');
                 }
 
-                const avatarUrl = userPhotoURL || `https://ui-avatars.com/api/?name=User&background=10b981&color=fff&rounded=true&bold=true`;
+                const avatarUrl = userPhotoURL || `https://ui-avatars.com/api/?name=${userName || 'User'}&background=10b981&color=fff&rounded=true&bold=true`;
                 if(avatarImgDashboard) avatarImgDashboard.src = avatarUrl;
                 if(avatarImgEditor) avatarImgEditor.src = avatarUrl;
+
+                // Tulis nama dan email di dropdown menu
+                if(nameElDash) nameElDash.innerText = userName || (isAnon ? 'User Anonim' : 'Google User');
+                if(emailElDash) emailElDash.innerText = userEmail || 'Tidak ada email';
+                
+                if(nameElEd) nameElEd.innerText = userName || (isAnon ? 'User Anonim' : 'Google User');
+                if(emailElEd) emailElEd.innerText = userEmail || 'Tidak ada email';
+
             } else {
                 if(loginBtnDashboard) loginBtnDashboard.classList.remove('hidden');
                 if(userProfileDashboard) {
