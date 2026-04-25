@@ -24,7 +24,33 @@ export default async function handler(req, res) {
   const apiKey = process.env.KIE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'KIE_API_KEY belum dipasang di environment Vercel!' });
 
-  const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId, cost } = req.body;
+  // PERBAIKAN: Hapus "cost" dari req.body. Kita tidak percaya data harga dari Frontend.
+  const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId } = req.body;
+
+  // ==========================================
+  // HITUNG BIAYA (COST) SINKRON DENGAN KIE.AI
+  // ==========================================
+  let cost = 1; // Harga default
+  const engineName = (engine || '').toLowerCase();
+  
+  if (type === 'Gambar') {
+      cost = 1;
+  } else if (engineName === 'grok') {
+      const dur = parseInt(duration) || 6;
+      cost = (dur / 6) * 18; // Kie.ai memotong 18 kredit tiap 6 detik untuk Grok
+  } else if (engineName.includes('veo3.1 lite')) {
+      cost = 30; // Kie.ai memotong 30 kredit untuk Veo Lite
+  } else if (engineName.includes('veo3.1 fast')) {
+      cost = 30;
+  } else if (engineName.includes('veo3.1 quality')) {
+      cost = 50; 
+  } else if (engineName.includes('kling 3.0')) {
+      cost = 15;
+  } else if (engineName.includes('kling')) { // kling 2.6
+      cost = 10;
+  } else if (type === 'Video' || type === 'Motion') {
+      cost = 5; // Default untuk video jenis lain
+  }
 
   // ==========================================
   // 1. CEK DAN POTONG KREDIT VIA FIREBASE ADMIN
@@ -44,7 +70,7 @@ export default async function handler(req, res) {
           const userData = userDoc.data();
           
           // ==========================================
-          // CEK AKSES VIDEO (Tambahan Baru)
+          // CEK AKSES VIDEO
           // ==========================================
           if ((type === 'Video' || type === 'Motion') && userData.videoAccess === false) {
               return res.status(403).json({ error: "Akses pembuatan video untuk akun kamu sedang dibekukan oleh Admin." });
@@ -56,7 +82,7 @@ export default async function handler(req, res) {
               return res.status(403).json({ error: `Kredit habis. Sisa ${currentCredits} ⚡, butuh ${cost} ⚡.` });
           }
 
-          // Potong kreditnya
+          // Potong kredit sesuai tarif engine (Firebase akan memotong sesuai tarif Kie.ai)
           await userRef.update({
               credits: admin.firestore.FieldValue.increment(-cost)
           });
@@ -69,7 +95,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 2. KODE ASLI GENERATE KIE AI
+  // 2. KODE ASLI GENERATE KIE AI (Bagian ini sama persis dengan punyamu)
   // ==========================================
   try {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
