@@ -1,4 +1,3 @@
-// File: api/admin/kie-balance.js
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     
@@ -10,10 +9,9 @@ export default async function handler(req, res) {
     }
 
     const apiKey = process.env.KIE_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "KIE_API_KEY belum dipasang di environment Vercel!" });
+    if (!apiKey) return res.status(500).json({ error: "KIE_API_KEY belum dipasang di Vercel!" });
 
     try {
-        // Memanggil API Kie.ai sesuai dokumentasi OpenAPI yang kamu berikan
         const response = await fetch("https://api.kie.ai/api/v1/chat/credit", {
             method: "GET",
             headers: {
@@ -24,9 +22,15 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        if (data.code === 200) {
-            // Berhasil mengambil sisa kredit pusat (Kie.ai)
-            res.status(200).json({ success: true, balance: data.data });
+        if (response.ok && data.code === 200) {
+            let balanceAmount = data.data;
+            
+            // Deteksi jika Kie.ai membalas dengan format objek
+            if (typeof balanceAmount === 'object' && balanceAmount !== null) {
+                balanceAmount = balanceAmount.total_balance ?? balanceAmount.balance ?? balanceAmount.credit ?? JSON.stringify(balanceAmount);
+            }
+            
+            res.status(200).json({ success: true, balance: balanceAmount });
         } else {
             res.status(400).json({ success: false, error: data.msg || "Gagal mengambil kredit dari Kie.ai" });
         }
