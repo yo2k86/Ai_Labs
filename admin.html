@@ -167,7 +167,6 @@
         <header class="glass-panel sticky top-4 z-30 px-6 py-4 mx-6 mt-4 rounded-2xl flex flex-col gap-4 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <div class="flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <!-- Menampilkan logo.png untuk Header Dasbor -->
                     <div class="p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
                         <img src="logo.png" alt="Ailabs Logo" class="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
                     </div>
@@ -194,18 +193,22 @@
             
             <!-- SECTION 1: MANAJEMEN USER -->
             <div id="section-users" class="flex flex-col gap-6">
-                <!-- Statistik -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Statistik 3 Kotak dengan Desain Glassmorphism Baru -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-emerald-500 flex items-center gap-5">
                         <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]"><i class="fas fa-users"></i></div>
                         <div><p class="text-sm text-gray-400 font-medium mb-1">Total Pengguna</p><h3 class="text-3xl font-extrabold drop-shadow-md" id="stat-total-users">0</h3></div>
+                    </div>
+                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-blue-500 flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"><i class="fas fa-wallet"></i></div>
+                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Kredit Klien</p><h3 class="text-3xl font-extrabold text-blue-400 drop-shadow-md" id="stat-total-local-credits">0 ⚡</h3></div>
                     </div>
                     <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-yellow-500 flex items-center gap-5">
                         <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-2xl shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"><i class="fas fa-bolt"></i></div>
                         <div>
                             <p class="text-sm text-gray-400 font-medium mb-1 flex items-center gap-2">
                                 Kredit (Kie.ai) 
-                                <button onclick="loadKieBalance()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm"><i class="fas fa-sync-alt text-[10px] text-white"></i></button>
+                                <button onclick="loadKieBalance()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm" title="Sinkronkan dengan server Kie.ai"><i class="fas fa-sync-alt text-[10px] text-white"></i></button>
                             </p>
                             <h3 class="text-3xl font-extrabold text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" id="stat-total-credits">...</h3>
                         </div>
@@ -228,6 +231,7 @@
                     </div>
                     <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto relative z-10 p-2">
                         <table class="w-full text-left border-collapse min-w-[700px]">
+                            <!-- 4 KOLOM HEADER -->
                             <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Profil & ID</th>
@@ -284,6 +288,7 @@
 
     <script>
         let currentAdminSessionCode = '';
+        // Memastikan appId sinkron dengan index.html
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
 
         function showToast(msg, type = 'success') {
@@ -334,7 +339,7 @@
                 });
                 const data = await res.json();
                 if (data.success) {
-                    el.innerText = data.balance.toLocaleString() + ' ⚡';
+                    el.innerText = Number(data.balance).toLocaleString('id-ID') + ' ⚡';
                 } else {
                     el.innerText = 'Error';
                     console.error("Gagal cek saldo Kie.ai:", data.error);
@@ -359,6 +364,9 @@
                 if(data.success) {
                     document.getElementById('stat-total-users').innerText = data.users.length;
                     
+                    const totalKreditLokal = data.users.reduce((sum, user) => sum + (user.credits || 0), 0);
+                    document.getElementById('stat-total-local-credits').innerText = totalKreditLokal.toLocaleString('id-ID') + ' ⚡';
+                    
                     if (data.users.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
                         return;
@@ -368,27 +376,38 @@
                         const isVideoOn = u.videoAccess !== false;
                         
                         return `
-                        <tr class="hover:bg-white/5 border-b border-white/5">
+                        <!-- ADA 4 KOLOM DATA DI SINI (td) SESUAI DENGAN HEADERNYA -->
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <!-- KOLOM 1: PROFIL & ID -->
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-white text-sm flex items-center gap-2">
+                                    <span class="font-bold text-white text-sm flex items-center gap-2 drop-shadow-md">
                                         ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
                                     </span>
                                     <span class="text-[10px] text-emerald-400/70 font-mono mt-0.5">${u.email}</span>
                                     <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
+
+                            <!-- KOLOM 2: SISA KREDIT -->
                             <td class="px-6 py-4 text-center">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40 hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
+                                <span class="px-4 py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
+                            </td>
+
+                            <!-- KOLOM 3: AKSES VIDEO -->
+                            <td class="px-6 py-4 text-center">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40 hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
                                     <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
+
+                            <!-- KOLOM 4: TOP-UP MANUAL -->
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
-                                    <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-lg px-2 py-2 text-center text-xs font-mono" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(16,185,129,0.4)]"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(239,68,68,0.4)]"><i class="fas fa-minus text-xs"></i></button>
+                                    <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-xl px-2 py-2 text-center text-xs font-mono" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-xl transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(16,185,129,0.4)]"><i class="fas fa-plus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-xl transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(239,68,68,0.4)]"><i class="fas fa-minus text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>
