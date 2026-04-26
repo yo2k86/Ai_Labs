@@ -130,7 +130,7 @@
     <div class="fixed inset-0 z-[-1] pointer-events-none">
         <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-emerald-500/20 blur-[120px] animate-pulse-slow"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-600/20 blur-[120px] animate-[pulse_8s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
-        <div class="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-blue-500/10 blur-[100px] animate-pulse"></div>
+        <div class="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-purple-500/10 blur-[100px] animate-pulse"></div>
     </div>
 
     <!-- Global Toast Notifikasi -->
@@ -178,12 +178,15 @@
             </div>
 
             <!-- Tab Navigation -->
-            <div class="flex gap-3">
-                <button id="tab-users" onclick="switchTab('users')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm">
+            <div class="flex flex-wrap gap-3">
+                <button id="tab-users" onclick="switchTab('users')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center">
                     <i class="fas fa-users mr-2 opacity-80"></i> Pengguna & Saldo
                 </button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm">
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center">
                     <i class="fas fa-ticket-alt mr-2 opacity-80"></i> Stok Kode VIP
+                </button>
+                <button id="tab-history" onclick="switchTab('history')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center">
+                    <i class="fas fa-history mr-2 opacity-80"></i> Riwayat Generasi
                 </button>
             </div>
         </header>
@@ -231,7 +234,6 @@
                     </div>
                     <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto relative z-10 p-2">
                         <table class="w-full text-left border-collapse min-w-[700px]">
-                            <!-- 4 KOLOM HEADER -->
                             <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Profil & ID</th>
@@ -283,6 +285,44 @@
                 </div>
             </div>
             
+            <!-- SECTION 3: RIWAYAT TASK AI -->
+            <div id="section-history" class="hidden flex flex-col gap-6">
+                <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-purple-500 flex items-center justify-between">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl shadow-[inset_0_0_10px_rgba(168,85,247,0.2)]"><i class="fas fa-history"></i></div>
+                        <div><p class="text-sm text-gray-400 font-medium mb-1">Riwayat Task Kie.ai</p><h3 class="text-xl font-extrabold drop-shadow-md text-white">Pantau & Ambil Video Hilang</h3></div>
+                    </div>
+                    <button onclick="loadHistory()" class="glass-btn text-sm px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Riwayat
+                    </button>
+                </div>
+
+                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
+                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-list-alt mr-2 text-purple-400"></i> Log Aktivitas User</h3>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari ID / Nama / Email...">
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto flex-1 custom-scrollbar p-2">
+                        <table class="w-full text-left border-collapse">
+                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
+                                <tr>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl w-1/4">Info Klien</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/3">Detail Prompt & Engine</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Waktu</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right rounded-tr-xl">Aksi Bantuan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody" class="text-sm divide-y divide-white/5">
+                                <!-- Data dimuat via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
         </main>
     </div>
 
@@ -322,10 +362,15 @@
         function switchTab(tab) {
             document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
             document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
+            document.getElementById('section-history').classList.toggle('hidden', tab !== 'history');
+            
             document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
             document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
+            document.getElementById('tab-history').classList.toggle('active-tab', tab === 'history');
+            
             if(tab === 'referrals') loadReferrals();
             if(tab === 'users') loadUsers();
+            if(tab === 'history') loadHistory();
         }
 
         async function loadKieBalance() {
@@ -376,9 +421,7 @@
                         const isVideoOn = u.videoAccess !== false;
                         
                         return `
-                        <!-- ADA 4 KOLOM DATA DI SINI (td) SESUAI DENGAN HEADERNYA -->
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <!-- KOLOM 1: PROFIL & ID -->
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
                                     <span class="font-bold text-white text-sm flex items-center gap-2 drop-shadow-md">
@@ -388,21 +431,15 @@
                                     <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
-
-                            <!-- KOLOM 2: SISA KREDIT -->
                             <td class="px-6 py-4 text-center">
                                 <span class="px-4 py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
                             </td>
-
-                            <!-- KOLOM 3: AKSES VIDEO -->
                             <td class="px-6 py-4 text-center">
                                 <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40 hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
                                     <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
-
-                            <!-- KOLOM 4: TOP-UP MANUAL -->
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
                                     <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-xl px-2 py-2 text-center text-xs font-mono" placeholder="0">
@@ -501,17 +538,133 @@
                             </td>
                             <td class="px-6 py-5 text-right">
                                 ${!c.used ? `
-                                    <button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2">
+                                    <button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2 w-24 justify-center">
                                         <i class="fas fa-copy"></i> Salin
                                     </button>
                                 ` : `
-                                    <span class="inline-block px-4 py-2 bg-red-500/5 border border-red-500/10 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>
+                                    <span class="inline-flex items-center justify-center w-24 px-4 py-2 bg-red-500/5 border border-red-500/10 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>
                                 `}
                             </td>
                         </tr>
                     `).join('');
                 }
             } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Gagal memuat stok.</td></tr>'; }
+        }
+
+        // FUNGSI BARU: Load History Data dari Vercel
+        async function loadHistory() {
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat dari database...</td></tr>';
+            try {
+                const res = await fetch('/api/admin/history', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    if (data.history.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada riwayat pembuatan video/gambar.</td></tr>';
+                        return;
+                    }
+                    tbody.innerHTML = data.history.map(h => {
+                        const dateObj = new Date(h.timestamp);
+                        const timeStr = dateObj.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                        const dateStr = dateObj.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
+                        
+                        return `
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <td class="px-6 py-5">
+                                <div class="font-bold text-white text-sm">${h.userName}</div>
+                                <div class="text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
+                                <div class="text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white transition" onclick="copyToClipboard('${h.taskId}')" title="Klik untuk salin Task ID">ID: ${h.taskId.substring(0,10)}... <i class="fas fa-copy"></i></div>
+                            </td>
+                            <td class="px-6 py-5">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px] font-bold border border-purple-500/30 uppercase">${h.type}</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold border border-blue-500/30 uppercase">${h.engine}</span>
+                                </div>
+                                <p class="text-xs text-gray-300 line-clamp-2" title="${h.prompt}">${h.prompt}</p>
+                            </td>
+                            <td class="px-6 py-5 text-center text-gray-400 text-xs">
+                                <div class="font-bold text-white">${timeStr}</div>
+                                <div class="text-[10px]">${dateStr}</div>
+                            </td>
+                            <td class="px-6 py-5 text-right">
+                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32">
+                                    <i class="fas fa-search"></i> Cek Server
+                                </button>
+                            </td>
+                        </tr>
+                    `}).join('');
+                } else {
+                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">${data.error || 'Gagal memuat riwayat.'}</td></tr>`;
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Koneksi API Gagal.</td></tr>'; }
+        }
+
+        // FUNGSI BARU: Mengecek Status Hasil ke Kie.ai
+        async function cekHasilKie(taskId, engine) {
+            const btn = document.getElementById(`btn-cek-${taskId}`);
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+            btn.disabled = true;
+
+            try {
+                // Memanggil endpoint check yang ada di server Vercel
+                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                const data = await res.json();
+                
+                let statusRaw = data.data?.status || data.status || data.data?.state || data.state || data.data?.successFlag || data.successFlag;
+                const status = String(statusRaw).toUpperCase();
+                
+                // Coba temukan URL hasil 
+                let resultUrl = null;
+                if (data.data?.resultUrl) resultUrl = data.data.resultUrl;
+                else if (data.data?.resultUrls && data.data.resultUrls.length > 0) resultUrl = data.data.resultUrls[0];
+                else if (data.data?.response?.resultUrls && data.data.response.resultUrls.length > 0) resultUrl = data.data.response.resultUrls[0];
+                else if (data.data?.video_url) resultUrl = data.data.video_url;
+                else if (data.data?.image_url) resultUrl = data.data.image_url;
+
+                if (resultUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '100' || status === '1' || resultUrl.includes('http'))) {
+                    // Berikan Link Download
+                    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka Hasil';
+                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg';
+                    
+                    // Deteksi jika link perlu diconvert dari tempfile.aiquickdraw (mirip fungsi download user)
+                    btn.onclick = async () => {
+                        if (resultUrl.includes('tempfile')) {
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                            try {
+                                const r = await fetch('/api/download', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({url: resultUrl})});
+                                const d = await r.json();
+                                window.open(d.data || resultUrl, '_blank');
+                            } catch(e) { window.open(resultUrl, '_blank'); }
+                            btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka Hasil';
+                        } else {
+                            window.open(resultUrl, '_blank');
+                        }
+                    };
+                    btn.disabled = false;
+                    showToast('Hasil ditemukan di server Kie.ai!');
+                } else if (status === 'FAIL' || status === 'FAILED' || status === 'ERROR' || status === '2' || status === '3' || status === '89') {
+                    btn.innerHTML = '<i class="fas fa-times"></i> AI Gagal';
+                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-red-500/20 text-red-500 border border-red-500/30 cursor-not-allowed opacity-70';
+                } else {
+                    btn.innerHTML = '<i class="fas fa-hourglass-half"></i> Proses AI...';
+                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-yellow-500/20 text-yellow-500 border border-yellow-500/30';
+                    setTimeout(() => {
+                        btn.innerHTML = originalHtml;
+                        btn.className = 'glass-btn text-white px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32';
+                        btn.disabled = false;
+                    }, 5000);
+                    showToast('Video klien masih dalam antrian/proses rendering AI.', 'error');
+                }
+            } catch (e) {
+                showToast('Gagal menghubungi server.', 'error');
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
         }
 
         function copyToClipboard(text) {
@@ -521,7 +674,7 @@
             el.select();
             document.execCommand('copy');
             document.body.removeChild(el);
-            showToast('Kode ' + text + ' berhasil disalin!');
+            showToast('Teks berhasil disalin!');
         }
 
         function filterTable(tbodyId, inputId) {
