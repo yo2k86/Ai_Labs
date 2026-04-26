@@ -24,7 +24,7 @@ export default async function handler(req, res) {
   const apiKey = process.env.KIE_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'KIE_API_KEY belum dipasang di environment Vercel!' });
 
-  // PERBAIKAN: Hapus "cost" dari req.body. Kita tidak percaya data harga dari Frontend.
+  // PERBAIKAN: Hapus "cost" dari destructuring req.body. Kita tidak percaya data harga dari Frontend.
   const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId } = req.body;
 
   // ==========================================
@@ -95,7 +95,7 @@ export default async function handler(req, res) {
   }
 
   // ==========================================
-  // 2. KODE ASLI GENERATE KIE AI (Bagian ini sama persis dengan punyamu)
+  // 2. KODE ASLI GENERATE KIE AI
   // ==========================================
   try {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
@@ -181,6 +181,36 @@ export default async function handler(req, res) {
         
         return res.status(400).json({ error: "Gagal membuat task di KIE AI", details: data });
     }
+
+    // ==========================================
+    // 3. FITUR BARU: SIMPAN RIWAYAT TASK KE FIREBASE (Untuk Admin)
+    // ==========================================
+    const taskId = data.data?.taskId || data.taskId || data.task_id;
+    
+    if (process.env.FIREBASE_PROJECT_ID && userId && appId && taskId) {
+        try {
+            // Ambil nama & email user dari database
+            const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
+            const userDoc = await userRef.get();
+            const uName = userDoc.exists ? userDoc.data().name : 'User';
+            const uEmail = userDoc.exists ? userDoc.data().email : 'No Email';
+
+            // Simpan Task ID sebagai riwayat agar bisa dipantau di Admin HTML
+            await db.collection('artifacts').doc(appId).collection('history').doc(taskId).set({
+                taskId: taskId,
+                userId: userId,
+                userName: uName,
+                userEmail: uEmail,
+                prompt: prompt || "Tanpa prompt",
+                engine: engine || "Kie.ai Engine",
+                type: type || "Video",
+                timestamp: admin.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Gagal simpan riwayat:", e);
+        }
+    }
+    // ==========================================
 
     res.status(response.status).json(data);
 
