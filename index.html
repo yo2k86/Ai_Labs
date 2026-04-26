@@ -1218,11 +1218,9 @@
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
                     window.currentUserId = user.uid;
-                    const isAnon = user.isAnonymous;
                     const photo = user.photoURL || `https://ui-avatars.com/api/?name=${user.displayName || 'User'}&background=10b981&color=fff&rounded=true&bold=true`;
                     
-                    // PERUBAHAN: Teruskan display name dan email
-                    if (window.updateAuthUI) window.updateAuthUI(true, photo, isAnon, user.displayName, user.email);
+                    if (window.updateAuthUI) window.updateAuthUI(true, photo, false, user.displayName, user.email);
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
@@ -1234,7 +1232,7 @@
                                 uid: user.uid,
                                 email: user.email || 'Tidak ada email',
                                 name: user.displayName || 'Google User',
-                                isAnon: isAnon,
+                                isAnon: false,
                                 credits: 0, 
                                 isPro: false,
                                 hasRedeemed: false, 
@@ -1242,13 +1240,11 @@
                             });
                         } else {
                             // Selalu perbarui nama dan email agar sinkron dengan Google
-                            if (!isAnon) {
-                                await setDoc(userRef, {
-                                    email: user.email || docSnap.data().email || 'Tidak ada email',
-                                    name: user.displayName || docSnap.data().name || 'Google User',
-                                    isAnon: false
-                                }, { merge: true });
-                            }
+                            await setDoc(userRef, {
+                                email: user.email || docSnap.data().email || 'Tidak ada email',
+                                name: user.displayName || docSnap.data().name || 'Google User',
+                                isAnon: false
+                            }, { merge: true });
                         }
                     } catch (err) {
                         console.error("Gagal init db:", err);
@@ -1291,7 +1287,6 @@
                             isAnon: false
                         }, { merge: true });
                         
-                        // PERUBAHAN: Teruskan display name dan email
                         if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false, signedInUser.displayName, signedInUser.email);
                     }
                 } catch (error) {
@@ -2172,17 +2167,27 @@
             }
 
             // --- PERBAIKAN SISTEM BIAYA KREDIT ---
-            // Sesuaikan harga berdasarkan engine atau tipe yang dipilih
+            // Sesuaikan harga berdasarkan engine secara dinamis
             let cost = 1; // Default harga
+            const engineName = genConfig.engine.toLowerCase();
             
             if (genConfig.type === 'Gambar') {
                 cost = 1; // Biaya generate gambar
-            } else if (genConfig.engine.toLowerCase() === 'grok') {
-                cost = 18; // Biaya khusus Grok
-            } else if (genConfig.engine.toLowerCase().includes('kling')) {
-                cost = 10; // Biaya khusus Kling
+            } else if (engineName === 'grok') {
+                const dur = parseInt(genConfig.duration) || 6;
+                cost = (dur / 6) * 18; // 18 kredit per 6 detik
+            } else if (engineName.includes('veo3.1 lite')) {
+                cost = 30; // Harga Veo 3 Lite
+            } else if (engineName.includes('veo3.1 fast')) {
+                cost = 30; // Sesuaikan jika Veo Fast beda (misal 30)
+            } else if (engineName.includes('veo3.1 quality')) {
+                cost = 50; // Sesuaikan jika Veo Quality beda (misal 50)
+            } else if (engineName.includes('kling 3.0')) {
+                cost = 15; // Harga Kling 3.0
+            } else if (engineName.includes('kling')) {
+                cost = 10; // Harga Kling 2.6
             } else if (genConfig.type === 'Video' || genConfig.type === 'Motion') {
-                cost = 5;  // Biaya default video lainnya (misal: Veo)
+                cost = 5;  // Default fallback
             }
             
             if (window.currentUserCredits < cost) {
@@ -2299,9 +2304,8 @@
                             type: genConfig.type,
                             duration: genConfig.duration,
                             userId: window.currentUserId, 
-                            appId: window.appId, 
-                            cost: cost 
-                        })
+                            appId: window.appId
+                        }) // Kita sudah hapus "cost: cost" di req.body, murni dihitung Vercel
                     });
 
                     const contentType = response.headers.get("content-type");
@@ -2368,7 +2372,6 @@
 
                     payload.userId = window.currentUserId;
                     payload.appId = window.appId;
-                    payload.cost = cost;
 
                     const response = await fetch(VERCEL_GENERATE_URL, {
                         method: "POST",
