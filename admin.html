@@ -22,8 +22,11 @@
                 extend: {
                     fontFamily: { sans: ['Inter', 'sans-serif'] },
                     colors: {
-                        darkbg: '#0a0a0a',
+                        darkbg: '#050505',
                         panelbg: '#121212',
+                    },
+                    animation: {
+                        'pulse-slow': 'pulse 6s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                     }
                 }
             }
@@ -31,73 +34,157 @@
     </script>
 
     <style>
-        body { background-color: #0a0a0a; color: #fff; }
+        body { background-color: #050505; color: #fff; }
+        
+        /* Efek Kaca Transparan & Berkilau */
         .glass-panel {
-            background: rgba(20, 20, 20, 0.6);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.3); /* Pantulan cahaya atas */
+            border-left: 1px solid rgba(255, 255, 255, 0.2); /* Pantulan cahaya kiri */
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden; /* Untuk efek kilau */
         }
+        
+        /* Animasi kilau saat disentuh/hover */
+        .glass-panel::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            z-index: 1; pointer-events: none;
+        }
+        .glass-panel:hover::after {
+            animation: shine 1.2s ease-in-out;
+        }
+        @keyframes shine {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        /* Input ala kaca */
+        .glass-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 15px rgba(16, 185, 129, 0.3);
+            outline: none;
+        }
+
+        /* Tombol ala kaca */
+        .glass-btn {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(5, 150, 105, 0.4) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
         
         input[type=number]::-webkit-inner-spin-button, 
         input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         input[type=number] { -moz-appearance: textfield; }
 
         .active-tab {
-            background: #059669 !important;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.6), rgba(5, 150, 105, 0.4)) !important;
             color: white !important;
-            border-color: #10b981 !important;
+            border-color: rgba(255,255,255,0.3) !important;
+            border-top-color: rgba(255,255,255,0.5) !important;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255,255,255,0.4);
         }
+        
+        /* Memperbaiki z-index agar table tetap rapi saat dihover dengan efek kilau */
+        table td, table th { position: relative; z-index: 2; }
     </style>
 </head>
-<body class="font-sans antialiased min-h-screen flex flex-col">
+<body class="font-sans antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Latar Belakang Ambient Glow (Kunci efek Kaca) -->
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-emerald-500/20 blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-600/20 blur-[120px] animate-[pulse_8s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
+        <div class="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-blue-500/10 blur-[100px] animate-pulse"></div>
+    </div>
 
     <!-- Global Toast Notifikasi -->
-    <div id="toast" class="fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 opacity-0 pointer-events-none transition-opacity duration-300 z-[999] border-l-4 border-emerald-500">
-        <i id="toast-icon" class="fas fa-info-circle text-emerald-400"></i>
-        <span id="toast-msg" class="text-sm font-medium">Notifikasi</span>
+    <div id="toast" class="fixed top-5 right-5 glass-panel px-6 py-4 rounded-xl flex items-center gap-4 opacity-0 pointer-events-none transition-all duration-300 z-[999] border-l-4 border-l-emerald-500 transform translate-y-[-20px]">
+        <i id="toast-icon" class="fas fa-info-circle text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"></i>
+        <span id="toast-msg" class="text-sm font-medium tracking-wide">Notifikasi</span>
     </div>
 
     <!-- VIEW 1: LOGIN ADMIN -->
-    <div id="login-view" class="fixed inset-0 z-[100] bg-darkbg flex flex-col items-center justify-center p-4 transition-opacity duration-500">
-        <div class="glass-panel p-8 rounded-2xl w-full max-w-md text-center border-t border-emerald-500/30">
-            <div class="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-emerald-500/50">
-                <i class="fas fa-shield-alt text-2xl text-emerald-400"></i>
+    <div id="login-view" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 transition-opacity duration-500 bg-black/40 backdrop-blur-sm">
+        <div class="glass-panel p-10 rounded-3xl w-full max-w-md text-center">
+            <!-- Menampilkan logo.png untuk halaman Login -->
+            <div class="relative inline-block mb-6">
+                <div class="absolute inset-0 bg-emerald-500/30 blur-2xl rounded-full"></div>
+                <img src="https://raw.githubusercontent.com/username/repo/main/logo.png" alt="Ailabs Logo" class="relative w-24 h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             </div>
-            <h1 class="text-2xl font-bold mb-2">Ailabs Command Center</h1>
-            <p class="text-sm text-gray-400 mb-8">Masukkan kode rahasia admin.</p>
-            <input type="password" id="admin-password" class="w-full bg-black/50 border border-white/10 rounded-lg px-4 py-3 text-center text-white focus:outline-none focus:border-emerald-500 transition-colors mb-4" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
-            <button onclick="loginAdmin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-colors shadow-lg">Masuk Sistem</button>
+            
+            <h1 class="text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">Command Center</h1>
+            <p class="text-sm text-gray-300/80 mb-8 font-light">Autentikasi keamanan tingkat lanjut.</p>
+            
+            <div class="relative mb-6 group">
+                <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-400 transition-colors"></i>
+                <input type="password" id="admin-password" class="glass-input w-full rounded-xl pl-12 pr-4 py-3.5 text-center text-white focus:ring-2 focus:ring-emerald-500/50" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
+            </div>
+            
+            <button onclick="loginAdmin()" class="glass-btn w-full text-white font-bold py-3.5 rounded-xl uppercase tracking-widest text-sm">Masuk Sistem</button>
         </div>
     </div>
 
     <!-- VIEW 2: DASHBOARD ADMIN -->
-    <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500">
+    <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500 relative z-10">
         
         <!-- Header & Nav -->
-        <header class="glass-panel sticky top-0 z-30 px-6 py-4 flex flex-col gap-4 border-b border-white/5">
+        <header class="glass-panel sticky top-4 z-30 px-6 py-4 mx-6 mt-4 rounded-2xl flex flex-col gap-4 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
             <div class="flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 bg-emerald-500 rounded flex items-center justify-center font-bold text-black">AL</div>
-                    <h2 class="font-bold text-lg">Ailabs Control Panel</h2>
+                <div class="flex items-center gap-4">
+                    <!-- Menampilkan logo.png untuk Header Dasbor -->
+                    <div class="p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
+                        <img src="https://raw.githubusercontent.com/username/repo/main/logo.png" alt="Ailabs Logo" class="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                    </div>
+                    <h2 class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Ailabs Control Panel</h2>
                 </div>
-                <button onclick="logoutAdmin()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-2">
+                <button onclick="logoutAdmin()" class="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-sm font-medium transition-all border border-red-500/20 flex items-center gap-2 shadow-lg">
                     <i class="fas fa-sign-out-alt"></i> Keluar
                 </button>
             </div>
 
             <!-- Tab Navigation -->
-            <div class="flex gap-2">
-                <button id="tab-users" onclick="switchTab('users')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition active-tab">
-                    <i class="fas fa-users mr-2"></i> Pengguna & Saldo
+            <div class="flex gap-3">
+                <button id="tab-users" onclick="switchTab('users')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm">
+                    <i class="fas fa-users mr-2 opacity-80"></i> Pengguna & Saldo
                 </button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold border border-transparent transition">
-                    <i class="fas fa-ticket-alt mr-2"></i> Stok Kode VIP
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm">
+                    <i class="fas fa-ticket-alt mr-2 opacity-80"></i> Stok Kode VIP
                 </button>
             </div>
         </header>
@@ -109,41 +196,44 @@
             <div id="section-users" class="flex flex-col gap-6">
                 <!-- Statistik -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-emerald-500 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl"><i class="fas fa-users"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Pengguna</p><h3 class="text-2xl font-bold" id="stat-total-users">0</h3></div>
+                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-emerald-500 flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]"><i class="fas fa-users"></i></div>
+                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Pengguna</p><h3 class="text-3xl font-extrabold drop-shadow-md" id="stat-total-users">0</h3></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-2xl border-l-4 border-yellow-500 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-400 text-xl"><i class="fas fa-bolt"></i></div>
+                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-yellow-500 flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-2xl shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"><i class="fas fa-bolt"></i></div>
                         <div>
-                            <p class="text-sm text-gray-400 flex items-center gap-2">
+                            <p class="text-sm text-gray-400 font-medium mb-1 flex items-center gap-2">
                                 Kredit (Kie.ai) 
-                                <button onclick="loadKieBalance()" class="hover:text-white transition"><i class="fas fa-sync-alt text-[10px]"></i></button>
+                                <button onclick="loadKieBalance()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm"><i class="fas fa-sync-alt text-[10px] text-white"></i></button>
                             </p>
-                            <h3 class="text-2xl font-bold text-yellow-400" id="stat-total-credits">...</h3>
+                            <h3 class="text-3xl font-extrabold text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" id="stat-total-credits">...</h3>
                         </div>
                     </div>
                 </div>
 
                 <!-- Tabel User -->
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
-                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
-                        <h3 class="font-bold text-lg">Daftar Klien Ailabs</h3>
+                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
+                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-server mr-2 text-emerald-400"></i> Daftar Klien Ailabs</h3>
                         <div class="flex items-center gap-3">
-                            <button onclick="loadUsers()" class="bg-white/10 hover:bg-white/20 text-xs px-3 py-1.5 rounded-lg border border-white/10 transition flex items-center">
-                                <i class="fas fa-sync-alt mr-1"></i> Refresh
+                            <button onclick="loadUsers()" class="glass-btn text-xs px-4 py-2 rounded-xl flex items-center shadow-lg font-semibold">
+                                <i class="fas fa-sync-alt mr-2"></i> Refresh
                             </button>
-                            <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-emerald-500 w-56" placeholder="Cari user...">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari user (nama/email)...">
+                            </div>
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto">
+                    <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto relative z-10 p-2">
                         <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
+                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-6 py-4">Profil & ID</th>
-                                    <th class="px-6 py-4 text-center">Sisa Kredit</th>
-                                    <th class="px-6 py-4 text-center">Akses Video</th>
-                                    <th class="px-6 py-4 text-right">Top-up Manual</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Profil & ID</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Sisa Kredit</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Akses Video</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right rounded-tr-xl">Top-up Manual</th>
                                 </tr>
                             </thead>
                             <tbody id="users-tbody" class="text-sm divide-y divide-white/5"></tbody>
@@ -154,28 +244,31 @@
 
             <!-- SECTION 2: STOK KODE REFERRAL -->
             <div id="section-referrals" class="hidden flex flex-col gap-6">
-                <div class="glass-panel p-6 rounded-2xl border-l-4 border-cyan-500 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl"><i class="fas fa-key"></i></div>
-                        <div><p class="text-sm text-gray-400">Total Stok Kode VIP</p><h3 class="text-2xl font-bold" id="stat-total-refs">300</h3></div>
+                <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-cyan-500 flex items-center justify-between">
+                    <div class="flex items-center gap-5">
+                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"><i class="fas fa-key"></i></div>
+                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Stok Kode VIP</p><h3 class="text-3xl font-extrabold drop-shadow-md" id="stat-total-refs">300</h3></div>
                     </div>
-                    <button onclick="loadReferrals()" class="bg-white/10 hover:bg-white/20 text-xs px-4 py-2 rounded-lg border border-white/10 transition flex items-center shadow-lg">
-                        <i class="fas fa-sync-alt mr-1"></i> Refresh Status Kode
+                    <button onclick="loadReferrals()" class="glass-btn text-sm px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Status Kode
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-2xl overflow-hidden flex flex-col h-[60vh]">
-                    <div class="p-5 border-b border-white/5 flex justify-between items-center bg-black/40">
-                        <h3 class="font-bold text-lg">Monitoring & Distribusi Kode</h3>
-                        <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="bg-black/50 border border-white/10 rounded-lg px-4 py-1.5 text-sm text-white focus:outline-none focus:border-cyan-500 w-64" placeholder="Cari kode...">
+                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
+                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-shield-alt mr-2 text-cyan-400"></i> Monitoring & Distribusi Kode</h3>
+                        <div class="relative">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari kode spesifik...">
+                        </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar">
+                    <div class="overflow-y-auto flex-1 custom-scrollbar p-2">
                         <table class="w-full text-left border-collapse">
-                            <thead class="bg-black/80 text-xs uppercase text-gray-400 sticky top-0 z-10">
+                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-6 py-4">Kode Referral (200 ⚡)</th>
-                                    <th class="px-6 py-4">Status & Pemakai</th>
-                                    <th class="px-6 py-4 text-right w-32">Aksi</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Kode Referral (200 ⚡)</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Status & Pemakai</th>
+                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-40 rounded-tr-xl">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="ref-tbody" class="text-sm divide-y divide-white/5">
@@ -191,19 +284,20 @@
 
     <script>
         let currentAdminSessionCode = '';
-        // PERBAIKAN: Menyamakan appId dengan yang ada di index.html agar terhubung ke database yang tepat
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
             document.getElementById('toast-msg').innerText = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
             
-            toast.className = `fixed top-5 right-5 glass-panel px-6 py-3 rounded-lg flex items-center gap-3 transition-opacity duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-emerald-500' : 'border-red-500'}`;
-            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400' : 'fa-exclamation-circle text-red-400'}`;
+            toast.className = `fixed top-5 right-5 glass-panel px-6 py-4 rounded-xl flex items-center gap-4 transition-all duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-l-emerald-500' : 'border-l-red-500'}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-xl drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
 
-            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 3000);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
+            }, 3000);
         }
 
         function loginAdmin() {
@@ -229,7 +323,6 @@
             if(tab === 'users') loadUsers();
         }
 
-        // FUNGSI BARU: Mengecek sisa kredit API langsung ke Kie.ai via Vercel
         async function loadKieBalance() {
             const el = document.getElementById('stat-total-credits');
             el.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
@@ -255,7 +348,6 @@
             const tbody = document.getElementById('users-tbody');
             tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data user dari Vercel...</td></tr>';
             try {
-                // Muat saldo API dari server Kie.ai setiap kali me-refresh halaman/user
                 loadKieBalance();
 
                 const res = await fetch('/api/admin/users', {
@@ -266,7 +358,6 @@
                 const data = await res.json();
                 if(data.success) {
                     document.getElementById('stat-total-users').innerText = data.users.length;
-                    // Hapus baris kalkulasi total kredit lokal (data.users.reduce...) karena sudah digantikan loadKieBalance()
                     
                     if (data.users.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
@@ -274,7 +365,6 @@
                     }
 
                     tbody.innerHTML = data.users.map(u => {
-                        // Menangani default videoAccess (jika tidak false, berarti true/ON)
                         const isVideoOn = u.videoAccess !== false;
                         
                         return `
@@ -289,19 +379,16 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">
-                                <span class="px-4 py-1.5 rounded bg-black/60 font-black text-yellow-400 border border-yellow-500/20 shadow-inner">${u.credits} ⚡</span>
-                            </td>
-                            <td class="px-6 py-4 text-center">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-wider transition shadow-lg w-20 flex justify-center items-center gap-1.5 ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/30'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40 hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
                                     <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
-                                    <input type="number" id="in-${u.uid}" class="w-16 bg-black/50 border border-white/10 rounded px-2 py-1.5 text-center text-xs focus:border-emerald-500 outline-none" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-600 hover:bg-emerald-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-600 hover:bg-red-500 rounded transition flex items-center justify-center shadow-lg"><i class="fas fa-minus text-xs"></i></button>
+                                    <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-lg px-2 py-2 text-center text-xs font-mono" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(16,185,129,0.4)]"><i class="fas fa-plus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-lg transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(239,68,68,0.4)]"><i class="fas fa-minus text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>
@@ -313,7 +400,7 @@
         }
 
         async function toggleVideoAccess(uid, currentStatus) {
-            const newStatus = !currentStatus; // Balikkan status
+            const newStatus = !currentStatus;
             const btn = document.getElementById(`btn-toggle-${uid}`);
             const originalHtml = btn.innerHTML;
             const originalClass = btn.className;
@@ -336,7 +423,7 @@
                 const data = await res.json();
                 if(data.success) {
                     showToast(`Akses video berhasil ${newStatus ? 'diaktifkan' : 'dimatikan'}!`);
-                    loadUsers(); // Muat ulang tabel untuk update tampilan terbaru
+                    loadUsers();
                 } else {
                     showToast(data.error || 'Gagal mengubah akses.', 'error');
                     btn.innerHTML = originalHtml;
@@ -384,22 +471,22 @@
                 const data = await res.json();
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
-                        <tr class="hover:bg-white/5 border-b border-white/5">
-                            <td class="px-6 py-4 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
-                            <td class="px-6 py-4">
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <td class="px-6 py-5 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.4)] text-lg'}">${c.code}</td>
+                            <td class="px-6 py-5 text-center">
                                 ${c.used ? 
-                                    '<span class="px-3 py-1 rounded-full bg-red-500/20 text-red-500 text-[10px] font-bold uppercase border border-red-500/30 shadow-inner">Terpakai</span>' : 
-                                    '<span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-500 text-[10px] font-bold uppercase border border-emerald-500/30 shadow-inner">Tersedia (Ready)</span>'
+                                    '<span class="px-4 py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : 
+                                    '<span class="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]">Tersedia (Ready)</span>'
                                 }
-                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] font-medium">${c.used ? `User: <span class="text-gray-300">${(c.usedBy || 'Unknown')}</span>` : ''}</div>
+                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] font-medium mx-auto">${c.used ? `User: <span class="text-gray-300">${(c.usedBy || 'Unknown')}</span>` : ''}</div>
                             </td>
-                            <td class="px-6 py-4 text-right">
+                            <td class="px-6 py-5 text-right">
                                 ${!c.used ? `
-                                    <button onclick="copyToClipboard('${c.code}')" class="bg-white/10 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg border border-white/20 transition-all flex items-center justify-center gap-2 text-xs ml-auto shadow-md font-bold">
+                                    <button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2">
                                         <i class="fas fa-copy"></i> Salin
                                     </button>
                                 ` : `
-                                    <span class="inline-block px-4 py-2 bg-red-500/10 border border-red-500/20 text-red-500/50 rounded-lg text-xs font-bold uppercase ml-auto">Hangus</span>
+                                    <span class="inline-block px-4 py-2 bg-red-500/5 border border-red-500/10 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>
                                 `}
                             </td>
                         </tr>
