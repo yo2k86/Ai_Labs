@@ -233,7 +233,7 @@
                     </div>
                     <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto relative z-10 p-2">
                         <table class="w-full text-left border-collapse min-w-[700px]">
-                            <!-- 4 KOLOM HEADER -->
+                            <!-- Header Tabel -->
                             <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Profil & ID</th>
@@ -277,9 +277,7 @@
                                     <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-40 rounded-tr-xl">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="ref-tbody" class="text-sm divide-y divide-white/5">
-                                <!-- Data dimuat via JS -->
-                            </tbody>
+                            <tbody id="ref-tbody" class="text-sm divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
@@ -315,9 +313,7 @@
                                     <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right rounded-tr-xl">Aksi Bantuan</th>
                                 </tr>
                             </thead>
-                            <tbody id="history-tbody" class="text-sm divide-y divide-white/5">
-                                <!-- Data dimuat via JS -->
-                            </tbody>
+                            <tbody id="history-tbody" class="text-sm divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
@@ -328,7 +324,6 @@
 
     <script>
         let currentAdminSessionCode = '';
-        // Memastikan appId sinkron dengan index.html
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
 
         function showToast(msg, type = 'success') {
@@ -338,7 +333,7 @@
             toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
             
             toast.className = `fixed top-5 right-5 glass-panel px-6 py-4 rounded-xl flex items-center gap-4 transition-all duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-l-emerald-500' : 'border-l-red-500'}`;
-            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-xl drop-shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-xl drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
 
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
@@ -387,7 +382,6 @@
                     el.innerText = Number(data.balance).toLocaleString('id-ID') + ' ⚡';
                 } else {
                     el.innerText = 'Error';
-                    console.error("Gagal cek saldo Kie.ai:", data.error);
                 }
             } catch(e) {
                 el.innerText = 'Offline';
@@ -396,10 +390,9 @@
 
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data user dari Vercel...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data...</td></tr>';
             try {
                 loadKieBalance();
-
                 const res = await fetch('/api/admin/users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
@@ -408,22 +401,18 @@
                 const data = await res.json();
                 if(data.success) {
                     document.getElementById('stat-total-users').innerText = data.users.length;
-                    
                     const totalKreditLokal = data.users.reduce((sum, user) => sum + (user.credits || 0), 0);
                     document.getElementById('stat-total-local-credits').innerText = totalKreditLokal.toLocaleString('id-ID') + ' ⚡';
                     
                     if (data.users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user terdaftar.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user.</td></tr>';
                         return;
                     }
 
                     tbody.innerHTML = data.users.map(u => {
                         const isVideoOn = u.videoAccess !== false;
-                        
                         return `
-                        <!-- ADA 4 KOLOM DATA (<tr> dengan 4 <td>) -->
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <!-- Kolom 1: Profil -->
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
                                     <span class="font-bold text-white text-sm flex items-center gap-2 drop-shadow-md">
@@ -433,79 +422,43 @@
                                     <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
-
-                            <!-- Kolom 2: Sisa Kredit -->
                             <td class="px-6 py-4 text-center">
                                 <span class="px-4 py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
                             </td>
-
-                            <!-- Kolom 3: Akses Video -->
                             <td class="px-6 py-4 text-center">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40 hover:shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40 hover:shadow-[0_0_10px_rgba(239,68,68,0.3)]'}" title="${isVideoOn ? 'Matikan akses video' : 'Aktifkan akses video'}">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40'}">
                                     <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
-
-                            <!-- Kolom 4: Topup Manual -->
                             <td class="px-6 py-4 text-right">
                                 <div class="flex justify-end items-center gap-2">
                                     <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-xl px-2 py-2 text-center text-xs font-mono" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-xl transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(16,185,129,0.4)]"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-xl transition-all flex items-center justify-center shadow-md hover:shadow-[0_0_8px_rgba(239,68,68,0.4)]"><i class="fas fa-minus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-xl transition-all flex items-center justify-center"><i class="fas fa-plus text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-xl transition-all flex items-center justify-center"><i class="fas fa-minus text-xs"></i></button>
                                 </div>
                             </td>
-                        </tr>
-                    `}).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">${data.error || 'Gagal memuat API Vercel.'}</td></tr>`;
+                        </tr>`}).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Gagal terhubung ke Vercel API.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">API Error.</td></tr>'; }
         }
 
         async function toggleVideoAccess(uid, currentStatus) {
             const newStatus = !currentStatus;
-            const btn = document.getElementById(`btn-toggle-${uid}`);
-            const originalHtml = btn.innerHTML;
-            const originalClass = btn.className;
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
             try {
                 const res = await fetch('/api/admin/toggle-access', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ 
-                        adminCode: currentAdminSessionCode, 
-                        appId: appId, 
-                        targetUid: uid, 
-                        videoAccess: newStatus 
-                    })
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: newStatus })
                 });
-                
-                const data = await res.json();
-                if(data.success) {
-                    showToast(`Akses video berhasil ${newStatus ? 'diaktifkan' : 'dimatikan'}!`);
-                    loadUsers();
-                } else {
-                    showToast(data.error || 'Gagal mengubah akses.', 'error');
-                    btn.innerHTML = originalHtml;
-                    btn.className = originalClass;
-                    btn.disabled = false;
-                }
-            } catch(e) { 
-                showToast('Kesalahan jaringan server.', 'error');
-                btn.innerHTML = originalHtml;
-                btn.className = originalClass;
-                btn.disabled = false;
-            }
+                if((await res.json()).success) { showToast(`Akses diubah!`); loadUsers(); }
+            } catch(e) { showToast('Gagal!', 'error'); }
         }
 
         async function changeCredit(uid, action) {
             const el = document.getElementById(`in-${uid}`);
             const val = parseInt(el.value);
-            if(!val || val <= 0) return showToast('Isi angka jumlah token yang benar!', 'error');
+            if(!val || val <= 0) return showToast('Isi angka!', 'error');
             const amount = action === 'add' ? val : -val;
             try {
                 const res = await fetch('/api/admin/topup', {
@@ -513,19 +466,13 @@
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
                 });
-                if((await res.json()).success) { 
-                    showToast('Saldo berhasil diupdate!'); 
-                    el.value = '';
-                    loadUsers(); 
-                } else {
-                    showToast('Gagal update saldo dari backend.', 'error');
-                }
-            } catch(e) { showToast('Gagal update saldo! Periksa koneksi.', 'error'); }
+                if((await res.json()).success) { showToast('Saldo diupdate!'); el.value = ''; loadUsers(); }
+            } catch(e) { showToast('Gagal!', 'error'); }
         }
 
         async function loadReferrals() {
             const tbody = document.getElementById('ref-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi stok kode...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi...</td></tr>';
             try {
                 const res = await fetch('/api/admin/referrals', {
                     method: 'POST',
@@ -536,33 +483,22 @@
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-6 py-5 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.4)] text-lg'}">${c.code}</td>
+                            <td class="px-6 py-5 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
                             <td class="px-6 py-5 text-center">
-                                ${c.used ? 
-                                    '<span class="px-4 py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : 
-                                    '<span class="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]">Tersedia (Ready)</span>'
-                                }
-                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] font-medium mx-auto">${c.used ? `User: <span class="text-gray-300">${(c.usedBy || 'Unknown')}</span>` : ''}</div>
+                                ${c.used ? '<span class="px-4 py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
+                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
                             </td>
                             <td class="px-6 py-5 text-right">
-                                ${!c.used ? `
-                                    <button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2 w-24 justify-center">
-                                        <i class="fas fa-copy"></i> Salin
-                                    </button>
-                                ` : `
-                                    <span class="inline-flex items-center justify-center w-24 px-4 py-2 bg-red-500/5 border border-red-500/10 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>
-                                `}
+                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-4 py-2 bg-red-500/5 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>`}
                             </td>
-                        </tr>
-                    `).join('');
+                        </tr>`).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Gagal memuat stok.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
-        // FUNGSI BARU: Load History Data dari Vercel
         async function loadHistory() {
             const tbody = document.getElementById('history-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat dari database...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat...</td></tr>';
             try {
                 const res = await fetch('/api/admin/history', {
                     method: 'POST',
@@ -571,106 +507,63 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    if (data.history.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada riwayat pembuatan video/gambar.</td></tr>';
-                        return;
-                    }
+                    if (data.history.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Kosong.</td></tr>'; return; }
                     tbody.innerHTML = data.history.map(h => {
                         const dateObj = new Date(h.timestamp);
-                        const timeStr = dateObj.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
-                        const dateStr = dateObj.toLocaleDateString('id-ID', {day: 'numeric', month: 'short'});
-                        
                         return `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
                             <td class="px-6 py-5">
                                 <div class="font-bold text-white text-sm">${h.userName}</div>
                                 <div class="text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
-                                <div class="text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white transition" onclick="copyToClipboard('${h.taskId}')" title="Klik untuk salin Task ID">ID: ${h.taskId.substring(0,10)}... <i class="fas fa-copy"></i></div>
+                                <div class="text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
                             </td>
                             <td class="px-6 py-5">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px] font-bold border border-purple-500/30 uppercase">${h.type}</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold border border-blue-500/30 uppercase">${h.engine}</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px] font-bold uppercase">${h.type}</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold uppercase">${h.engine}</span>
                                 </div>
-                                <p class="text-xs text-gray-300 line-clamp-2" title="${h.prompt}">${h.prompt}</p>
+                                <p class="text-xs text-gray-300 line-clamp-2">${h.prompt}</p>
                             </td>
                             <td class="px-6 py-5 text-center text-gray-400 text-xs">
-                                <div class="font-bold text-white">${timeStr}</div>
-                                <div class="text-[10px]">${dateStr}</div>
+                                <div class="font-bold text-white">${dateObj.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
+                                <div class="text-[10px]">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
                             </td>
                             <td class="px-6 py-5 text-right">
                                 <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32">
                                     <i class="fas fa-search"></i> Cek Server
                                 </button>
                             </td>
-                        </tr>
-                    `}).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="4" class="p-10 text-center text-red-400">${data.error || 'Gagal memuat riwayat.'}</td></tr>`;
+                        </tr>`}).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Koneksi API Gagal.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
-        // FUNGSI BARU: Mengecek Status Hasil ke Kie.ai
         async function cekHasilKie(taskId, engine) {
             const btn = document.getElementById(`btn-cek-${taskId}`);
             const originalHtml = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengecek...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
-
             try {
-                // Memanggil endpoint check yang ada di server Vercel
                 const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
                 const data = await res.json();
-                
-                let statusRaw = data.data?.status || data.status || data.data?.state || data.state || data.data?.successFlag || data.successFlag;
-                const status = String(statusRaw).toUpperCase();
-                
-                // Coba temukan URL hasil 
-                let resultUrl = null;
-                if (data.data?.resultUrl) resultUrl = data.data.resultUrl;
-                else if (data.data?.resultUrls && data.data.resultUrls.length > 0) resultUrl = data.data.resultUrls[0];
-                else if (data.data?.response?.resultUrls && data.data.response.resultUrls.length > 0) resultUrl = data.data.response.resultUrls[0];
-                else if (data.data?.video_url) resultUrl = data.data.video_url;
-                else if (data.data?.image_url) resultUrl = data.data.image_url;
+                let status = String(data.data?.status || data.status || data.data?.successFlag || data.successFlag).toUpperCase();
+                let resultUrl = data.data?.resultUrl || (data.data?.resultUrls && data.data.resultUrls[0]) || (data.data?.response?.resultUrls && data.data.response.resultUrls[0]);
 
                 if (resultUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '100' || status === '1' || resultUrl.includes('http'))) {
-                    // Berikan Link Download
-                    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka Hasil';
-                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg';
-                    
-                    btn.onclick = async () => {
-                        if (resultUrl.includes('tempfile')) {
-                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-                            try {
-                                const r = await fetch('/api/download', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({url: resultUrl})});
-                                const d = await r.json();
-                                window.open(d.data || resultUrl, '_blank');
-                            } catch(e) { window.open(resultUrl, '_blank'); }
-                            btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka Hasil';
-                        } else {
-                            window.open(resultUrl, '_blank');
-                        }
-                    };
+                    btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka';
+                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-emerald-500 text-white';
+                    btn.onclick = () => window.open(resultUrl, '_blank');
                     btn.disabled = false;
-                    showToast('Hasil ditemukan di server Kie.ai!');
-                } else if (status === 'FAIL' || status === 'FAILED' || status === 'ERROR' || status === '2' || status === '3' || status === '89') {
-                    btn.innerHTML = '<i class="fas fa-times"></i> AI Gagal';
-                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-red-500/20 text-red-500 border border-red-500/30 cursor-not-allowed opacity-70';
+                    showToast('Hasil ditemukan!');
                 } else {
-                    btn.innerHTML = '<i class="fas fa-hourglass-half"></i> Proses AI...';
-                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-yellow-500/20 text-yellow-500 border border-yellow-500/30';
-                    setTimeout(() => {
-                        btn.innerHTML = originalHtml;
-                        btn.className = 'glass-btn text-white px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32';
-                        btn.disabled = false;
-                    }, 5000);
-                    showToast('Video klien masih dalam antrian/proses rendering AI.', 'error');
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
+                    showToast('Masih proses/Antri.', 'error');
                 }
             } catch (e) {
-                showToast('Gagal menghubungi server.', 'error');
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
+                showToast('Gagal cek.', 'error');
             }
         }
 
