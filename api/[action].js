@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import crypto from 'crypto';
 
 // ==========================================
 // INISIALISASI FIREBASE ADMIN (Hanya 1 kali)
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
     const apiKey = process.env.KIE_API_KEY;
 
     // ========================================================
-    // ROUTE YANG TIDAK BUTUH KIE_API_KEY (Berhubungan dengan Database)
+    // ROUTE YANG TIDAK BUTUH KIE_API_KEY (Berhubungan dengan Database / Callback)
     // ========================================================
     try {
         if (action === 'redeem') return await handleRedeem(req, res, db);
@@ -40,6 +41,7 @@ export default async function handler(req, res) {
         if (action === 'topup') return await handleTopup(req, res, db);
         if (action === 'toggle_access') return await handleToggleAccess(req, res, db);
         if (action === 'get_referrals') return await handleGetReferrals(req, res, db);
+        if (action === 'webhook') return await handleWebhook(req, res, db); // Endpoint baru untuk Kie AI
     } catch (error) {
         console.error(`Error on DB route /api/${action}:`, error);
         return res.status(500).json({ error: "Internal Server Error", message: error.message });
@@ -77,7 +79,6 @@ export default async function handler(req, res) {
     }
 }
 
-
 // ==========================================
 // 1. FUNGSI CHECK (/api/check)
 // ==========================================
@@ -98,7 +99,6 @@ async function handleCheck(req, res, apiKey) {
     const data = await response.json();
     return res.status(200).json(data);
 }
-
 
 // ==========================================
 // 2. FUNGSI DOWNLOAD (/api/download)
@@ -121,7 +121,6 @@ async function handleDownload(req, res, apiKey) {
     return res.status(200).json({ data: result.data || req.body.url });
 }
 
-
 // ==========================================
 // 3. FUNGSI GENERATE (/api/generate)
 // ==========================================
@@ -130,7 +129,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId, cost } = req.body;
 
-    // A. PEMOTONGAN KREDIT DI FIREBASE
     if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
         try {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
@@ -157,7 +155,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
     }
 
-    // B. MENGIRIM KE API KIE
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
@@ -191,10 +188,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             };
             if (hasImages) payload.input.image_urls = image_urls.slice(0, 7);
         } else if (type === 'Gambar') {
-            payload = {
-                model: "grok-imagine/text-to-image",
-                input: { prompt: prompt, aspect_ratio: ratio || "16:9" }
-            };
+            payload = { model: "grok-imagine/text-to-image", input: { prompt: prompt, aspect_ratio: ratio || "16:9" } };
         }
     } else {
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
@@ -203,11 +197,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         else if (engine === 'veo3.1 quality') veoModel = "veo3";
         else if (engine === 'veo3.1 fast') veoModel = "veo3_fast";
 
-        payload = {
-            model: veoModel,
-            prompt: prompt || "Cinematic aesthetic generation",
-            aspect_ratio: ratio || "16:9"
-        };
+        payload = { model: veoModel, prompt: prompt || "Cinematic aesthetic generation", aspect_ratio: ratio || "16:9" };
         if (image_urls && image_urls.length > 0) payload.imageUrls = image_urls;
     }
 
@@ -220,7 +210,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     const data = await response.json();
 
     if (!response.ok || (data.code && data.code !== 200)) {
-        console.error("API KIE Error:", data);
         if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             await userRef.update({ credits: admin.firestore.FieldValue.increment(cost) }); // Refund
@@ -228,37 +217,44 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         return res.status(400).json({ error: "Gagal membuat task di KIE AI", details: data });
     }
 
-    // ====================================================
-    // 🚀 INI TAMBAHANNYA: MENYIMPAN RIWAYAT SETELAH SUKSES
-    // ====================================================
-    if (process.env.FIREBASE_PROJECT_ID && userId && appId) {
-        try {
-            const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
-            const userDoc = await userRef.get();
-            const userName = userDoc.exists ? userDoc.data().name : 'User';
-            const userEmail = userDoc.exists ? userDoc.data().email : 'Anonim';
+    // =========================================================
+    // MENCATAT RIWAYAT SETELAH BERHASIL DIKIRIM KE KIE AI
+    // =========================================================
+    try {
+        const historyAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
+        const historyUserId = userId || 'anonymous';
+        let userName = 'User Anonim';
+        let userEmail = 'Tidak Ada Email';
 
-            const taskId = data.data?.taskId || data.taskId || data.task_id || 'unknown';
-            
-            await db.collection('artifacts').doc(appId).collection('history').add({
-                taskId: taskId,
-                userId: userId,
-                userName: userName,
-                userEmail: userEmail,
-                prompt: prompt || 'Tanpa prompt',
-                engine: engine || 'Unknown',
-                type: type || 'Unknown',
-                timestamp: admin.firestore.FieldValue.serverTimestamp()
-            });
-        } catch (err) {
-            console.error("Gagal simpan history:", err);
+        if (process.env.FIREBASE_PROJECT_ID && userId) {
+            const userRef = db.collection('artifacts').doc(historyAppId).collection('users').doc(userId).collection('profile').doc('data');
+            const userDoc = await userRef.get();
+            if (userDoc.exists) {
+                userName = userDoc.data().name || userName;
+                userEmail = userDoc.data().email || userEmail;
+            }
         }
+
+        const taskId = data.data?.taskId || data.taskId || data.task_id || 'unknown';
+        
+        await db.collection('artifacts').doc(historyAppId).collection('history').add({
+            taskId: taskId,
+            userId: historyUserId,
+            userName: userName,
+            userEmail: userEmail,
+            prompt: prompt || 'Tanpa prompt',
+            engine: engine || 'Unknown',
+            type: type || 'Unknown',
+            status: 'PROCESSING', // Status awal
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+    } catch (err) {
+        console.error("❌ Gagal simpan history:", err);
     }
-    // ====================================================
+    // =========================================================
 
     return res.status(response.status).json(data);
 }
-
 
 // ==========================================
 // 4. FUNGSI REDEEM (/api/redeem)
@@ -267,12 +263,10 @@ async function handleRedeem(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { userId, appId, code } = req.body;
 
-    if (!userId || !appId || !code) {
-        return res.status(400).json({ error: "Data tidak lengkap (userId, appId, atau kode kosong)" });
-    }
+    if (!userId || !appId || !code) return res.status(400).json({ error: "Data tidak lengkap" });
 
     const validCodes = [
-        "AL-9A2X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
+        "AL-NEW1X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
         "AL-2L7C", "AL-8M4D", "AL-3N9F", "AL-5P6G", "AL-7Q2H", "AL-1R8J", "AL-6T5K", "AL-4V1L", "AL-9W3M", "AL-2X7N",
         "AL-8Y4P", "AL-3Z9Q", "AL-5A6R", "AL-7B2T", "AL-1C8V", "AL-6D5W", "AL-4E1X", "AL-9F3Y", "AL-2G7Z", "AL-8H4A",
         "VIP-A1X9", "VIP-B2Y8", "VIP-C3Z7", "VIP-D4A6", "VIP-E5B5", "VIP-F6C4", "VIP-G7D3", "VIP-H8E2", "VIP-J9F1", "VIP-K1G9",
@@ -329,11 +323,7 @@ async function handleRedeem(req, res, db) {
             }
 
             const currentCredits = userData.credits || 0;
-            t.update(userRef, { 
-                credits: currentCredits + 200, 
-                hasRedeemed: true, 
-                redeemedCode: inputCode 
-            });
+            t.update(userRef, { credits: currentCredits + 200, hasRedeemed: true, redeemedCode: inputCode });
             return true;
         });
 
@@ -342,7 +332,6 @@ async function handleRedeem(req, res, db) {
         return res.status(400).json({ success: false, error: e.message });
     }
 }
-
 
 // ==========================================
 // 5. FUNGSI UPLOAD (/api/upload)
@@ -355,11 +344,7 @@ async function handleUpload(req, res, apiKey) {
     const response = await fetch('https://kieai.redpandaai.co/api/file-base64-upload', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            base64Data: base64Data,
-            uploadPath: uploadPath || 'ailabs-uploads',
-            fileName: fileName || `upload_${Date.now()}.jpg`
-        })
+        body: JSON.stringify({ base64Data: base64Data, uploadPath: uploadPath || 'ailabs-uploads', fileName: fileName || `upload_${Date.now()}.jpg` })
     });
 
     const contentType = response.headers.get("content-type");
@@ -369,7 +354,6 @@ async function handleUpload(req, res, apiKey) {
     const data = await response.json();
     return res.status(response.status).json(data);
 }
-
 
 // ==========================================
 // 6. FUNGSI UPLOAD URL (/api/upload-url)
@@ -382,11 +366,7 @@ async function handleUploadUrl(req, res, apiKey) {
     const response = await fetch('https://kieai.redpandaai.co/api/file-url-upload', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            fileUrl: fileUrl,
-            uploadPath: uploadPath || 'ailabs-url-uploads',
-            fileName: fileName || `url_import_${Date.now()}.jpg`
-        })
+        body: JSON.stringify({ fileUrl: fileUrl, uploadPath: uploadPath || 'ailabs-url-uploads', fileName: fileName || `url_import_${Date.now()}.jpg` })
     });
 
     const contentType = response.headers.get("content-type");
@@ -396,7 +376,6 @@ async function handleUploadUrl(req, res, apiKey) {
     const data = await response.json();
     return res.status(response.status).json(data);
 }
-
 
 // ==========================================
 // 7. FUNGSI VEO ACTION (/api/veo-action)
@@ -460,12 +439,11 @@ async function handleHistory(req, res, db) {
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
         return res.status(403).json({ error: "Akses Ditolak" });
     }
-    if (!appId) {
-        return res.status(400).json({ error: "appId diperlukan" });
-    }
+    
+    const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
 
     try {
-        const historySnapshot = await db.collection('artifacts').doc(appId)
+        const historySnapshot = await db.collection('artifacts').doc(targetAppId)
                                         .collection('history')
                                         .orderBy('timestamp', 'desc')
                                         .limit(50)
@@ -532,7 +510,8 @@ async function handleGetUsers(req, res, db) {
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
         return res.status(403).json({ error: "Akses Ditolak" });
     }
-    if (!appId) return res.status(400).json({ error: "appId diperlukan" });
+    
+    const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
 
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
@@ -540,8 +519,7 @@ async function handleGetUsers(req, res, db) {
 
         for (const profileDoc of profilesSnapshot.docs) {
             const pathSegments = profileDoc.ref.path.split('/');
-            // Path structure: artifacts/{appId}/users/{userId}/profile/data
-            if (pathSegments.length >= 4 && pathSegments[1] === appId) {
+            if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
                 const uid = pathSegments[3];
                 const data = profileDoc.data();
                 
@@ -631,7 +609,8 @@ async function handleGetReferrals(req, res, db) {
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
         return res.status(403).json({ error: "Akses Ditolak" });
     }
-    if (!appId) return res.status(400).json({ error: "appId diperlukan" });
+    
+    const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
 
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
@@ -639,7 +618,7 @@ async function handleGetReferrals(req, res, db) {
         
         for (const profileDoc of profilesSnapshot.docs) {
             const pathSegments = profileDoc.ref.path.split('/');
-            if (pathSegments.length >= 4 && pathSegments[1] === appId) {
+            if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
                 const uid = pathSegments[3];
                 const data = profileDoc.data();
                 
@@ -696,4 +675,55 @@ async function handleGetReferrals(req, res, db) {
         console.error("Referrals Sync Error:", error);
         return res.status(500).json({ error: "Gagal mensinkronkan status kode: " + error.message });
     }
+}
+
+// ==========================================
+// 14. FUNGSI WEBHOOK KIE AI (/api/webhook)
+// ==========================================
+async function handleWebhook(req, res, db) {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
+
+    const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; // Tambahkan ini di Vercel Env jika mau pakai verifikasi
+    const timestamp = req.headers['x-webhook-timestamp'];
+    const receivedSignature = req.headers['x-webhook-signature'];
+
+    const data = req.body;
+    const taskId = data.data?.task_id || data.taskId;
+    const code = data.code;
+
+    // 1. Verifikasi Keamanan Signature dari Kie AI (Opsional tapi direkomendasikan)
+    if (webhookHmacKey && timestamp && receivedSignature && taskId) {
+        const message = `${taskId}.${timestamp}`;
+        const expectedSignature = crypto.createHmac('sha256', webhookHmacKey).update(message).digest('base64');
+        
+        // Membandingkan signature
+        if (expectedSignature.length !== receivedSignature.length || !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
+            console.error("Webhook signature invalid!");
+            return res.status(401).json({ error: 'Invalid signature' });
+        }
+    }
+
+    // 2. Simpan Laporan Status ke Firebase
+    if (taskId) {
+        try {
+            // Kita cari taskId ini di seluruh database history kita
+            const historyQuery = await db.collectionGroup('history').where('taskId', '==', taskId).get();
+            
+            if (!historyQuery.empty) {
+                const batch = db.batch();
+                historyQuery.docs.forEach(doc => {
+                    batch.update(doc.ref, {
+                        status: code === 200 ? 'SUCCESS' : 'FAILED',
+                        updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                });
+                await batch.commit();
+                console.log(`Webhook diterima: Task ${taskId} berstatus ${code === 200 ? 'SUCCESS' : 'FAILED'}`);
+            }
+        } catch (err) {
+            console.error("Webhook Firebase Error:", err);
+        }
+    }
+
+    return res.status(200).json({ status: 'received' });
 }
