@@ -909,7 +909,8 @@
     <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        // MENGUBAH IMPORT: Menambahkan signInWithRedirect dan getRedirectResult
+        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -985,21 +986,21 @@
                 }
             });
 
+            // MENANGANI HASIL LOGIN REDIRECT: Ini yang menangkap data user setelah kembali dari layar login Google
+            getRedirectResult(auth).then((result) => {
+                if (result && result.user) {
+                    window.showToast("Berhasil login dengan Google!");
+                }
+            }).catch((error) => {
+                console.error("Error setelah redirect Google:", error);
+            });
+
             window.signInWithGoogle = async () => {
                 try {
-                    const result = await signInWithPopup(auth, provider);
-                    const signedInUser = result.user;
-                    window.showToast("Berhasil login dengan Google!");
-
-                    if (signedInUser) {
-                        const userRef = doc(db, 'artifacts', appId, 'users', signedInUser.uid, 'profile', 'data');
-                        await setDoc(userRef, { email: signedInUser.email || 'Tidak ada email', name: signedInUser.displayName || 'Google User', isAnon: false }, { merge: true });
-                        if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false, signedInUser.displayName, signedInUser.email);
-                    }
+                    // MENGGUNAKAN REDIRECT: Metode ini tidak akan bentrok dengan WebView Android
+                    await signInWithRedirect(auth, provider);
                 } catch (error) {
-                    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-                        window.showCustomAlert("Gagal login dengan Google: " + error.message);
-                    }
+                    window.showCustomAlert("Gagal inisiasi login Google: " + error.message);
                 }
             };
 
