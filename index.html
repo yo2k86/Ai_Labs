@@ -985,7 +985,7 @@
     <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -1103,7 +1103,6 @@
             }).catch((error) => {
                 sessionStorage.removeItem('isGoogleLoginPending');
                 console.error("Error setelah redirect Google:", error);
-                window.showCustomAlert("Gagal login ulang: " + error.message);
                 
                 const forceLoginBtn = document.getElementById('btn-force-login');
                 const loginLoading = document.getElementById('login-loading-indicator');
@@ -1124,9 +1123,21 @@
                         forceLoginBtn.disabled = true;
                     }
 
-                    sessionStorage.setItem('isGoogleLoginPending', 'true');
                     await setPersistence(auth, browserLocalPersistence);
-                    await signInWithRedirect(auth, provider);
+                    
+                    // Coba pakai Popup dulu karena lebih stabil di WebView Android
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        if (result && result.user) {
+                            window.showToast("Berhasil login!");
+                        }
+                    } catch (popupError) {
+                        console.warn("Popup diblokir/gagal, mencoba Redirect...", popupError);
+                        // Fallback ke redirect jika WebView memblokir popup
+                        sessionStorage.setItem('isGoogleLoginPending', 'true');
+                        await signInWithRedirect(auth, provider);
+                    }
+                    
                 } catch (error) {
                     sessionStorage.removeItem('isGoogleLoginPending');
                     window.showCustomAlert("Gagal inisiasi login Google: " + error.message);
