@@ -1038,6 +1038,75 @@
         setInterval(slideTick, 4000);
         window.goToSlide = (idx) => { slideIndex = idx - 1; slideTick(); };
 
+        // AUDIO PLAYER & VISUALIZER LOGIC
+        let audioCtx, analyser, audioSource, dataArray, bufferLength;
+        let isMusicPlaying = false; let visualizerInitialized = false; let animationId;
+        const audioElement = document.getElementById('bg-audio');
+        const toggleBtn = document.getElementById('btn-toggle-music');
+        const toggleIcon = document.getElementById('music-toggle-icon');
+        const canvas = document.getElementById('music-visualizer');
+        const canvasCtx = canvas ? canvas.getContext('2d') : null;
+
+        function initVisualizer() {
+            if (visualizerInitialized || !audioElement || !canvasCtx) return;
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
+            analyser = audioCtx.createAnalyser();
+            audioSource = audioCtx.createMediaElementSource(audioElement);
+            audioSource.connect(analyser); analyser.connect(audioCtx.destination);
+            analyser.fftSize = 64; bufferLength = analyser.frequencyBinCount;
+            dataArray = new Uint8Array(bufferLength);
+            visualizerInitialized = true; drawVisualizer();
+        }
+
+        function drawVisualizer() {
+            if (!canvasCtx) return;
+            animationId = requestAnimationFrame(drawVisualizer);
+            canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!isMusicPlaying) {
+                canvasCtx.fillStyle = 'rgba(16, 185, 129, 0.3)';
+                const barWidth = (canvas.width / bufferLength);
+                for(let i = 0; i < bufferLength; i++) canvasCtx.fillRect(i * barWidth, canvas.height / 2, barWidth - 0.5, 1);
+                return;
+            }
+            analyser.getByteFrequencyData(dataArray);
+            const barWidth = (canvas.width / bufferLength);
+            let barHeight, x = 0;
+            for(let i = 0; i < bufferLength; i++) {
+                barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+                let gradient = canvasCtx.createLinearGradient(0, canvas.height, 0, 0);
+                gradient.addColorStop(0, '#06b6d4'); gradient.addColorStop(1, '#10b981');
+                canvasCtx.fillStyle = gradient;
+                canvasCtx.fillRect(x, canvas.height - barHeight, barWidth - 0.5, barHeight);
+                x += barWidth;
+            }
+        }
+
+        function toggleMusic() {
+            if (!visualizerInitialized) initVisualizer();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            if (isMusicPlaying) {
+                if (audioElement) audioElement.pause();
+                isMusicPlaying = false;
+                if(toggleIcon) toggleIcon.className = "fa-solid fa-play text-emerald-400";
+            } else {
+                if (audioElement) {
+                    audioElement.play().then(() => {
+                        isMusicPlaying = true;
+                        if(toggleIcon) toggleIcon.className = "fa-solid fa-pause text-emerald-400";
+                    }).catch(err => console.log("Autoplay diblokir browser:", err));
+                }
+            }
+        }
+
+        if (toggleBtn) toggleBtn.addEventListener('click', (e) => { e.stopPropagation(); toggleMusic(); });
+        
+        // Mulai musik saat pengguna pertama kali mengetuk layar (opsional)
+        document.body.addEventListener('click', function firstInteractionAudio() {
+            if (!isMusicPlaying) toggleMusic();
+            document.body.removeEventListener('click', firstInteractionAudio);
+        }, { once: true });
+
     </script>
 </body>
 </html>
