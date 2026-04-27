@@ -1095,18 +1095,30 @@
                  if (loginLoading) loginLoading.classList.remove('hidden');
             }
 
+            // [PERBAIKAN SUPER UNTUK WEBVIEW/APK]
             getRedirectResult(auth).then((result) => {
                 sessionStorage.removeItem('isGoogleLoginPending');
                 if (result && result.user) {
-                    window.showToast("Berhasil login dengan Google!");
+                    console.log("Login sukses via Redirect!");
                 }
             }).catch((error) => {
                 sessionStorage.removeItem('isGoogleLoginPending');
                 console.error("Error setelah redirect Google:", error);
                 
+                // WebView sering membuang error "internal-error" atau "redirect-cancelled-by-user"
+                // Jangan tampilkan alert jika error ini muncul, langsung reset tombol saja
+                if (error.code !== 'auth/redirect-cancelled-by-user' && error.code !== 'auth/internal-error') {
+                    window.showCustomAlert("Sesi login terputus oleh sistem Android. Coba lagi.");
+                }
+                
                 const forceLoginBtn = document.getElementById('btn-force-login');
                 const loginLoading = document.getElementById('login-loading-indicator');
-                if (forceLoginBtn) { forceLoginBtn.classList.remove('hidden'); forceLoginBtn.classList.add('flex'); }
+                if (forceLoginBtn) {
+                    forceLoginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500 text-lg"></i> <span>Masuk dengan Google</span>';
+                    forceLoginBtn.disabled = false;
+                    forceLoginBtn.classList.remove('hidden'); 
+                    forceLoginBtn.classList.add('flex'); 
+                }
                 if (loginLoading) { loginLoading.classList.add('hidden'); loginLoading.classList.remove('flex'); }
             });
 
@@ -1119,28 +1131,44 @@
                     
                     const forceLoginBtn = document.getElementById('btn-force-login');
                     if (forceLoginBtn) {
-                        forceLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i> <span>Membuka Google...</span>';
+                        forceLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i> <span>Menghubungkan...</span>';
                         forceLoginBtn.disabled = true;
                     }
 
+                    // 1. Wajib set ke Local Persistence agar sesi awet
                     await setPersistence(auth, browserLocalPersistence);
                     
-                    // Coba pakai Popup dulu karena lebih stabil di WebView Android
-                    try {
-                        const result = await signInWithPopup(auth, provider);
-                        if (result && result.user) {
-                            window.showToast("Berhasil login!");
-                        }
-                    } catch (popupError) {
-                        console.warn("Popup diblokir/gagal, mencoba Redirect...", popupError);
-                        // Fallback ke redirect jika WebView memblokir popup
+                    // 2. Tambahkan param khusus untuk memaksa refresh login di browser eksternal
+                    provider.setCustomParameters({
+                        prompt: 'select_account'
+                    });
+
+                    // 3. Deteksi apakah ini di dalam WebView Android (Apk)
+                    const isWebView = /wv|x-webview|android.*version\/[\d\.]+.*chrome\/[0-9]{2,3}\.0\.0\.0/i.test(navigator.userAgent);
+                    
+                    if (isWebView) {
+                        // JIKA DI DALAM APK (WEBVIEW), JANGAN PAKAI POPUP KARENA AKAN DIBLOKIR!
+                        // Langsung hajar pakai Redirect
+                        console.log("Terdeteksi WebView Android, menggunakan Redirect Method...");
                         sessionStorage.setItem('isGoogleLoginPending', 'true');
                         await signInWithRedirect(auth, provider);
+                    } else {
+                        // JIKA DI BROWSER BIASA (CHROME/SAFARI), COBA POPUP DULU
+                        try {
+                            const result = await signInWithPopup(auth, provider);
+                            if (result && result.user) {
+                                console.log("Login sukses via Popup!");
+                            }
+                        } catch (popupError) {
+                            console.warn("Popup diblokir, fallback ke Redirect...", popupError);
+                            sessionStorage.setItem('isGoogleLoginPending', 'true');
+                            await signInWithRedirect(auth, provider);
+                        }
                     }
                     
                 } catch (error) {
                     sessionStorage.removeItem('isGoogleLoginPending');
-                    window.showCustomAlert("Gagal inisiasi login Google: " + error.message);
+                    console.error("Gagal inisiasi login Google:", error);
                     
                     const forceLoginBtn = document.getElementById('btn-force-login');
                     if (forceLoginBtn) {
