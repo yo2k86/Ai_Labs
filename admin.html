@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Ailabs Admin - Control Panel</title>
     
     <!-- Import Tailwind CSS -->
@@ -99,7 +99,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.6);
         }
 
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
         ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
@@ -127,180 +127,185 @@
         <div class="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-purple-500/10 blur-[100px] animate-pulse"></div>
     </div>
 
-    <div id="toast" class="fixed top-5 right-5 glass-panel px-6 py-4 rounded-xl flex items-center gap-4 opacity-0 pointer-events-none transition-all duration-300 z-[999] border-l-4 border-l-emerald-500 transform translate-y-[-20px]">
+    <!-- Tweak Toast untuk HP -->
+    <div id="toast" class="fixed top-2 sm:top-5 right-2 sm:right-5 w-[calc(100%-16px)] sm:w-auto glass-panel px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 opacity-0 pointer-events-none transition-all duration-300 z-[999] border-l-4 border-l-emerald-500 transform translate-y-[-20px]">
         <i id="toast-icon" class="fas fa-info-circle text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"></i>
-        <span id="toast-msg" class="text-sm font-medium tracking-wide">Notifikasi</span>
+        <span id="toast-msg" class="text-xs sm:text-sm font-medium tracking-wide">Notifikasi</span>
     </div>
 
     <!-- VIEW 1: LOGIN ADMIN -->
     <div id="login-view" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 transition-opacity duration-500 bg-black/40 backdrop-blur-sm">
-        <div class="glass-panel p-10 rounded-3xl w-full max-w-md text-center">
-            <div class="relative inline-block mb-6">
+        <div class="glass-panel p-6 sm:p-10 rounded-3xl w-full max-w-md text-center">
+            <div class="relative inline-block mb-4 sm:mb-6">
                 <div class="absolute inset-0 bg-emerald-500/30 blur-2xl rounded-full"></div>
-                <img src="logo.png" alt="Ailabs Logo" class="relative w-24 h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                <img src="logo.png" alt="Ailabs Logo" class="relative w-20 sm:w-24 h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             </div>
             
-            <h1 class="text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">Command Center</h1>
-            <p class="text-sm text-gray-300/80 mb-8 font-light">Autentikasi keamanan tingkat lanjut.</p>
+            <h1 class="text-2xl sm:text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">Command Center</h1>
+            <p class="text-xs sm:text-sm text-gray-300/80 mb-6 sm:mb-8 font-light">Autentikasi keamanan tingkat lanjut.</p>
             
-            <div class="relative mb-6 group">
+            <div class="relative mb-5 sm:mb-6 group">
                 <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-400 transition-colors"></i>
-                <input type="password" id="admin-password" class="glass-input w-full rounded-xl pl-12 pr-4 py-3.5 text-center text-white focus:ring-2 focus:ring-emerald-500/50" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
+                <input type="password" id="admin-password" class="glass-input w-full rounded-xl pl-12 pr-4 py-3 sm:py-3.5 text-center text-sm sm:text-base text-white focus:ring-2 focus:ring-emerald-500/50" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
             </div>
             
-            <button onclick="loginAdmin()" class="glass-btn w-full text-white font-bold py-3.5 rounded-xl uppercase tracking-widest text-sm">Masuk Sistem</button>
+            <button onclick="loginAdmin()" class="glass-btn w-full text-white font-bold py-3 sm:py-3.5 rounded-xl uppercase tracking-widest text-xs sm:text-sm">Masuk Sistem</button>
         </div>
     </div>
 
     <!-- VIEW 2: DASHBOARD ADMIN -->
     <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500 relative z-10">
         
-        <header class="glass-panel sticky top-4 z-30 px-6 py-4 mx-6 mt-4 rounded-2xl flex flex-col gap-4 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <div class="p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
-                        <img src="logo.png" alt="Ailabs Logo" class="w-8 h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+        <!-- Header dibuat responsif agar elemen tidak bertumpuk -->
+        <header class="glass-panel sticky top-2 sm:top-4 z-30 px-4 sm:px-6 py-4 mx-2 sm:mx-6 mt-2 sm:mt-4 rounded-2xl flex flex-col gap-4 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-1.5 sm:p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
+                        <img src="logo.png" alt="Ailabs Logo" class="w-6 h-6 sm:w-8 sm:h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
                     </div>
-                    <h2 class="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Ailabs Control Panel</h2>
+                    <h2 class="font-extrabold text-base sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Ailabs Control Panel</h2>
                 </div>
-                <button onclick="logoutAdmin()" class="px-4 py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-sm font-medium transition-all border border-red-500/20 flex items-center gap-2 shadow-lg">
+                <button onclick="logoutAdmin()" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-xs sm:text-sm font-medium transition-all border border-red-500/20 flex items-center gap-2 shadow-lg">
                     <i class="fas fa-sign-out-alt"></i> Keluar
                 </button>
             </div>
 
-            <div class="flex flex-wrap gap-3">
-                <button id="tab-users" onclick="switchTab('users')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center">
-                    <i class="fas fa-users mr-2 opacity-80"></i> Pengguna & Saldo
+            <div class="flex flex-row overflow-x-auto custom-scrollbar gap-2 sm:gap-3 pb-1">
+                <button id="tab-users" onclick="switchTab('users')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center justify-center">
+                    <i class="fas fa-users mr-2 opacity-80"></i> Pengguna
                 </button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center">
-                    <i class="fas fa-ticket-alt mr-2 opacity-80"></i> Stok Kode VIP
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
+                    <i class="fas fa-ticket-alt mr-2 opacity-80"></i> Stok VIP
                 </button>
-                <button id="tab-history" onclick="switchTab('history')" class="px-5 py-2.5 rounded-xl bg-white/5 text-gray-300 text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center">
-                    <i class="fas fa-history mr-2 opacity-80"></i> Riwayat Generasi
+                <button id="tab-history" onclick="switchTab('history')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
+                    <i class="fas fa-history mr-2 opacity-80"></i> Riwayat
                 </button>
             </div>
         </header>
 
-        <main class="flex-1 p-6 max-w-7xl mx-auto w-full">
+        <main class="flex-1 p-3 sm:p-6 max-w-7xl mx-auto w-full">
             
             <!-- SECTION 1: MANAJEMEN USER -->
-            <div id="section-users" class="flex flex-col gap-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-emerald-500 flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-2xl shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]"><i class="fas fa-users"></i></div>
-                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Pengguna</p><h3 class="text-3xl font-extrabold drop-shadow-md" id="stat-total-users">0</h3></div>
+            <div id="section-users" class="flex flex-col gap-4 sm:gap-6">
+                <!-- Cards grid tetap responsif (1 kolom hp, 3 kolom desktop) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-emerald-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]"><i class="fas fa-users"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Pengguna</p><h3 class="text-2xl sm:text-3xl font-extrabold drop-shadow-md" id="stat-total-users">0</h3></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-blue-500 flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-2xl shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"><i class="fas fa-wallet"></i></div>
-                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Kredit Klien</p><h3 class="text-3xl font-extrabold text-blue-400 drop-shadow-md" id="stat-total-local-credits">0 ⚡</h3></div>
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-blue-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"><i class="fas fa-wallet"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Kredit Klien</p><h3 class="text-2xl sm:text-3xl font-extrabold text-blue-400 drop-shadow-md" id="stat-total-local-credits">0 ⚡</h3></div>
                     </div>
-                    <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-yellow-500 flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-2xl shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"><i class="fas fa-bolt"></i></div>
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-yellow-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"><i class="fas fa-bolt"></i></div>
                         <div>
-                            <p class="text-sm text-gray-400 font-medium mb-1 flex items-center gap-2">
+                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1 flex items-center gap-2">
                                 Kredit Pusat (Kie.ai) 
-                                <button onclick="loadKieBalance()" class="w-6 h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm" title="Sinkronkan dengan server Kie.ai"><i class="fas fa-sync-alt text-[10px] text-white"></i></button>
+                                <button onclick="loadKieBalance()" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm" title="Sinkronkan dengan server Kie.ai"><i class="fas fa-sync-alt text-[8px] sm:text-[10px] text-white"></i></button>
                             </p>
-                            <h3 class="text-3xl font-extrabold text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" id="stat-total-credits">...</h3>
+                            <h3 class="text-2xl sm:text-3xl font-extrabold text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" id="stat-total-credits">...</h3>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
-                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-server mr-2 text-emerald-400"></i> Daftar Klien Ailabs</h3>
-                        <div class="flex items-center gap-3">
-                            <button onclick="loadUsers()" class="glass-btn text-xs px-4 py-2 rounded-xl flex items-center shadow-lg font-semibold">
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <!-- Title dan Search dibuat tumpuk (col) di hp, sejajar (row) di desktop -->
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-server mr-2 text-emerald-400"></i> Daftar Klien Ailabs</h3>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+                            <button onclick="loadUsers()" class="glass-btn text-xs px-4 py-2 sm:py-2.5 rounded-xl flex items-center justify-center shadow-lg font-semibold w-full sm:w-auto">
                                 <i class="fas fa-sync-alt mr-2"></i> Refresh
                             </button>
-                            <div class="relative">
+                            <div class="relative w-full sm:w-auto">
                                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                                <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari user (nama/email)...">
+                                <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari user...">
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar overflow-x-auto relative z-10 p-2">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <!-- Tabel disetting agar bisa horizontal scroll rapih di HP -->
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar relative z-10 w-full">
+                        <table class="w-full text-left border-collapse min-w-[650px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Profil & ID</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Sisa Kredit</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Akses Video</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right rounded-tr-xl">Top-up Manual</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Profil & ID</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Sisa Kredit</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Akses Video</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Top-up Manual</th>
                                 </tr>
                             </thead>
-                            <tbody id="users-tbody" class="text-sm divide-y divide-white/5"></tbody>
+                            <tbody id="users-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
             <!-- SECTION 2: STOK KODE REFERRAL -->
-            <div id="section-referrals" class="hidden flex flex-col gap-6">
-                <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-cyan-500 flex items-center justify-between">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-2xl shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"><i class="fas fa-key"></i></div>
-                        <div><p class="text-sm text-gray-400 font-medium mb-1">Total Stok Kode VIP</p><h3 class="text-3xl font-extrabold drop-shadow-md" id="stat-total-refs">300</h3></div>
+            <div id="section-referrals" class="hidden flex flex-col gap-4 sm:gap-6">
+                <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-cyan-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"><i class="fas fa-key"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Stok Kode VIP</p><h3 class="text-2xl sm:text-3xl font-extrabold drop-shadow-md" id="stat-total-refs">300</h3></div>
                     </div>
-                    <button onclick="loadReferrals()" class="glass-btn text-sm px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                    <button onclick="loadReferrals()" class="glass-btn w-full sm:w-auto justify-center text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
                         <i class="fas fa-sync-alt mr-2"></i> Refresh Status Kode
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
-                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-shield-alt mr-2 text-cyan-400"></i> Monitoring & Distribusi Kode</h3>
-                        <div class="relative">
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-shield-alt mr-2 text-cyan-400"></i> Monitoring Kode</h3>
+                        <div class="relative w-full md:w-auto">
                             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                            <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari kode spesifik...">
+                            <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari kode spesifik...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar p-2">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl">Kode Referral (200 ⚡)</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Status & Pemakai</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-40 rounded-tr-xl">Aksi</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Kode Referral (200 ⚡)</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Status & Pemakai</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-32 sm:w-40">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody id="ref-tbody" class="text-sm divide-y divide-white/5"></tbody>
+                            <tbody id="ref-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
             
             <!-- SECTION 3: RIWAYAT TASK AI -->
-            <div id="section-history" class="hidden flex flex-col gap-6">
-                <div class="glass-panel p-6 rounded-3xl border-l-4 border-l-purple-500 flex items-center justify-between">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-2xl shadow-[inset_0_0_10px_rgba(168,85,247,0.2)]"><i class="fas fa-history"></i></div>
-                        <div><p class="text-sm text-gray-400 font-medium mb-1">Riwayat Task Kie.ai</p><h3 class="text-xl font-extrabold drop-shadow-md text-white">Pantau & Ambil Video Hilang</h3></div>
+            <div id="section-history" class="hidden flex flex-col gap-4 sm:gap-6">
+                <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-purple-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(168,85,247,0.2)]"><i class="fas fa-history"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Riwayat Task Kie.ai</p><h3 class="text-lg sm:text-xl font-extrabold drop-shadow-md text-white">Pantau & Ambil Video</h3></div>
                     </div>
-                    <button onclick="loadHistory()" class="glass-btn text-sm px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                    <button onclick="loadHistory()" class="glass-btn w-full sm:w-auto justify-center text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
                         <i class="fas fa-sync-alt mr-2"></i> Refresh Riwayat
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-3xl flex flex-col h-[60vh] border border-white/10">
-                    <div class="p-5 border-b border-white/10 flex justify-between items-center bg-white/5 backdrop-blur-md z-20 rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-lg tracking-wide"><i class="fas fa-list-alt mr-2 text-purple-400"></i> Log Aktivitas User</h3>
-                        <div class="relative">
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-list-alt mr-2 text-purple-400"></i> Log Aktivitas User</h3>
+                        <div class="relative w-full md:w-auto">
                             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
-                            <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input rounded-xl pl-9 pr-4 py-2 text-sm w-64" placeholder="Cari ID / Nama / Email...">
+                            <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari ID / Nama / Email...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto flex-1 custom-scrollbar p-2">
-                        <table class="w-full text-left border-collapse">
-                            <thead class="text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider rounded-tl-xl w-1/4">Info Klien</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/3">Detail Prompt & Engine</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Waktu</th>
-                                    <th class="px-6 py-4 bg-[#1a1c23]/80 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right rounded-tr-xl">Aksi Bantuan</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/4">Info Klien</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/3">Detail Prompt & Engine</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Waktu</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Aksi Bantuan</th>
                                 </tr>
                             </thead>
-                            <tbody id="history-tbody" class="text-sm divide-y divide-white/5"></tbody>
+                            <tbody id="history-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
                         </table>
                     </div>
                 </div>
@@ -319,8 +324,8 @@
             document.getElementById('toast-msg').innerText = msg;
             toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
             
-            toast.className = `fixed top-5 right-5 glass-panel px-6 py-4 rounded-xl flex items-center gap-4 transition-all duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-l-emerald-500' : 'border-l-red-500'}`;
-            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-xl drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
+            toast.className = `fixed top-2 sm:top-5 right-2 sm:right-5 w-[calc(100%-16px)] sm:w-auto glass-panel px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 transition-all duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-l-emerald-500' : 'border-l-red-500'}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-lg sm:text-xl drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-lg sm:text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
 
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
@@ -377,7 +382,7 @@
 
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data...</td></tr>';
             try {
                 loadKieBalance();
                 const res = await fetch('/api/get_users', {
@@ -392,42 +397,43 @@
                     document.getElementById('stat-total-local-credits').innerText = totalKreditLokal.toLocaleString('id-ID') + ' ⚡';
                     
                     if (data.users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Belum ada user.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-gray-500 italic">Belum ada user.</td></tr>';
                         return;
                     }
 
+                    // Tweak pada padding td: px-4 py-3 sm:px-6 sm:py-4
                     tbody.innerHTML = data.users.map(u => {
                         const isVideoOn = u.videoAccess !== false;
                         return `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-6 py-4">
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 whitespace-nowrap">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-white text-sm flex items-center gap-2 drop-shadow-md">
-                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
+                                    <span class="font-bold text-white text-xs sm:text-sm flex items-center gap-2 drop-shadow-md">
+                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[8px] sm:text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
                                     </span>
-                                    <span class="text-[10px] text-emerald-400/70 font-mono mt-0.5">${u.email}</span>
-                                    <span class="text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
+                                    <span class="text-[9px] sm:text-[10px] text-emerald-400/70 font-mono mt-0.5 truncate w-32 sm:w-auto">${u.email}</span>
+                                    <span class="text-[8px] sm:text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="px-4 py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
+                                <span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] text-xs sm:text-sm">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-24 flex justify-center items-center gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40'}">
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-16 sm:w-24 flex justify-center items-center gap-1 sm:gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40'}">
                                     <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
-                            <td class="px-6 py-4 text-right">
-                                <div class="flex justify-end items-center gap-2">
-                                    <input type="number" id="in-${u.uid}" class="glass-input w-16 rounded-xl px-2 py-2 text-center text-xs font-mono" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-8 h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-xl transition-all flex items-center justify-center"><i class="fas fa-plus text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-8 h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-xl transition-all flex items-center justify-center"><i class="fas fa-minus text-xs"></i></button>
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-right whitespace-nowrap">
+                                <div class="flex justify-end items-center gap-1.5 sm:gap-2">
+                                    <input type="number" id="in-${u.uid}" class="glass-input w-12 sm:w-16 rounded-lg sm:rounded-xl px-1 sm:px-2 py-1.5 sm:py-2 text-center text-xs font-mono" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-plus text-[10px] sm:text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-7 h-7 sm:w-8 sm:h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-minus text-[10px] sm:text-xs"></i></button>
                                 </div>
                             </td>
                         </tr>`}).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">API Error.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-red-500">API Error.</td></tr>'; }
         }
 
         async function toggleVideoAccess(uid, currentStatus) {
@@ -459,7 +465,7 @@
 
         async function loadReferrals() {
             const tbody = document.getElementById('ref-tbody');
-            tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="3" class="p-6 sm:p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi...</td></tr>';
             try {
                 const res = await fetch('/api/get_referrals', {
                     method: 'POST',
@@ -470,22 +476,22 @@
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-6 py-5 font-mono font-bold tracking-widest ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-lg'}">${c.code}</td>
-                            <td class="px-6 py-5 text-center">
-                                ${c.used ? '<span class="px-4 py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
-                                <div class="text-[10px] text-gray-500 mt-2 truncate max-w-[200px] mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 font-mono font-bold tracking-widest whitespace-nowrap ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-sm sm:text-lg'}">${c.code}</td>
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-center whitespace-nowrap">
+                                ${c.used ? '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[9px] sm:text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
+                                <div class="text-[9px] sm:text-[10px] text-gray-500 mt-2 truncate max-w-[150px] sm:max-w-[200px] mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
                             </td>
-                            <td class="px-6 py-5 text-right">
-                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-5 py-2 rounded-xl text-xs ml-auto font-bold flex items-center gap-2"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-4 py-2 bg-red-500/5 text-red-500/40 rounded-xl text-xs font-bold uppercase ml-auto">Hangus</span>`}
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-right whitespace-nowrap">
+                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center gap-1 sm:gap-2"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/5 text-red-500/40 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase ml-auto">Hangus</span>`}
                             </td>
                         </tr>`).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-10 text-center text-red-500">Error.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-6 sm:p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
         async function loadHistory() {
             const tbody = document.getElementById('history-tbody');
-            tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat...</td></tr>';
             try {
                 const res = await fetch('/api/history', {
                     method: 'POST',
@@ -494,35 +500,35 @@
                 });
                 const data = await res.json();
                 if(data.success) {
-                    if (data.history.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-gray-500 italic">Kosong.</td></tr>'; return; }
+                    if (data.history.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-gray-500 italic">Kosong.</td></tr>'; return; }
                     tbody.innerHTML = data.history.map(h => {
                         const dateObj = new Date(h.timestamp);
                         return `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-6 py-5">
-                                <div class="font-bold text-white text-sm">${h.userName}</div>
-                                <div class="text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
-                                <div class="text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 whitespace-nowrap">
+                                <div class="font-bold text-white text-xs sm:text-sm">${h.userName}</div>
+                                <div class="text-[9px] sm:text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
+                                <div class="text-[8px] sm:text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
                             </td>
-                            <td class="px-6 py-5">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[9px] font-bold uppercase">${h.type}</span>
-                                    <span class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold uppercase">${h.engine}</span>
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 min-w-[200px]">
+                                <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.type}</span>
+                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.engine}</span>
                                 </div>
-                                <p class="text-xs text-gray-300 line-clamp-2">${h.prompt}</p>
+                                <p class="text-[10px] sm:text-xs text-gray-300 line-clamp-2 w-full whitespace-normal break-all">${h.prompt}</p>
                             </td>
-                            <td class="px-6 py-5 text-center text-gray-400 text-xs">
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-center text-gray-400 text-[10px] sm:text-xs whitespace-nowrap">
                                 <div class="font-bold text-white">${dateObj.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
-                                <div class="text-[10px]">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
+                                <div class="text-[9px] sm:text-[10px]">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
                             </td>
-                            <td class="px-6 py-5 text-right">
-                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32">
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-right whitespace-nowrap">
+                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32">
                                     <i class="fas fa-search"></i> Cek Server
                                 </button>
                             </td>
                         </tr>`}).join('');
                 }
-            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-10 text-center text-red-500">Error.</td></tr>'; }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
         async function cekHasilKie(taskId, engine) {
@@ -538,7 +544,7 @@
 
                 if (resultUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '100' || status === '1' || resultUrl.includes('http'))) {
                     btn.innerHTML = '<i class="fas fa-external-link-alt"></i> Buka';
-                    btn.className = 'px-4 py-2 rounded-xl text-xs ml-auto font-bold flex items-center justify-center gap-2 w-32 bg-emerald-500 text-white';
+                    btn.className = 'px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-emerald-500 text-white';
                     btn.onclick = () => window.open(resultUrl, '_blank');
                     btn.disabled = false;
                     showToast('Hasil ditemukan!');
