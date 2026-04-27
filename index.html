@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <!-- Memastikan scaling viewport benar untuk mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#000000">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
     <title>Ailabs - Dashboard</title>
     
     <!-- Import Tailwind CSS -->
@@ -2333,6 +2339,17 @@
                 window.showCustomAlert("Terjadi masalah:\n" + error.message);
             }
         };
+
+        // PWA Service Worker Registration untuk dukung fitur Android
+        if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(reg => console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope))
+                    .catch(err => console.warn('PWA: Service Worker gagal didaftarkan (Abaikan jika di preview).', err.message));
+            });
+        } else {
+            console.log('PWA: Pendaftaran Service Worker dilewati di environment preview/lokal ini.');
+        }
     </script>
 </body>
 </html>
