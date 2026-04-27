@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <!-- Memastikan scaling viewport benar untuk mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#000000">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
-    
     <title>Ailabs - Dashboard</title>
     
     <!-- Import Tailwind CSS -->
@@ -47,7 +41,6 @@
             background-color: #000;
             color: #fff;
             overscroll-behavior: none; /* Mencegah pull-to-refresh di mobile */
-            -webkit-tap-highlight-color: transparent; /* Hilangkan flicker abu-abu saat tombol di-tap agar terasa native */
         }
 
         /* --- Landing Page Styles --- */
@@ -63,13 +56,11 @@
         .linear-overlay {
             background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.95) 100%);
         }
-        
-        /* OPTIMASI: Menggunakan translate3d untuk mengaktifkan Hardware Acceleration (GPU) di HP Android */
         @keyframes slowPan {
-            0% { transform: translate3d(0px, 0px, 0) scale(1); }
-            33% { transform: translate3d(-20px, -30px, 0) scale(1.05); }
-            66% { transform: translate3d(20px, -10px, 0) scale(1.02); }
-            100% { transform: translate3d(0px, 0px, 0) scale(1); }
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(-20px, -30px) scale(1.05); }
+            66% { transform: translate(20px, -10px) scale(1.02); }
+            100% { transform: translate(0px, 0px) scale(1); }
         }
         .bg-grid-container {
             width: 110vw;
@@ -77,28 +68,25 @@
             top: -5vh;
             left: -5vw;
             animation: slowPan 25s ease-in-out infinite;
-            will-change: transform; /* Memberitahu browser untuk bersiap merender animasi ini */
         }
 
         @keyframes rowSlideLeft {
-            0% { transform: translate3d(0, 0, 0); }
-            50% { transform: translate3d(-15%, 0, 0); }
-            100% { transform: translate3d(0, 0, 0); }
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-15%); }
+            100% { transform: translateX(0); }
         }
         @keyframes rowSlideRight {
-            0% { transform: translate3d(-15%, 0, 0); }
-            50% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-15%, 0, 0); }
+            0% { transform: translateX(-15%); }
+            50% { transform: translateX(0); }
+            100% { transform: translateX(-15%); }
         }
         .slide-left {
             width: 150vw;
             animation: rowSlideLeft 45s linear infinite;
-            will-change: transform;
         }
         .slide-right {
             width: 150vw;
             animation: rowSlideRight 45s linear infinite;
-            will-change: transform;
         }
         .bg-grid-container img {
             transition: opacity 1.5s ease-in-out;
@@ -286,21 +274,21 @@
     <!-- VIEW 1: LANDING PAGE -->
     <!-- ========================================== -->
     <div id="view-landing" class="relative h-screen w-full overflow-hidden block transition-opacity duration-500">
-        <!-- BACKGROUND IMAGE GRID: Menambahkan properti lazy loading -->
+        <!-- BACKGROUND IMAGE GRID -->
         <div class="absolute bg-grid-container z-0 flex flex-col gap-4 md:gap-6 opacity-60 pointer-events-none p-2 md:p-4">
             <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] opacity-90 slide-left">
-                <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
             </div>
             <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] -ml-8 md:-ml-32 opacity-100 slide-right">
-                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
             </div>
         </div>
 
@@ -374,21 +362,29 @@
     <div id="view-dashboard" class="hidden min-h-screen emerald-glow-bg pb-32 relative fade-enter">
         
         <nav class="sticky top-0 w-full px-3 sm:px-6 py-3 sm:py-4 flex justify-between items-center z-40 bg-black/80 md:bg-black/50 backdrop-blur-xl border-b border-emerald-500/20 shadow-[0_4px_30px_rgba(16,185,129,0.1)]">
-            <div class="flex items-center gap-3 sm:gap-5">
-                <div class="flex items-center gap-1.5 md:gap-3 cursor-pointer group" onclick="goToLanding()">
-                    <img src="logo.png" alt="Ailabs Logo" class="h-5 md:h-8 object-contain opacity-90 group-hover:opacity-100 transition-opacity">
-                    <div class="text-lg md:text-2xl font-bold tracking-tight leading-none hidden sm:block group-hover:text-gray-300 transition-colors">Ailabs</div>
-                </div>
-                
-                <!-- TOMBOL MUSIK PINDAH KE SINI -->
-                <button id="btn-toggle-music" class="flex items-center gap-1 border border-emerald-500/50 rounded-full px-2 py-1 md:px-3 md:py-1.5 text-[10px] md:text-sm font-bold text-emerald-50 bg-emerald-950/20 hover:bg-emerald-900/40 transition shrink-0">
-                    <i id="music-toggle-icon" class="fa-solid fa-play text-emerald-400"></i>
-                    <canvas id="music-visualizer" width="40" height="16" class="w-4 sm:w-6 md:w-10 h-2 md:h-3 pointer-events-none"></canvas>
-                </button>
+            <div class="flex items-center gap-1.5 md:gap-3 cursor-pointer group" onclick="goToLanding()">
+                <img src="logo.png" alt="Ailabs Logo" class="h-5 md:h-8 object-contain opacity-90 group-hover:opacity-100 transition-opacity">
+                <div class="text-lg md:text-2xl font-bold tracking-tight leading-none hidden sm:block group-hover:text-gray-300 transition-colors">Ailabs</div>
             </div>
             
             <div class="flex items-center gap-1.5 sm:gap-4">
-                <div id="auth-section-dashboard" class="flex items-center gap-2 pl-2 sm:pl-3">
+                <div class="flex items-center gap-1.5 sm:gap-3">
+                    <button id="btn-toggle-music" class="flex items-center gap-1 border border-emerald-500/50 rounded-full px-2 py-1 md:px-4 md:py-1.5 text-[10px] md:text-sm font-bold text-emerald-50 bg-emerald-950/20 hover:bg-emerald-900/40 transition">
+                        <i id="music-toggle-icon" class="fa-solid fa-play text-emerald-400"></i>
+                        <canvas id="music-visualizer" width="40" height="16" class="w-4 sm:w-6 md:w-10 h-2 md:h-3 pointer-events-none"></canvas>
+                    </button>
+
+                    <button onclick="window.open('https://ailabs-prompt-share.vercel.app/', '_blank')" class="neon-btn-cyan flex items-center gap-1 md:gap-2 border border-cyan-500/50 rounded-full px-2.5 py-1 md:px-4 md:py-1.5 text-[10px] md:text-sm font-bold text-cyan-50 bg-cyan-950/20 hover:bg-cyan-900/40 transition">
+                        <i class="fa-solid fa-tv text-cyan-400"></i> 
+                        <span class="hidden md:inline">Workspace</span>
+                    </button>
+                    <button onclick="goToPrompts()" class="neon-btn-purple flex items-center gap-1 md:gap-2 border border-purple-500/50 rounded-full px-2.5 py-1 md:px-4 md:py-1.5 text-[10px] md:text-sm font-bold text-purple-50 bg-purple-950/20 hover:bg-purple-900/40 transition">
+                        <i class="fa-solid fa-wand-magic-sparkles text-purple-400"></i> 
+                        <span class="hidden md:inline">Prompt</span>
+                    </button>
+                </div>
+
+                <div id="auth-section-dashboard" class="flex items-center gap-2 border-l border-gray-700 pl-2 sm:pl-3">
                     <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-semibold hover:bg-gray-200 transition flex items-center gap-1 sm:gap-2">
                         <i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login</span>
                     </button>
@@ -509,8 +505,7 @@
         </main>
 
         <div class="fixed bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 z-50">
-            <!-- MENGUBAH ACTION TOMBOL MENJADI BUKA MENU -->
-            <button onclick="openNewProjectMenu()" class="cta-kelap-kelip bg-black/80 backdrop-blur-xl border border-emerald-500/50 text-white rounded-full px-8 py-3 md:px-12 md:py-5 text-sm md:text-base font-bold flex items-center gap-2 hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap">
+            <button onclick="goToEditor()" class="cta-kelap-kelip bg-black/80 backdrop-blur-xl border border-emerald-500/50 text-white rounded-full px-8 py-3 md:px-12 md:py-5 text-sm md:text-base font-bold flex items-center gap-2 hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap">
                 <i class="fa-solid fa-plus"></i> Project baru
             </button>
         </div>
@@ -751,50 +746,6 @@
     <!-- SEMUA MODALS DIKUMPULKAN DI SINI           -->
     <!-- ========================================== -->
 
-    <!-- Modal Menu Project Baru -->
-    <div id="new-project-menu" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex flex-col justify-end md:justify-center items-center p-0 md:p-4 transition-opacity duration-300 opacity-0" onclick="closeNewProjectMenu(event)">
-        <div class="glass-card w-full max-w-md p-6 rounded-t-3xl md:rounded-3xl border-t border-emerald-500/50 transform translate-y-full md:translate-y-0 transition-transform duration-300 shadow-[0_-10px_40px_rgba(16,185,129,0.15)] bg-[#0a0a0a]" id="new-project-menu-content" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-lg md:text-xl font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-layer-group text-emerald-400"></i> Buat Baru
-                </h3>
-                <button onclick="closeNewProjectMenu()" class="text-gray-400 hover:text-white bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-times"></i></button>
-            </div>
-            
-            <div class="flex flex-col gap-3">
-                <button onclick="goToEditor(); closeNewProjectMenu()" class="flex items-center gap-4 bg-emerald-900/20 hover:bg-emerald-800/40 border border-emerald-500/30 p-4 rounded-xl transition text-left group">
-                    <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(16,185,129,0.5)]">
-                        <i class="fa-solid fa-plus text-emerald-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-bold text-sm md:text-base">Project Baru</h4>
-                        <p class="text-[10px] md:text-xs text-gray-400">Buka AI Generator untuk buat gambar & video</p>
-                    </div>
-                </button>
-
-                <button onclick="window.open('https://ailabs-prompt-share.vercel.app/', '_blank'); closeNewProjectMenu()" class="flex items-center gap-4 bg-cyan-900/20 hover:bg-cyan-800/40 border border-cyan-500/30 p-4 rounded-xl transition text-left group">
-                    <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-                        <i class="fa-solid fa-tv text-cyan-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-bold text-sm md:text-base">Quantum Workspace</h4>
-                        <p class="text-[10px] md:text-xs text-gray-400">Buka ruang kerja terpadu Ailabs</p>
-                    </div>
-                </button>
-
-                <button onclick="goToPrompts(); closeNewProjectMenu()" class="flex items-center gap-4 bg-purple-900/20 hover:bg-purple-800/40 border border-purple-500/30 p-4 rounded-xl transition text-left group">
-                    <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(168,85,247,0.5)]">
-                        <i class="fa-solid fa-wand-magic-sparkles text-purple-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-bold text-sm md:text-base">Galeri Prompt</h4>
-                        <p class="text-[10px] md:text-xs text-gray-400">Cari inspirasi dari prompt komunitas</p>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modals Editor / Viewer -->
     <div id="video-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur flex items-center justify-center p-2">
         <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-white bg-white/20 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
@@ -952,8 +903,7 @@
     <!-- Firebase SDK Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // MENGUBAH IMPORT: Menambahkan signInWithRedirect dan getRedirectResult
-        import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
@@ -980,9 +930,6 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
-            
-            // Force local persistence untuk WebViews
-            setPersistence(auth, browserLocalPersistence).catch((err) => console.log("Persistence error:", err));
 
             window.db = db;
             window.appId = appId;
@@ -990,8 +937,6 @@
             window.fsDoc = doc;
             window.fsSetDoc = setDoc;
             window.fsDeleteDoc = deleteDoc;
-
-            let isInitialAuthCheck = true;
 
             onAuthStateChanged(auth, async (user) => {
                 if (user) {
@@ -1027,76 +972,28 @@
                             }
                         }, (error) => { console.error("Error Snapshot:", error.message); });
                     } catch(e) {}
-                    
-                    isInitialAuthCheck = false;
                 } else {
-                    // --- JIKA USER BELUM LOGIN ---
                     window.currentUserId = null; window.currentUserCredits = 0;
                     if (creditUnsubscribe) { creditUnsubscribe(); creditUnsubscribe = null; }
                     if (window.updateAuthUI) window.updateAuthUI(false);
-                    
-                    // Tampilkan Layar Wajib Login
-                    const viewLogin = document.getElementById('view-login');
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    const loginLoading = document.getElementById('login-loading-indicator');
-                    
-                    if (viewLogin) {
-                        viewLogin.classList.remove('hidden');
-                        setTimeout(() => viewLogin.classList.remove('opacity-0'), 10);
-                        
-                        // Jika tidak sedang dialihkan (redirect), munculkan tombol login
-                        if (!sessionStorage.getItem('isGoogleLoginPending')) {
-                            if (forceLoginBtn) { forceLoginBtn.classList.remove('hidden'); forceLoginBtn.classList.add('flex'); }
-                            if (loginLoading) loginLoading.classList.add('hidden');
-                        }
-                    }
-                    isInitialAuthCheck = false;
                 }
-            });
-
-            // Cek apakah sedang memproses kembalian dari login Google
-            const isRedirecting = sessionStorage.getItem('isGoogleLoginPending');
-            if (isRedirecting) {
-                 window.showToast("Memproses otentikasi...");
-                 const forceLoginBtn = document.getElementById('btn-force-login');
-                 const loginLoading = document.getElementById('login-loading-indicator');
-                 if (forceLoginBtn) forceLoginBtn.classList.add('hidden');
-                 if (loginLoading) loginLoading.classList.remove('hidden');
-            }
-
-            // MENANGANI HASIL LOGIN REDIRECT: Ini yang menangkap data user setelah kembali dari layar login Google
-            getRedirectResult(auth).then((result) => {
-                sessionStorage.removeItem('isGoogleLoginPending');
-                if (result && result.user) {
-                    window.showToast("Berhasil login dengan Google!");
-                }
-            }).catch((error) => {
-                sessionStorage.removeItem('isGoogleLoginPending');
-                console.error("Error setelah redirect Google:", error);
-                window.showCustomAlert("Gagal login ulang: " + error.message);
             });
 
             window.signInWithGoogle = async () => {
                 try {
-                    // Beri indikator loading di tombol navbar (opsional)
-                    ['dashboard', 'editor'].forEach(v => {
-                        const btn = document.getElementById(`login-btn-${v}`);
-                        if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin text-red-500"></i> <span class="hidden sm:inline md:inline">Tunggu...</span>';
-                    });
-                    
-                    // Indikator loading di tombol layar wajib login
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    if (forceLoginBtn) forceLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i> Membuka Google...';
+                    const result = await signInWithPopup(auth, provider);
+                    const signedInUser = result.user;
+                    window.showToast("Berhasil login dengan Google!");
 
-                    sessionStorage.setItem('isGoogleLoginPending', 'true');
-                    await setPersistence(auth, browserLocalPersistence);
-                    await signInWithRedirect(auth, provider);
+                    if (signedInUser) {
+                        const userRef = doc(db, 'artifacts', appId, 'users', signedInUser.uid, 'profile', 'data');
+                        await setDoc(userRef, { email: signedInUser.email || 'Tidak ada email', name: signedInUser.displayName || 'Google User', isAnon: false }, { merge: true });
+                        if (window.updateAuthUI) window.updateAuthUI(true, signedInUser.photoURL, false, signedInUser.displayName, signedInUser.email);
+                    }
                 } catch (error) {
-                    sessionStorage.removeItem('isGoogleLoginPending');
-                    window.showCustomAlert("Gagal inisiasi login Google: " + error.message);
-                    
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    if (forceLoginBtn) forceLoginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500 text-lg"></i> Masuk dengan Google';
+                    if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+                        window.showCustomAlert("Gagal login dengan Google: " + error.message);
+                    }
                 }
             };
 
@@ -1112,10 +1009,6 @@
             };
 
         } else {
-            // Sembunyikan layar login jika Firebase tidak disetup (mencegah error nge-freeze)
-            const viewLogin = document.getElementById('view-login');
-            if (viewLogin) viewLogin.classList.add('hidden');
-            
             window.signInWithGoogle = async () => { window.showCustomAlert("Firebase belum dikonfigurasi."); };
             window.signOutUser = async () => { if (window.updateAuthUI) window.updateAuthUI(false); };
         }
@@ -1185,7 +1078,7 @@
                     if(nm) nm.innerText = userName || (isAnon ? 'User Anonim' : 'Google User');
                     if(em) em.innerText = userEmail || 'Tidak ada email';
                 } else {
-                    if(btn) { btn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline md:inline">Login</span>'; btn.classList.remove('hidden'); }
+                    if(btn) btn.classList.remove('hidden');
                     if(prof) { prof.classList.add('hidden'); prof.classList.remove('flex'); }
                 }
             });
@@ -1247,43 +1140,6 @@
             const input = document.getElementById('redeem-code-input');
             if(modal) modal.classList.add('hidden');
             if(input) input.value = '';
-        }
-
-        // FUNGSI UNTUK MENU PROJECT BARU
-        window.openNewProjectMenu = function() {
-            const menu = document.getElementById('new-project-menu');
-            const content = document.getElementById('new-project-menu-content');
-            if (menu && content) {
-                menu.classList.remove('hidden');
-                // Timeout dikit biar animasi CSS jalan
-                setTimeout(() => {
-                    menu.classList.remove('opacity-0');
-                    if (window.innerWidth < 768) {
-                        content.classList.remove('translate-y-full'); // Animasi geser dari bawah (Mobile)
-                    } else {
-                        content.classList.remove('scale-95', 'opacity-0'); // Animasi pop up (Desktop)
-                    }
-                }, 10);
-            }
-        }
-        
-        window.closeNewProjectMenu = function(e) {
-            // Hindari close kalau yang di klik adalah box content-nya langsung
-            if (e && e.target.id === 'new-project-menu-content') return;
-            
-            const menu = document.getElementById('new-project-menu');
-            const content = document.getElementById('new-project-menu-content');
-            if (menu && content) {
-                menu.classList.add('opacity-0');
-                if (window.innerWidth < 768) {
-                    content.classList.add('translate-y-full');
-                } else {
-                    content.classList.add('scale-95', 'opacity-0');
-                }
-                setTimeout(() => {
-                    menu.classList.add('hidden');
-                }, 300);
-            }
         }
 
         window.submitRedeemCode = async function() {
@@ -1731,18 +1587,10 @@
             const pctText = document.getElementById('loading-percentage');
             const tipText = document.getElementById('loading-tip-text');
             
-            const tips = ["Memproses ratusan frame...", "Mencegah HP tertidur...", "Sedang menganalisis objek...", "Menyusun piksel demi piksel..."];
+            const tips = ["Memproses ratusan frame...", "Resolusi tinggi butuh waktu.", "Sedang menganalisis wajah...", "Menyusun piksel demi piksel..."];
 
             function startLoaderUX() {
                 simulatedProgress = 0; if(progressBar) progressBar.style.width = '0%'; if(pctText) pctText.innerText = '0%';
-                
-                // MENCEGAH LAYAR HP MATI/SLEEP SELAMA LOADING DI APK
-                try {
-                    if ('wakeLock' in navigator) {
-                        navigator.wakeLock.request('screen').then(wl => window.appWakeLock = wl).catch(e => console.log("WakeLock gagal:", e));
-                    }
-                } catch (err) {}
-
                 progressInterval = setInterval(() => {
                     if (simulatedProgress < 85) simulatedProgress += Math.random() * 2; else if (simulatedProgress < 99) simulatedProgress += Math.random() * 0.2;
                     const currentPct = Math.min(99, Math.round(simulatedProgress));
@@ -1757,11 +1605,6 @@
             function stopLoaderUX() {
                 clearInterval(progressInterval); clearInterval(tipInterval);
                 if(progressBar) progressBar.style.width = '100%'; if(pctText) pctText.innerText = '100%';
-                
-                // LEPASKAN WAKELOCK AGAR HP BISA SLEEP LAGI
-                if (window.appWakeLock) {
-                    window.appWakeLock.release().then(() => window.appWakeLock = null).catch(e=>e);
-                }
             }
             startLoaderUX();
 
@@ -1775,10 +1618,8 @@
                         method: "POST", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId })
                     });
-                    
-                    let data;
-                    try { data = await response.json(); } catch (e) { throw new Error("Koneksi terputus/Timeout. Jika kredit terpotong, AI sedang memproses di latar belakang."); }
-                    if(!response.ok) throw new Error(data.error || data.msg || "Gagal membuat task");
+                    const data = await response.json();
+                    if(!response.ok) throw new Error(data.error || "Gagal");
                     
                     stopLoaderUX();
                     setTimeout(() => {
@@ -1803,42 +1644,22 @@
                     if (genConfig.type === 'Motion') payload.video_urls = videoUrls;
 
                     const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                    
-                    let data;
-                    try { 
-                        data = await response.json(); 
-                    } catch (e) { 
-                        throw new Error("Server Vercel Timeout (504). Jangan panik, request kamu SANGAT MUNGKIN sudah masuk dan dikerjakan oleh Server AI di latar belakang."); 
-                    }
-                    
-                    if (!response.ok) throw new Error(data.error || data.msg || "Gagal membuat task");
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || "Gagal membuat task");
 
-                    // PERBAIKAN: Menangkap taskId dan task_id dengan aman
-                    const taskId = data.data?.taskId || data.taskId || data.data?.task_id || data.task_id;
-                    if (!taskId) throw new Error("Gagal dapat Task ID dari server AI.");
+                    const taskId = data.data?.taskId || data.taskId;
+                    if (!taskId) throw new Error("Gagal dapat Task ID.");
                     
                     let finalMediaUrl = null; let attempts = 0;
                     while (!finalMediaUrl && attempts < 180) { 
                         await new Promise(resolve => setTimeout(resolve, 5000));
                         attempts++;
-                        
-                        // PERBAIKAN PENTING: Anti-putus jaringan saat APK di background
-                        let checkRes, checkData;
-                        try {
-                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
-                            checkData = await checkRes.json();
-                        } catch (err) {
-                            console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
-                            continue; // Terus berputar meskipun jaringan putus sebentar
-                        }
-
+                        const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                        const checkData = await checkRes.json();
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
-                        
-                        if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3') { 
-                            throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
-                        }
+                        if (checkData.error && !checkData.data) throw new Error(checkData.error);
 
                         let foundUrls = [];
                         JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
@@ -1846,13 +1667,11 @@
                         let mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)) || validUrls[0];
 
                         if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '1' || mediaUrl.includes('tempfile'))) {
-                            try {
-                                finalMediaUrl = mediaUrl.includes('tempfile') ? await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: mediaUrl }) }).then(r=>r.json()).then(d=>d.data||mediaUrl).catch(()=>mediaUrl) : mediaUrl;
-                            } catch(e) { finalMediaUrl = mediaUrl; }
+                            finalMediaUrl = mediaUrl.includes('tempfile') ? await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: mediaUrl }) }).then(r=>r.json()).then(d=>d.data||mediaUrl).catch(()=>mediaUrl) : mediaUrl;
                             break;
-                        }
+                        } else if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3') { throw new Error(checkData.errorMessage || "AI gagal memproses."); }
                     }
-                    if (!finalMediaUrl) throw new Error("Waktu tunggu habis! Hasil mungkin nyangkut di server.");
+                    if (!finalMediaUrl) throw new Error("Waktu habis!");
                     window.lastGenData.taskId = taskId; window.lastGenData.engine = genConfig.engine;
 
                     stopLoaderUX();
@@ -2466,10 +2285,7 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: actionType, taskId: taskId, prompt: extendPrompt })
                 });
-                
-                let initData;
-                try { initData = await initRes.json(); } catch(e) { throw new Error("Server terputus saat request Veo Action."); }
-                
+                const initData = await initRes.json();
                 if (!initRes.ok && !initData.processing) throw new Error(initData.error || initData.msg || "Gagal inisiasi action Veo");
 
                 let activeTaskId = taskId; if (actionType === 'extend' && initData.data?.taskId) activeTaskId = initData.data.taskId;
@@ -2479,14 +2295,8 @@
                     if (loadingText) loadingText.innerText = `Memproses ${actionType.toUpperCase()}... (${attempts}/${maxAttempts})`;
 
                     if (actionType === 'extend') {
-                        let checkData;
-                        try {
-                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
-                            checkData = await checkRes.json();
-                        } catch (err) {
-                            continue; // Terus putar jika jaringan APK putus
-                        }
-
+                        const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
+                        const checkData = await checkRes.json();
                         let status = String(checkData.data?.successFlag ?? checkData.successFlag ?? "").toUpperCase();
                         
                         if (status === '1') {
@@ -2500,14 +2310,11 @@
                             break;
                         } else if (status === '2' || status === '3') { throw new Error(checkData.errorMessage || "Gagal memperpanjang video."); }
                     } else {
-                        let checkRes, checkData;
-                        try {
-                            checkRes = await fetch('/api/veo-action', {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: actionType, taskId: taskId })
-                            });
-                            checkData = await checkRes.json();
-                        } catch(err) { continue; }
+                        const checkRes = await fetch('/api/veo-action', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: actionType, taskId: taskId })
+                        });
+                        const checkData = await checkRes.json();
                         
                         if (checkRes.ok && checkData.url) { finalMediaUrl = checkData.url; break; } 
                         else if (checkRes.ok && checkData.processing) { continue; } 
@@ -2526,17 +2333,6 @@
                 window.showCustomAlert("Terjadi masalah:\n" + error.message);
             }
         };
-
-        // PWA Service Worker Registration untuk dukung fitur Android
-        if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope))
-                    .catch(err => console.warn('PWA: Service Worker gagal didaftarkan (Abaikan jika di preview).', err.message));
-            });
-        } else {
-            console.log('PWA: Pendaftaran Service Worker dilewati di environment preview/lokal ini.');
-        }
     </script>
 </body>
 </html>
