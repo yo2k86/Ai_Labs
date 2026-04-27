@@ -1731,10 +1731,18 @@
             const pctText = document.getElementById('loading-percentage');
             const tipText = document.getElementById('loading-tip-text');
             
-            const tips = ["Memproses ratusan frame...", "Resolusi tinggi butuh waktu.", "Sedang menganalisis wajah...", "Menyusun piksel demi piksel..."];
+            const tips = ["Memproses ratusan frame...", "Mencegah HP tertidur...", "Sedang menganalisis objek...", "Menyusun piksel demi piksel..."];
 
             function startLoaderUX() {
                 simulatedProgress = 0; if(progressBar) progressBar.style.width = '0%'; if(pctText) pctText.innerText = '0%';
+                
+                // MENCEGAH LAYAR HP MATI/SLEEP SELAMA LOADING DI APK
+                try {
+                    if ('wakeLock' in navigator) {
+                        navigator.wakeLock.request('screen').then(wl => window.appWakeLock = wl).catch(e => console.log("WakeLock gagal:", e));
+                    }
+                } catch (err) {}
+
                 progressInterval = setInterval(() => {
                     if (simulatedProgress < 85) simulatedProgress += Math.random() * 2; else if (simulatedProgress < 99) simulatedProgress += Math.random() * 0.2;
                     const currentPct = Math.min(99, Math.round(simulatedProgress));
@@ -1749,6 +1757,11 @@
             function stopLoaderUX() {
                 clearInterval(progressInterval); clearInterval(tipInterval);
                 if(progressBar) progressBar.style.width = '100%'; if(pctText) pctText.innerText = '100%';
+                
+                // LEPASKAN WAKELOCK AGAR HP BISA SLEEP LAGI
+                if (window.appWakeLock) {
+                    window.appWakeLock.release().then(() => window.appWakeLock = null).catch(e=>e);
+                }
             }
             startLoaderUX();
 
@@ -1762,8 +1775,10 @@
                         method: "POST", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId })
                     });
-                    const data = await response.json();
-                    if(!response.ok) throw new Error(data.error || "Gagal");
+                    
+                    let data;
+                    try { data = await response.json(); } catch (e) { throw new Error("Koneksi terputus/Timeout. Jika kredit terpotong, AI sedang memproses di latar belakang."); }
+                    if(!response.ok) throw new Error(data.error || data.msg || "Gagal membuat task");
                     
                     stopLoaderUX();
                     setTimeout(() => {
@@ -1788,22 +1803,42 @@
                     if (genConfig.type === 'Motion') payload.video_urls = videoUrls;
 
                     const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || "Gagal membuat task");
+                    
+                    let data;
+                    try { 
+                        data = await response.json(); 
+                    } catch (e) { 
+                        throw new Error("Server Vercel Timeout (504). Jangan panik, request kamu SANGAT MUNGKIN sudah masuk dan dikerjakan oleh Server AI di latar belakang."); 
+                    }
+                    
+                    if (!response.ok) throw new Error(data.error || data.msg || "Gagal membuat task");
 
-                    const taskId = data.data?.taskId || data.taskId;
-                    if (!taskId) throw new Error("Gagal dapat Task ID.");
+                    // PERBAIKAN: Menangkap taskId dan task_id dengan aman
+                    const taskId = data.data?.taskId || data.taskId || data.data?.task_id || data.task_id;
+                    if (!taskId) throw new Error("Gagal dapat Task ID dari server AI.");
                     
                     let finalMediaUrl = null; let attempts = 0;
                     while (!finalMediaUrl && attempts < 180) { 
                         await new Promise(resolve => setTimeout(resolve, 5000));
                         attempts++;
-                        const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
-                        const checkData = await checkRes.json();
+                        
+                        // PERBAIKAN PENTING: Anti-putus jaringan saat APK di background
+                        let checkRes, checkData;
+                        try {
+                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                            checkData = await checkRes.json();
+                        } catch (err) {
+                            console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
+                            continue; // Terus berputar meskipun jaringan putus sebentar
+                        }
+
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
-                        if (checkData.error && !checkData.data) throw new Error(checkData.error);
+                        
+                        if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3') { 
+                            throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
+                        }
 
                         let foundUrls = [];
                         JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
@@ -1811,11 +1846,13 @@
                         let mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)) || validUrls[0];
 
                         if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '1' || mediaUrl.includes('tempfile'))) {
-                            finalMediaUrl = mediaUrl.includes('tempfile') ? await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: mediaUrl }) }).then(r=>r.json()).then(d=>d.data||mediaUrl).catch(()=>mediaUrl) : mediaUrl;
+                            try {
+                                finalMediaUrl = mediaUrl.includes('tempfile') ? await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: mediaUrl }) }).then(r=>r.json()).then(d=>d.data||mediaUrl).catch(()=>mediaUrl) : mediaUrl;
+                            } catch(e) { finalMediaUrl = mediaUrl; }
                             break;
-                        } else if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3') { throw new Error(checkData.errorMessage || "AI gagal memproses."); }
+                        }
                     }
-                    if (!finalMediaUrl) throw new Error("Waktu habis!");
+                    if (!finalMediaUrl) throw new Error("Waktu tunggu habis! Hasil mungkin nyangkut di server.");
                     window.lastGenData.taskId = taskId; window.lastGenData.engine = genConfig.engine;
 
                     stopLoaderUX();
@@ -2429,7 +2466,10 @@
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: actionType, taskId: taskId, prompt: extendPrompt })
                 });
-                const initData = await initRes.json();
+                
+                let initData;
+                try { initData = await initRes.json(); } catch(e) { throw new Error("Server terputus saat request Veo Action."); }
+                
                 if (!initRes.ok && !initData.processing) throw new Error(initData.error || initData.msg || "Gagal inisiasi action Veo");
 
                 let activeTaskId = taskId; if (actionType === 'extend' && initData.data?.taskId) activeTaskId = initData.data.taskId;
@@ -2439,8 +2479,14 @@
                     if (loadingText) loadingText.innerText = `Memproses ${actionType.toUpperCase()}... (${attempts}/${maxAttempts})`;
 
                     if (actionType === 'extend') {
-                        const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
-                        const checkData = await checkRes.json();
+                        let checkData;
+                        try {
+                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
+                            checkData = await checkRes.json();
+                        } catch (err) {
+                            continue; // Terus putar jika jaringan APK putus
+                        }
+
                         let status = String(checkData.data?.successFlag ?? checkData.successFlag ?? "").toUpperCase();
                         
                         if (status === '1') {
@@ -2454,11 +2500,14 @@
                             break;
                         } else if (status === '2' || status === '3') { throw new Error(checkData.errorMessage || "Gagal memperpanjang video."); }
                     } else {
-                        const checkRes = await fetch('/api/veo-action', {
-                            method: 'POST', headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ action: actionType, taskId: taskId })
-                        });
-                        const checkData = await checkRes.json();
+                        let checkRes, checkData;
+                        try {
+                            checkRes = await fetch('/api/veo-action', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: actionType, taskId: taskId })
+                            });
+                            checkData = await checkRes.json();
+                        } catch(err) { continue; }
                         
                         if (checkRes.ok && checkData.url) { finalMediaUrl = checkData.url; break; } 
                         else if (checkRes.ok && checkData.processing) { continue; } 
