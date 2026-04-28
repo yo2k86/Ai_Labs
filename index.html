@@ -283,43 +283,9 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- VIEW 0: LOGIN PAGE (Wajib Login)           -->
-    <!-- ========================================== -->
-    <div id="view-login" class="flex fixed inset-0 z-[9999] bg-black flex-col items-center justify-center transition-opacity duration-500 emerald-glow-bg fade-enter-active" style="opacity: 1;">
-        <!-- Latar belakang animasi (redup) -->
-        <div class="absolute bg-grid-container z-0 flex flex-col gap-4 md:gap-6 opacity-30 pointer-events-none p-2 md:p-4">
-            <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] opacity-90 slide-left">
-                <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-            </div>
-        </div>
-        <div class="absolute inset-0 z-10 bg-gradient-to-b from-black/60 via-black/90 to-black pointer-events-none"></div>
-
-        <div class="relative z-20 flex flex-col items-center justify-center p-8 glass-panel rounded-3xl max-w-sm w-[90%] text-center border-t border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.15)]">
-            <img src="icon-512.png" alt="Ailabs Logo" class="h-16 mb-4 drop-shadow-[0_0_15px_rgba(16,185,129,0.5)]" onerror="this.src='https://ui-avatars.com/api/?name=Ai&background=10b981&color=fff'">
-            <h1 class="text-3xl font-bold text-white mb-2 tracking-widest">Ailabs</h1>
-            <p class="text-sm text-gray-400 mb-8">Silakan masuk menggunakan akun Google Anda untuk melanjutkan.</p>
-
-            <div id="login-loading-indicator" class="flex flex-col items-center justify-center gap-3">
-                <i class="fas fa-spinner fa-spin text-emerald-500 text-3xl"></i>
-                <p class="text-xs text-gray-400 font-mono tracking-widest uppercase">Memeriksa Sesi...</p>
-            </div>
-
-            <button id="btn-force-login" onclick="signInWithGoogle()" class="hidden w-full items-center justify-center gap-3 bg-white hover:bg-gray-200 text-black font-bold py-3 px-6 rounded-full transition-transform active:scale-95 shadow-lg">
-                <i class="fa-brands fa-google text-red-500 text-lg"></i>
-                <span>Masuk dengan Google</span>
-            </button>
-        </div>
-        
-        <p class="absolute bottom-6 text-gray-500 text-xs font-medium tracking-widest uppercase z-20">Aplikasi oleh Bangpro</p>
-    </div>
-
-    <!-- ========================================== -->
     <!-- VIEW 1: LANDING PAGE -->
     <!-- ========================================== -->
-    <!-- Dirubah ke hidden agar tidak berkedip ketika cek otentikasi -->
-    <div id="view-landing" class="hidden relative h-screen w-full overflow-hidden transition-opacity duration-500">
+    <div id="view-landing" class="relative h-screen w-full overflow-hidden transition-opacity duration-500 fade-enter-active" style="opacity: 1;">
         <!-- BACKGROUND IMAGE GRID: Menambahkan properti lazy loading -->
         <div class="absolute bg-grid-container z-0 flex flex-col gap-4 md:gap-6 opacity-60 pointer-events-none p-2 md:p-4">
             <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] opacity-90 slide-left">
@@ -423,7 +389,7 @@
             
             <div class="flex items-center gap-1.5 sm:gap-4">
                 <div id="auth-section-dashboard" class="flex items-center gap-2 pl-2 sm:pl-3">
-                    <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-semibold hover:bg-gray-200 transition hidden items-center gap-1 sm:gap-2">
+                    <button id="login-btn-dashboard" onclick="signInWithGoogle()" class="bg-white text-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-sm font-semibold hover:bg-gray-200 transition items-center gap-1 sm:gap-2 flex">
                         <i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline">Login</span>
                     </button>
                     
@@ -567,7 +533,7 @@
                 <button class="hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-2 pl-2 md:pl-3 border-l border-gray-700">
-                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] md:text-sm font-semibold hover:bg-gray-200 hidden items-center gap-1">
+                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] md:text-sm font-semibold hover:bg-gray-200 items-center gap-1 flex">
                         <i class="fa-brands fa-google text-red-500"></i> <span class="hidden md:inline">Login</span>
                     </button>
                     
@@ -1015,13 +981,6 @@
             
             setPersistence(auth, browserLocalPersistence).catch((err) => console.log("Persistence error:", err));
 
-            window.db = db;
-            window.appId = appId;
-            window.fsCollection = collection;
-            window.fsDoc = doc;
-            window.fsSetDoc = setDoc;
-            window.fsDeleteDoc = deleteDoc;
-
             let isInitialAuthCheck = true;
 
             onAuthStateChanged(auth, async (user) => {
@@ -1059,28 +1018,17 @@
                         }, (error) => { console.error("Error Snapshot:", error.message); });
                     } catch(e) {}
                     
-                    // --- JIKA USER SUDAH LOGIN, SEMBUNYIKAN LAYAR WAJIB LOGIN ---
-                    const viewLogin = document.getElementById('view-login');
-                    if (viewLogin && !viewLogin.classList.contains('hidden')) {
-                        showView('view-landing'); // Arahkan ke beranda setelah login berhasil
+                    if (isInitialAuthCheck) {
+                        showView('view-landing');
                     }
                     isInitialAuthCheck = false;
                 } else {
-                    // --- JIKA USER BELUM LOGIN ---
                     window.currentUserId = null; window.currentUserCredits = 0;
                     if (creditUnsubscribe) { creditUnsubscribe(); creditUnsubscribe = null; }
                     if (window.updateAuthUI) window.updateAuthUI(false);
                     
-                    // Tampilkan Layar Wajib Login dengan memaksa menyembunyikan yang lain
-                    showView('view-login');
-                    
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    const loginLoading = document.getElementById('login-loading-indicator');
-                    
-                    // Jika tidak sedang dialihkan (redirect), munculkan tombol login
-                    if (!sessionStorage.getItem('isGoogleLoginPending')) {
-                        if (forceLoginBtn) { forceLoginBtn.classList.remove('hidden'); forceLoginBtn.classList.add('flex'); }
-                        if (loginLoading) { loginLoading.classList.add('hidden'); loginLoading.classList.remove('flex'); }
+                    if (isInitialAuthCheck) {
+                        showView('view-landing');
                     }
                     isInitialAuthCheck = false;
                 }
@@ -1089,13 +1037,8 @@
             const isRedirecting = sessionStorage.getItem('isGoogleLoginPending');
             if (isRedirecting) {
                  window.showToast("Memproses otentikasi...");
-                 const forceLoginBtn = document.getElementById('btn-force-login');
-                 const loginLoading = document.getElementById('login-loading-indicator');
-                 if (forceLoginBtn) forceLoginBtn.classList.add('hidden');
-                 if (loginLoading) loginLoading.classList.remove('hidden');
             }
 
-            // [PERBAIKAN SUPER UNTUK WEBVIEW/APK]
             getRedirectResult(auth).then((result) => {
                 sessionStorage.removeItem('isGoogleLoginPending');
                 if (result && result.user) {
@@ -1105,21 +1048,14 @@
                 sessionStorage.removeItem('isGoogleLoginPending');
                 console.error("Error setelah redirect Google:", error);
                 
-                // WebView sering membuang error "internal-error" atau "redirect-cancelled-by-user"
-                // Jangan tampilkan alert jika error ini muncul, langsung reset tombol saja
                 if (error.code !== 'auth/redirect-cancelled-by-user' && error.code !== 'auth/internal-error') {
                     window.showCustomAlert("Sesi login terputus oleh sistem Android. Coba lagi.");
                 }
                 
-                const forceLoginBtn = document.getElementById('btn-force-login');
-                const loginLoading = document.getElementById('login-loading-indicator');
-                if (forceLoginBtn) {
-                    forceLoginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500 text-lg"></i> <span>Masuk dengan Google</span>';
-                    forceLoginBtn.disabled = false;
-                    forceLoginBtn.classList.remove('hidden'); 
-                    forceLoginBtn.classList.add('flex'); 
-                }
-                if (loginLoading) { loginLoading.classList.add('hidden'); loginLoading.classList.remove('flex'); }
+                ['dashboard', 'editor'].forEach(v => {
+                    const btn = document.getElementById(`login-btn-${v}`);
+                    if (btn) btn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline md:inline">Login</span>';
+                });
             });
 
             window.signInWithGoogle = async () => {
@@ -1128,53 +1064,29 @@
                         const btn = document.getElementById(`login-btn-${v}`);
                         if (btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin text-red-500"></i> <span class="hidden sm:inline md:inline">Tunggu...</span>';
                     });
-                    
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    if (forceLoginBtn) {
-                        forceLoginBtn.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-500 text-lg"></i> <span>Menghubungkan...</span>';
-                        forceLoginBtn.disabled = true;
-                    }
 
-                    // 1. Wajib set ke Local Persistence agar sesi awet
                     await setPersistence(auth, browserLocalPersistence);
-                    
-                    // 2. Tambahkan param khusus untuk memaksa refresh login di browser eksternal
-                    provider.setCustomParameters({
-                        prompt: 'select_account'
-                    });
+                    provider.setCustomParameters({ prompt: 'select_account' });
 
-                    // 3. Deteksi apakah ini di dalam WebView Android (Apk)
-                    const isWebView = /wv|x-webview|android.*version\/[\d\.]+.*chrome\/[0-9]{2,3}\.0\.0\.0/i.test(navigator.userAgent);
-                    
-                    if (isWebView) {
-                        // JIKA DI DALAM APK (WEBVIEW), JANGAN PAKAI POPUP KARENA AKAN DIBLOKIR!
-                        // Langsung hajar pakai Redirect
-                        console.log("Terdeteksi WebView Android, menggunakan Redirect Method...");
+                    try {
+                        const result = await signInWithPopup(auth, provider);
+                        if (result && result.user) {
+                            console.log("Login sukses via Popup!");
+                        }
+                    } catch (popupError) {
+                        console.warn("Popup diblokir, fallback ke Redirect...", popupError);
                         sessionStorage.setItem('isGoogleLoginPending', 'true');
                         await signInWithRedirect(auth, provider);
-                    } else {
-                        // JIKA DI BROWSER BIASA (CHROME/SAFARI), COBA POPUP DULU
-                        try {
-                            const result = await signInWithPopup(auth, provider);
-                            if (result && result.user) {
-                                console.log("Login sukses via Popup!");
-                            }
-                        } catch (popupError) {
-                            console.warn("Popup diblokir, fallback ke Redirect...", popupError);
-                            sessionStorage.setItem('isGoogleLoginPending', 'true');
-                            await signInWithRedirect(auth, provider);
-                        }
                     }
                     
                 } catch (error) {
                     sessionStorage.removeItem('isGoogleLoginPending');
                     console.error("Gagal inisiasi login Google:", error);
                     
-                    const forceLoginBtn = document.getElementById('btn-force-login');
-                    if (forceLoginBtn) {
-                        forceLoginBtn.innerHTML = '<i class="fa-brands fa-google text-red-500 text-lg"></i> <span>Masuk dengan Google</span>';
-                        forceLoginBtn.disabled = false;
-                    }
+                    ['dashboard', 'editor'].forEach(v => {
+                        const btn = document.getElementById(`login-btn-${v}`);
+                        if (btn) btn.innerHTML = '<i class="fa-brands fa-google text-red-500"></i> <span class="hidden sm:inline md:inline">Login</span>';
+                    });
                 }
             };
 
@@ -1378,14 +1290,14 @@
         }
 
         function hideAllViews() {
-            ['view-login', 'view-landing', 'view-dashboard', 'view-editor', 'view-prompts'].forEach(id => {
+            ['view-landing', 'view-dashboard', 'view-editor', 'view-prompts'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) { el.style.opacity = '0'; el.classList.remove('fade-enter-active'); setTimeout(() => el.classList.add('hidden'), 500); }
             });
         }
 
         function showView(viewId) {
-            ['view-login', 'view-landing', 'view-dashboard', 'view-editor', 'view-prompts'].forEach(id => {
+            ['view-landing', 'view-dashboard', 'view-editor', 'view-prompts'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el && id !== viewId) { 
                     el.classList.add('hidden');
@@ -1395,8 +1307,8 @@
             const target = document.getElementById(viewId);
             if (target) {
                 target.classList.remove('hidden');
-                // Set explicitly flex for editor and login modal
-                if (viewId === 'view-editor' || viewId === 'view-login') target.classList.add('flex');
+                // Set explicitly flex for editor
+                if (viewId === 'view-editor') target.classList.add('flex');
                 
                 void target.offsetWidth; 
                 target.classList.add('fade-enter-active');
@@ -1844,7 +1756,7 @@
 
                     const response = await fetch("/api/generate", {
                         method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId })
+                        body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId, cost: cost })
                     });
                     
                     let data;
@@ -1870,7 +1782,7 @@
                     if (genConfig.type === 'Motion') { if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); if (editorImages['akhir']) videoUrls.push(editorImages['akhir']); } 
                     else { if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); if (editorImages['akhir']) videoImageUrls.push(editorImages['akhir']); }
 
-                    const payload = { prompt: promptText, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, duration: genConfig.duration, image_urls: videoImageUrls, mode: genConfig.motionMode, character_orientation: genConfig.characterOrientation, background_source: genConfig.backgroundSource, userId: window.currentUserId, appId: window.appId };
+                    const payload = { prompt: promptText, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, duration: genConfig.duration, image_urls: videoImageUrls, mode: genConfig.motionMode, character_orientation: genConfig.characterOrientation, background_source: genConfig.backgroundSource, userId: window.currentUserId, appId: window.appId, cost: cost };
                     if (genConfig.type === 'Motion') payload.video_urls = videoUrls;
 
                     const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
@@ -1905,19 +1817,35 @@
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
                         
-                        if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3') { 
+                        if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED') { 
                             throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
-                        let foundUrls = [];
-                        JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
-                        const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org') && !videoImageUrls.includes(u) && !videoUrls.includes(u));
-                        let mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)) || validUrls[0];
+                        let mediaUrl = checkData.data?.resultUrl || 
+                                       (checkData.data?.resultUrls && checkData.data.resultUrls[0]) || 
+                                       (checkData.data?.response?.resultUrls && checkData.data.response.resultUrls[0]) || 
+                                       checkData.data?.response?.video_url || 
+                                       checkData.data?.video_url;
 
-                        if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '1' || mediaUrl.includes('tempfile'))) {
+                        if (!mediaUrl) {
+                            let foundUrls = [];
+                            JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
+                            const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org') && !videoImageUrls.includes(u) && !videoUrls.includes(u));
+                            mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)) || validUrls[0];
+                        }
+
+                        if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '100' || status === '1' || mediaUrl.includes('tempfile'))) {
                             try {
-                                finalMediaUrl = mediaUrl.includes('tempfile') ? await fetch('/api/download', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: mediaUrl }) }).then(r=>r.json()).then(d=>d.data||mediaUrl).catch(()=>mediaUrl) : mediaUrl;
-                            } catch(e) { finalMediaUrl = mediaUrl; }
+                                const dlRes = await fetch('/api/download', { 
+                                    method: 'POST', 
+                                    headers: { 'Content-Type': 'application/json' }, 
+                                    body: JSON.stringify({ url: mediaUrl }) 
+                                });
+                                const dlData = await dlRes.json();
+                                finalMediaUrl = dlData.data || dlData.url || mediaUrl;
+                            } catch(e) { 
+                                finalMediaUrl = mediaUrl; 
+                            }
                             break;
                         }
                     }
