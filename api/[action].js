@@ -10,7 +10,6 @@ if (!admin.apps.length) {
             credential: admin.credential.cert({
                 projectId: process.env.FIREBASE_PROJECT_ID,
                 clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                // Pastikan private key string terbaca dengan benar dari Vercel Env
                 privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
             })
         });
@@ -21,7 +20,7 @@ if (!admin.apps.length) {
 const db = admin.firestore();
 
 export default async function handler(req, res) {
-    // Vercel Dynamic Route: Menangkap URL path
+    // Vercel Dynamic Route
     let action = req.query.action;
     
     // SISTEM PINTAR: Jika HTML memanggil /api/admin, kita ambil action aslinya dari req.body
@@ -32,7 +31,7 @@ export default async function handler(req, res) {
     const apiKey = process.env.KIE_API_KEY;
 
     // ========================================================
-    // ROUTE YANG TIDAK BUTUH KIE_API_KEY (Berhubungan dengan Database / Callback)
+    // ROUTE DATABASE & ADMIN (Tidak butuh KIE_API_KEY)
     // ========================================================
     try {
         if (action === 'redeem') return await handleRedeem(req, res, db);
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
     }
 
     // ========================================================
-    // ROUTE YANG WAJIB BUTUH KIE_API_KEY (Generate AI dll)
+    // ROUTE GENERATE AI
     // ========================================================
     if (!apiKey) {
         return res.status(500).json({ error: "KIE_API_KEY belum dipasang di environment Vercel!" });
@@ -72,10 +71,19 @@ export default async function handler(req, res) {
 }
 
 // ==========================================
-// 1. FUNGSI CHECK (Persis dari check.js.txt)
+// 1. FUNGSI CHECK (Persis dari check.js.txt + Fix Vercel Bug)
 // ==========================================
 async function handleCheck(req, res, apiKey) {
-  const { taskId, engine } = req.query;
+  let taskId = req.query.taskId;
+  let engine = req.query.engine;
+
+  // PENGAMAN KHUSUS VERCEL: Terkadang Vercel membuang parameter URL jika menggunakan file dinamis [action].js
+  // Kita paksa ambil dari raw URL jika req.query.taskId kosong
+  if (!taskId && req.url && req.url.includes('?')) {
+      const urlParams = new URLSearchParams(req.url.split('?')[1]);
+      taskId = taskId || urlParams.get('taskId');
+      engine = engine || urlParams.get('engine');
+  }
 
   if (!taskId) return res.status(400).json({ error: "Parameter taskId tidak ditemukan" });
 
@@ -126,7 +134,7 @@ async function handleDownload(req, res, apiKey) {
 }
 
 // ==========================================
-// 3. FUNGSI UTAMA GENERATE (Dari generate.js.txt + Pengaman Grok)
+// 3. FUNGSI UTAMA GENERATE (Sesuai Logika Aslimu + Pengaman Extra)
 // ==========================================
 async function handleGenerate(req, res, apiKey, db, admin) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Metode harus POST' });
@@ -189,18 +197,33 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
+    let incomingMode = String(mode || "720p").toLowerCase();
+
     // ---> 1. KLING & MOTION
     if (type === 'Motion' || (engine && engine.includes('Kling'))) {
         const isKling3 = engine === 'Kling 3.0';
+        
+        let klingMode = incomingMode;
+        if (isKling3) {
+            // Kling 3.0 butuh "std" / "pro"
+            if (klingMode === "720p") klingMode = "std";
+            if (klingMode === "1080p") klingMode = "pro";
+            if (klingMode !== "std" && klingMode !== "pro") klingMode = "std";
+        } else {
+            // Kling 2.6 butuh "720p" / "1080p"
+            if (klingMode === "std") klingMode = "720p";
+            if (klingMode === "pro") klingMode = "1080p";
+            if (klingMode !== "720p" && klingMode !== "1080p") klingMode = "720p";
+        }
+
         payload = {
             model: isKling3 ? "kling-3.0/motion-control" : "kling-2.6/motion-control",
             input: {
                 prompt: prompt || "No distortion, the character's movements are consistent with the video.",
-                // VITAL: Kling asli menggunakan input_urls
                 input_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
                 video_urls: video_urls.length > 0 ? [video_urls[0]] : [],
                 character_orientation: character_orientation || "video",
-                mode: mode || "720p" // Dibiarkan sesuai kode aslimu
+                mode: klingMode 
             }
         };
         if (isKling3 && background_source) {
@@ -208,31 +231,33 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         }
     }
     // ---> 2. GROK
-    else if (engine && engine.toLowerCase() === 'grok') {
+    else if (engine && engine.toLowerCase().includes('grok')) {
+        const hasImages = image_urls && image_urls.length > 0;
         if (type === 'Video') {
-            const hasImages = image_urls && image_urls.length > 0;
             const modelName = hasImages ? "grok-imagine/image-to-video" : "grok-imagine/text-to-video";
             
-            // PENGAMAN: Grok menolak mode "720p" atau "1080p". Harus "normal", "spicy", "fun".
+            // PENGAMAN KHUSUS GROK VIDEO (Menolak 720p di mode)
             let safeMode = "normal";
-            if (String(mode).toLowerCase() === "spicy") safeMode = "spicy";
-            if (String(mode).toLowerCase() === "fun") safeMode = "fun";
+            if (incomingMode === "spicy") safeMode = "spicy";
+            if (incomingMode === "fun") safeMode = "fun";
             if (hasImages && safeMode === 'spicy') safeMode = "normal";
+
+            let safeDuration = parseInt(duration) || 6;
+            safeDuration = Math.min(Math.max(safeDuration, 6), 30);
 
             payload = {
                 model: modelName,
                 input: {
-                    prompt: prompt || "Cinematic aesthetic movement",
+                    prompt: prompt ? prompt.substring(0, 4900) : "Cinematic aesthetic movement",
                     aspect_ratio: ratio || "16:9",
-                    mode: safeMode, // Menggunakan safeMode agar tidak Error 500
-                    duration: duration ? String(duration) : "6",
+                    mode: safeMode,
+                    duration: String(safeDuration),
                     resolution: "720p",
                     nsfw_checker: false
                 }
             };
             if (hasImages) payload.input.image_urls = image_urls.slice(0, 7);
         } else if (type === 'Gambar') {
-            const hasImages = image_urls && image_urls.length > 0;
             if (hasImages) {
                 payload = {
                     model: "grok-imagine/image-to-image",
@@ -246,21 +271,23 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             }
         }
     } 
-    // ---> 3. VEO
+    // ---> 3. VEO 3.1
     else {
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
         let veoModel = "veo3_fast"; 
         if (engine === 'veo3.1 lite') veoModel = "veo3_lite";
         else if (engine === 'veo3.1 quality') veoModel = "veo3";
-        else if (engine === 'veo3.1 fast') veoModel = "veo3_fast";
 
         payload = {
             model: veoModel,
             prompt: prompt || "Cinematic aesthetic generation",
             aspect_ratio: ratio || "16:9"
         };
-        // VITAL: Veo menggunakan imageUrls (camelCase)
-        if (image_urls && image_urls.length > 0) payload.imageUrls = image_urls;
+        // VEO minta imageUrls (CamelCase)
+        if (image_urls && image_urls.length > 0) {
+            payload.imageUrls = image_urls;
+            payload.image_urls = image_urls; // Backup
+        }
     }
 
     const response = await fetch(endpoint, {
@@ -271,21 +298,19 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const data = await response.json();
 
-    // REFUND JIKA GAGAL DARI KIE
+    // REFUND JIKA GAGAL DARI KIE AI
     if (!response.ok || (data.code && data.code !== 200)) {
-        console.error("KIE AI REJECTED:", JSON.stringify(data)); // Log Error 
+        console.error("🔴 KIE AI REJECTED REQUEST:", JSON.stringify(data));
         
         if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             await userRef.update({ credits: admin.firestore.FieldValue.increment(cost) });
         }
-        
         let errorMsg = "Gagal memproses task.";
         if (data.msg) errorMsg = data.msg;
         else if (data.message) errorMsg = data.message;
         else if (data.error && data.error.message) errorMsg = data.error.message;
-        else errorMsg = JSON.stringify(data);
-
+        
         return res.status(400).json({ error: `Kie AI Error: ${errorMsg}` });
     }
 
@@ -363,7 +388,6 @@ async function handleRedeem(req, res, db) {
     ];
 
     const inputCode = code.toUpperCase();
-
     if (!validCodes.includes(inputCode)) {
         return res.status(400).json({ success: false, error: "Kode tidak valid! Periksa kembali penulisan kodenya." });
     }
@@ -403,7 +427,6 @@ async function handleRedeem(req, res, db) {
 // ==========================================
 async function handleUpload(req, res, apiKey) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
-  
   try {
     const { base64Data, uploadPath, fileName } = req.body;
     if (!base64Data) return res.status(400).json({ error: 'Data base64 tidak ditemukan' });
@@ -429,7 +452,6 @@ async function handleUpload(req, res, apiKey) {
 // ==========================================
 async function handleUploadUrl(req, res, apiKey) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
-
   try {
     const { fileUrl, uploadPath, fileName } = req.body;
     if (!fileUrl) return res.status(400).json({ error: 'URL file tidak ditemukan' });
@@ -508,10 +530,8 @@ async function handleVeoAction(req, res, apiKey) {
 // 8. FUNGSI HISTORY ADMIN
 // ==========================================
 async function handleHistory(req, res, db) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-    
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
     try {
         const historySnapshot = await db.collection('artifacts').doc(targetAppId).collection('history').orderBy('timestamp', 'desc').limit(50).get();
@@ -526,39 +546,25 @@ async function handleHistory(req, res, db) {
             });
         });
         return res.status(200).json({ success: true, history: historyList });
-    } catch (error) {
-        return res.status(500).json({ error: "Gagal mengambil riwayat: " + error.message });
-    }
+    } catch (error) { return res.status(500).json({ error: "Gagal mengambil riwayat" }); }
 }
 
-// ==========================================
-// 9. FUNGSI KIE BALANCE ADMIN
-// ==========================================
 async function handleKieBalance(req, res, apiKey) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-
     try {
         const response = await fetch("https://api.kie.ai/api/v1/chat/credit", {
             method: "GET", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
         });
         const data = await response.json();
         if (data.code === 200) return res.status(200).json({ success: true, balance: data.data });
-        else return res.status(400).json({ success: false, error: data.msg || "Gagal mengambil kredit dari Kie.ai" });
-    } catch (error) {
-        return res.status(500).json({ success: false, error: error.message });
-    }
+        else return res.status(400).json({ success: false, error: data.msg });
+    } catch (error) { return res.status(500).json({ success: false }); }
 }
 
-// ==========================================
-// 10. FUNGSI GET USERS ADMIN
-// ==========================================
 async function handleGetUsers(req, res, db) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-    
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
@@ -567,69 +573,39 @@ async function handleGetUsers(req, res, db) {
             const pathSegments = profileDoc.ref.path.split('/');
             if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
                 const uid = pathSegments[3]; const data = profileDoc.data();
-                usersList.push({
-                    uid: uid, name: data.name || 'User', email: data.email || 'Anonim',
-                    isAnon: data.isAnon || false, credits: data.credits || 0,
-                    videoAccess: data.videoAccess !== false
-                });
+                usersList.push({ uid, name: data.name || 'User', email: data.email || 'Anonim', isAnon: data.isAnon || false, credits: data.credits || 0, videoAccess: data.videoAccess !== false });
             }
         }
         return res.status(200).json({ success: true, users: usersList });
-    } catch (error) {
-        return res.status(500).json({ error: "Gagal mengambil data user: " + error.message });
-    }
+    } catch (error) { return res.status(500).json({ error: "Gagal mengambil data user" }); }
 }
 
-// ==========================================
-// 11. FUNGSI TOPUP ADMIN
-// ==========================================
 async function handleTopup(req, res, db) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId, targetUid, amount } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-    if (!appId || !targetUid || typeof amount !== 'number') return res.status(400).json({ error: "Data tidak lengkap" });
-
     try {
         const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('profile').doc('data');
         await db.runTransaction(async (t) => {
             const doc = await t.get(profileRef);
             if (!doc.exists) throw new Error("User tidak ditemukan di database");
-            const currentCredits = doc.data().credits || 0;
-            const newCredits = Math.max(0, currentCredits + amount); 
-            t.update(profileRef, { credits: newCredits });
+            t.update(profileRef, { credits: Math.max(0, (doc.data().credits || 0) + amount) });
         });
-        return res.status(200).json({ success: true, message: "Topup berhasil dieksekusi" });
-    } catch (error) {
-        return res.status(500).json({ error: "Gagal topup: " + error.message });
-    }
+        return res.status(200).json({ success: true, message: "Topup berhasil" });
+    } catch (error) { return res.status(500).json({ error: "Gagal topup" }); }
 }
 
-// ==========================================
-// 12. FUNGSI TOGGLE ACCESS ADMIN
-// ==========================================
 async function handleToggleAccess(req, res, db) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId, targetUid, videoAccess } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-    if (!appId || !targetUid || typeof videoAccess !== 'boolean') return res.status(400).json({ error: "Data tidak lengkap" });
-
     try {
-        const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('profile').doc('data');
-        await profileRef.update({ videoAccess: videoAccess });
-        return res.status(200).json({ success: true, message: "Akses video berhasil diupdate" });
-    } catch (error) {
-        return res.status(500).json({ error: "Gagal update akses: " + error.message });
-    }
+        await db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('profile').doc('data').update({ videoAccess });
+        return res.status(200).json({ success: true, message: "Akses diupdate" });
+    } catch (error) { return res.status(500).json({ error: "Gagal update akses" }); }
 }
 
-// ==========================================
-// 13. FUNGSI GET REFERRALS ADMIN
-// ==========================================
 async function handleGetReferrals(req, res, db) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
     if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
-    
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
@@ -637,8 +613,8 @@ async function handleGetReferrals(req, res, db) {
         for (const profileDoc of profilesSnapshot.docs) {
             const pathSegments = profileDoc.ref.path.split('/');
             if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
-                const uid = pathSegments[3]; const data = profileDoc.data();
-                if (data.redeemedCode) usedCodesMap[data.redeemedCode.toUpperCase()] = data.email || uid;
+                const data = profileDoc.data();
+                if (data.redeemedCode) usedCodesMap[data.redeemedCode.toUpperCase()] = data.email || pathSegments[3];
             }
         }
         const allCodes = [
@@ -678,21 +654,18 @@ async function handleGetReferrals(req, res, db) {
             return { code: upperCode, used: !!usedCodesMap[upperCode], usedBy: usedCodesMap[upperCode] || null };
         });
         return res.status(200).json({ success: true, codes: result });
-    } catch (error) {
-        return res.status(500).json({ error: "Gagal mensinkronkan status kode: " + error.message });
-    }
+    } catch (error) { return res.status(500).json({ error: "Gagal mensinkronkan status kode" }); }
 }
 
-// ==========================================
-// 14. FUNGSI WEBHOOK KIE AI
-// ==========================================
 async function handleWebhook(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; 
     const timestamp = req.headers['x-webhook-timestamp'];
     const receivedSignature = req.headers['x-webhook-signature'];
     const data = req.body;
-    const taskId = data.data?.task_id || data.taskId;
+    
+    // Fix: Mengambil task ID, bisa dari struktur data.data.task_id atau data.taskId
+    const taskId = data.data?.task_id || data.data?.taskId || data.taskId || data.task_id;
     const code = data.code;
 
     if (webhookHmacKey && timestamp && receivedSignature && taskId) {
