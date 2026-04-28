@@ -1765,8 +1765,8 @@
                             continue;
                         }
 
-                        let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
-                        const isSuccess = ['SUCCESS', 'COMPLETED', '100', '1', 'FINISHED', 'DONE'].includes(status);
+                        let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || checkData.data?.task_status || checkData.data?.state || "").toUpperCase();
+                        const isSuccess = ['SUCCESS', 'COMPLETED', '100', '1', 'FINISHED', 'DONE', 'SUCCEEDED', 'SUCCESSFUL'].includes(status);
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
                         
@@ -1774,14 +1774,20 @@
                             throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
-                        if (isSuccess) {
-                            let mediaUrl = checkData.data?.resultUrl || 
-                                           checkData.data?.resultUrls?.[0] || 
-                                           checkData.data?.response?.resultUrls?.[0] || 
-                                           checkData.data?.task_result?.videos?.[0]?.url ||  
-                                           checkData.data?.task_result?.images?.[0]?.url ||  
-                                           checkData.data?.response?.video_url || 
-                                           checkData.data?.video_url;
+                        let directMediaUrl = checkData.data?.resultUrl || 
+                                             checkData.data?.resultUrls?.[0] || 
+                                             checkData.data?.response?.fullResultUrls?.[0] ||
+                                             checkData.data?.response?.resultUrls?.[0] || 
+                                             checkData.data?.task_result?.videos?.[0]?.url ||  
+                                             checkData.data?.task_result?.images?.[0]?.url ||  
+                                             checkData.data?.response?.video_url || 
+                                             checkData.data?.video_url ||
+                                             checkData.data?.url;
+
+                        const isStillProcessing = ['0', 'PROCESSING', 'PENDING', 'STARTING', 'RUNNING'].includes(status);
+
+                        if (isSuccess || (directMediaUrl && !isStillProcessing)) {
+                            let mediaUrl = directMediaUrl;
 
                             if (!mediaUrl) {
                                 let foundUrls = [];
