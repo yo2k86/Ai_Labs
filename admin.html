@@ -32,408 +32,527 @@
             }
         }
     </script>
+
     <style>
         body { background-color: #050505; color: #fff; }
-        .glass-card {
-            background: rgba(30, 30, 30, 0.4);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        
+        /* Efek Kaca Transparan & Berkilau */
+        .glass-panel {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-top: 1px solid rgba(255, 255, 255, 0.3);
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+            position: relative;
+            overflow: hidden;
         }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
-        /* Hide element helper */
-        .hidden { display: none !important; }
+        
+        .glass-panel::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -150%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg);
+            z-index: 1; pointer-events: none;
+        }
+        .glass-panel:hover::after {
+            animation: shine 1.2s ease-in-out;
+        }
+        @keyframes shine {
+            0% { left: -150%; }
+            100% { left: 150%; }
+        }
+
+        .glass-input {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus {
+            background: rgba(0, 0, 0, 0.6);
+            border-color: rgba(16, 185, 129, 0.6);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 0 15px rgba(16, 185, 129, 0.3);
+            outline: none;
+        }
+
+        .glass-btn {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.4) 0%, rgba(5, 150, 105, 0.4) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .glass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+            border-top: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+
+        .active-tab {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.6), rgba(5, 150, 105, 0.4)) !important;
+            color: white !important;
+            border-color: rgba(255,255,255,0.3) !important;
+            border-top-color: rgba(255,255,255,0.5) !important;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3), inset 0 1px 1px rgba(255,255,255,0.4);
+        }
+        
+        table td, table th { position: relative; z-index: 2; }
     </style>
 </head>
-<body class="font-sans antialiased selection:bg-emerald-500 selection:text-white min-h-screen flex flex-col">
+<body class="font-sans antialiased min-h-screen flex flex-col relative overflow-x-hidden">
 
-    <!-- Global Toast -->
-    <div id="toast" class="fixed top-4 left-1/2 -translate-x-1/2 glass-card px-4 py-2 rounded-full flex items-center gap-2 opacity-0 pointer-events-none transition-all duration-300 z-[9999] transform -translate-y-4">
-        <i id="toast-icon" class="fas fa-info-circle text-emerald-400"></i>
-        <span id="toast-message" class="text-xs sm:text-sm font-medium">Notifikasi</span>
+    <div class="fixed inset-0 z-[-1] pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-emerald-500/20 blur-[120px] animate-pulse-slow"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] rounded-full bg-cyan-600/20 blur-[120px] animate-[pulse_8s_cubic-bezier(0.4,0,0.6,1)_infinite]"></div>
+        <div class="absolute top-[40%] left-[40%] w-[30vw] h-[30vw] rounded-full bg-purple-500/10 blur-[100px] animate-pulse"></div>
+    </div>
+
+    <!-- Tweak Toast untuk HP -->
+    <div id="toast" class="fixed top-2 sm:top-5 right-2 sm:right-5 w-[calc(100%-16px)] sm:w-auto glass-panel px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 opacity-0 pointer-events-none transition-all duration-300 z-[999] border-l-4 border-l-emerald-500 transform translate-y-[-20px]">
+        <i id="toast-icon" class="fas fa-info-circle text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]"></i>
+        <span id="toast-msg" class="text-xs sm:text-sm font-medium tracking-wide">Notifikasi</span>
     </div>
 
     <!-- VIEW 1: LOGIN ADMIN -->
-    <div id="view-login" class="flex-1 flex flex-col items-center justify-center p-4">
-        <div class="glass-card p-6 sm:p-8 rounded-2xl w-full max-w-sm text-center relative overflow-hidden">
-            <div class="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-purple-500/10 z-0"></div>
-            <div class="relative z-10">
-                <div class="w-16 h-16 bg-black border border-emerald-500/30 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                    <i class="fa-solid fa-shield-halved text-emerald-400 text-3xl"></i>
-                </div>
-                <h1 class="text-xl sm:text-2xl font-bold mb-2">Ailabs Command</h1>
-                <p class="text-xs text-gray-400 mb-6">Akses Terbatas. Masukkan sandi sistem.</p>
-                
-                <input type="password" id="login-code" class="w-full bg-black/60 border border-gray-700 focus:border-emerald-500 rounded-xl px-4 py-3 text-center text-white mb-4 outline-none transition-colors" placeholder="••••••••" onkeypress="if(event.key === 'Enter') checkLogin()">
-                
-                <button onclick="checkLogin()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition-all shadow-lg active:scale-95">
-                    Otorisasi Akses
-                </button>
+    <div id="login-view" class="fixed inset-0 z-[100] flex flex-col items-center justify-center p-4 transition-opacity duration-500 bg-black/40 backdrop-blur-sm">
+        <div class="glass-panel p-6 sm:p-10 rounded-3xl w-full max-w-md text-center">
+            <div class="relative inline-block mb-4 sm:mb-6">
+                <div class="absolute inset-0 bg-emerald-500/30 blur-2xl rounded-full"></div>
+                <img src="logo.png" alt="Ailabs Logo" class="relative w-20 sm:w-24 h-auto mx-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
             </div>
+            
+            <h1 class="text-2xl sm:text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400 tracking-tight">Command Center</h1>
+            <p class="text-xs sm:text-sm text-gray-300/80 mb-6 sm:mb-8 font-light">Autentikasi keamanan tingkat lanjut.</p>
+            
+            <div class="relative mb-5 sm:mb-6 group">
+                <i class="fas fa-lock absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 group-focus-within:text-emerald-400 transition-colors"></i>
+                <input type="password" id="admin-password" class="glass-input w-full rounded-xl pl-12 pr-4 py-3 sm:py-3.5 text-center text-sm sm:text-base text-white focus:ring-2 focus:ring-emerald-500/50" placeholder="Kode Rahasia Admin" onkeypress="if(event.key === 'Enter') loginAdmin()">
+            </div>
+            
+            <button onclick="loginAdmin()" class="glass-btn w-full text-white font-bold py-3 sm:py-3.5 rounded-xl uppercase tracking-widest text-xs sm:text-sm">Masuk Sistem</button>
         </div>
     </div>
 
-    <!-- VIEW 2: MAIN DASHBOARD -->
-    <div id="view-main" class="hidden flex-col h-screen w-full">
-        <!-- HEADER -->
-        <header class="glass-card border-b border-white/5 px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center shrink-0 z-10 sticky top-0">
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-server text-emerald-400 text-xl sm:text-2xl"></i>
-                <div>
-                    <h1 class="text-sm sm:text-lg font-bold leading-tight">Ailabs Core</h1>
-                    <p class="text-[9px] sm:text-[10px] text-emerald-400 font-mono" id="app-id-display">AppID: 1:2902...d513</p>
+    <!-- VIEW 2: DASHBOARD ADMIN -->
+    <div id="dashboard-view" class="hidden w-full min-h-screen flex flex-col opacity-0 transition-opacity duration-500 relative z-10">
+        
+        <!-- Header dibuat responsif agar elemen tidak bertumpuk -->
+        <header class="glass-panel sticky top-2 sm:top-4 z-30 px-4 sm:px-6 py-4 mx-2 sm:mx-6 mt-2 sm:mt-4 rounded-2xl flex flex-col gap-4 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]">
+            <div class="flex flex-wrap sm:flex-nowrap justify-between items-center gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-1.5 sm:p-2 rounded-xl bg-white/5 border border-white/10 shadow-inner">
+                        <img src="logo.png" alt="Ailabs Logo" class="w-6 h-6 sm:w-8 sm:h-8 object-contain drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">
+                    </div>
+                    <h2 class="font-extrabold text-base sm:text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Ailabs Control Panel</h2>
                 </div>
+                <button onclick="logoutAdmin()" class="px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-xs sm:text-sm font-medium transition-all border border-red-500/20 flex items-center gap-2 shadow-lg">
+                    <i class="fas fa-sign-out-alt"></i> Keluar
+                </button>
             </div>
-            <div class="flex items-center gap-3 sm:gap-4">
-                <div class="text-right hidden sm:block">
-                    <p class="text-[10px] text-gray-400 uppercase tracking-wider">Kie.ai Balance</p>
-                    <p class="text-sm font-bold text-yellow-400" id="kie-balance-text"><i class="fas fa-spinner fa-spin text-xs"></i></p>
-                </div>
-                <button onclick="logout()" class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-power-off text-sm"></i>
+
+            <div class="flex flex-row overflow-x-auto custom-scrollbar gap-2 sm:gap-3 pb-1">
+                <button id="tab-users" onclick="switchTab('users')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center justify-center">
+                    <i class="fas fa-users mr-2 opacity-80"></i> Pengguna
+                </button>
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
+                    <i class="fas fa-ticket-alt mr-2 opacity-80"></i> Stok VIP
+                </button>
+                <button id="tab-history" onclick="switchTab('history')" class="whitespace-nowrap flex-1 sm:flex-none px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl bg-white/5 text-gray-300 text-xs sm:text-sm font-semibold border border-white/10 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
+                    <i class="fas fa-history mr-2 opacity-80"></i> Riwayat
                 </button>
             </div>
         </header>
 
-        <!-- NAVIGATION TABS -->
-        <div class="flex px-2 sm:px-6 pt-4 gap-2 overflow-x-auto custom-scrollbar shrink-0">
-            <button onclick="switchTab('users')" id="tab-btn-users" class="px-4 py-2 text-xs sm:text-sm font-bold rounded-t-xl bg-emerald-600 text-white transition-colors whitespace-nowrap"><i class="fa-solid fa-users mr-1.5"></i> Klien & Saldo</button>
-            <button onclick="switchTab('history')" id="tab-btn-history" class="px-4 py-2 text-xs sm:text-sm font-bold rounded-t-xl bg-white/5 text-gray-400 hover:bg-white/10 transition-colors whitespace-nowrap"><i class="fa-solid fa-clock-rotate-left mr-1.5"></i> Riwayat Generate</button>
-            <button onclick="switchTab('referral')" id="tab-btn-referral" class="px-4 py-2 text-xs sm:text-sm font-bold rounded-t-xl bg-white/5 text-gray-400 hover:bg-white/10 transition-colors whitespace-nowrap"><i class="fa-solid fa-tags mr-1.5"></i> Status VIP Code</button>
-        </div>
-
-        <!-- CONTENT AREA -->
-        <main class="flex-1 overflow-hidden relative bg-panelbg border-t border-emerald-500/20">
+        <main class="flex-1 p-3 sm:p-6 max-w-7xl mx-auto w-full">
             
-            <!-- TAB: USERS -->
-            <div id="tab-users" class="absolute inset-0 overflow-y-auto custom-scrollbar p-3 sm:p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 class="text-base sm:text-xl font-bold"><i class="fa-solid fa-users text-emerald-400 mr-2"></i>Database Klien</h2>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <div class="relative flex-1 sm:w-64">
-                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs"></i>
-                            <input type="text" id="search-users" onkeyup="filterTable('users-tbody', 'search-users')" class="w-full bg-black border border-gray-700 rounded-lg pl-8 pr-3 py-1.5 text-xs sm:text-sm text-white focus:border-emerald-500 outline-none" placeholder="Cari nama/email...">
+            <!-- SECTION 1: MANAJEMEN USER -->
+            <div id="section-users" class="flex flex-col gap-4 sm:gap-6">
+                <!-- Cards grid tetap responsif (1 kolom hp, 3 kolom desktop) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-emerald-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(16,185,129,0.2)]"><i class="fas fa-users"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Pengguna</p><h3 class="text-2xl sm:text-3xl font-extrabold drop-shadow-md" id="stat-total-users">0</h3></div>
+                    </div>
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-blue-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(59,130,246,0.2)]"><i class="fas fa-wallet"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Kredit Klien</p><h3 class="text-2xl sm:text-3xl font-extrabold text-blue-400 drop-shadow-md" id="stat-total-local-credits">0 ⚡</h3></div>
+                    </div>
+                    <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-yellow-500 flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-yellow-500/20 border border-yellow-500/30 flex items-center justify-center text-yellow-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(234,179,8,0.2)]"><i class="fas fa-bolt"></i></div>
+                        <div>
+                            <p class="text-xs sm:text-sm text-gray-400 font-medium mb-1 flex items-center gap-2">
+                                Kredit Pusat (Kie.ai) 
+                                <button onclick="loadKieBalance()" class="w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-white/5 hover:bg-white/20 border border-white/10 flex items-center justify-center transition-all shadow-sm" title="Sinkronkan dengan server Kie.ai"><i class="fas fa-sync-alt text-[8px] sm:text-[10px] text-white"></i></button>
+                            </p>
+                            <h3 class="text-2xl sm:text-3xl font-extrabold text-yellow-400 drop-shadow-[0_0_8px_rgba(234,179,8,0.4)]" id="stat-total-credits">...</h3>
                         </div>
-                        <button onclick="loadUsers()" class="bg-white/10 hover:bg-white/20 p-1.5 sm:px-3 rounded-lg text-xs sm:text-sm transition-colors shrink-0"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
                 </div>
 
-                <div class="w-full overflow-x-auto rounded-xl border border-gray-800 bg-black">
-                    <table class="w-full text-left border-collapse min-w-[600px]">
-                        <thead>
-                            <tr class="bg-gray-900/50 text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider border-b border-gray-800">
-                                <th class="p-3 font-medium">User Info</th>
-                                <th class="p-3 font-medium text-center">Tipe</th>
-                                <th class="p-3 font-medium text-center">Kredit ⚡</th>
-                                <th class="p-3 font-medium text-center">Akses Video</th>
-                                <th class="p-3 font-medium text-right">Aksi Topup</th>
-                            </tr>
-                        </thead>
-                        <tbody id="users-tbody" class="text-xs sm:text-sm divide-y divide-gray-800">
-                            <tr><td colspan="5" class="p-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat data...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- TAB: HISTORY -->
-            <div id="tab-history" class="hidden absolute inset-0 overflow-y-auto custom-scrollbar p-3 sm:p-6">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
-                    <h2 class="text-base sm:text-xl font-bold"><i class="fa-solid fa-clock-rotate-left text-cyan-400 mr-2"></i>Aktivitas Generate (50 Terakhir)</h2>
-                    <div class="flex gap-2 w-full sm:w-auto">
-                        <div class="relative flex-1 sm:w-64">
-                            <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs"></i>
-                            <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="w-full bg-black border border-gray-700 rounded-lg pl-8 pr-3 py-1.5 text-xs sm:text-sm text-white focus:border-cyan-500 outline-none" placeholder="Cari prompt/user...">
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <!-- Title dan Search dibuat tumpuk (col) di hp, sejajar (row) di desktop -->
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-server mr-2 text-emerald-400"></i> Daftar Klien Ailabs</h3>
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
+                            <button onclick="loadUsers()" class="glass-btn text-xs px-4 py-2 sm:py-2.5 rounded-xl flex items-center justify-center shadow-lg font-semibold w-full sm:w-auto">
+                                <i class="fas fa-sync-alt mr-2"></i> Refresh
+                            </button>
+                            <div class="relative w-full sm:w-auto">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" id="search-user" onkeyup="filterTable('users-tbody', 'search-user')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari user...">
+                            </div>
                         </div>
-                        <button onclick="loadHistory()" class="bg-white/10 hover:bg-white/20 p-1.5 sm:px-3 rounded-lg text-xs sm:text-sm transition-colors shrink-0"><i class="fa-solid fa-rotate-right"></i></button>
+                    </div>
+                    <!-- Tabel disetting agar bisa horizontal scroll rapih di HP -->
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar relative z-10 w-full">
+                        <table class="w-full text-left border-collapse min-w-[650px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                                <tr>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Profil & ID</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Sisa Kredit</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Akses Video</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Top-up Manual</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
+                        </table>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 gap-3 sm:gap-4" id="history-cards-container">
-                    <div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat data...</div>
-                </div>
             </div>
 
-            <!-- TAB: REFERRAL -->
-            <div id="tab-referral" class="hidden absolute inset-0 overflow-y-auto custom-scrollbar p-3 sm:p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-base sm:text-xl font-bold"><i class="fa-solid fa-tags text-purple-400 mr-2"></i>Status Kode VIP</h2>
-                    <button onclick="loadReferrals()" class="bg-white/10 hover:bg-white/20 p-1.5 sm:px-3 rounded-lg text-xs sm:text-sm transition-colors shrink-0"><i class="fa-solid fa-rotate-right"></i></button>
-                </div>
-                
-                <div class="flex flex-wrap gap-4 mb-4 text-xs font-mono">
-                    <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-500/20 border border-emerald-500 inline-block"></span> Tersedia</div>
-                    <div class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500 inline-block"></span> Terpakai</div>
+            <!-- SECTION 2: STOK KODE REFERRAL -->
+            <div id="section-referrals" class="hidden flex flex-col gap-4 sm:gap-6">
+                <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-cyan-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"><i class="fas fa-key"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Total Stok Kode VIP</p><h3 class="text-2xl sm:text-3xl font-extrabold drop-shadow-md" id="stat-total-refs">300</h3></div>
+                    </div>
+                    <button onclick="loadReferrals()" class="glass-btn w-full sm:w-auto justify-center text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Status Kode
+                    </button>
                 </div>
 
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3" id="referral-grid">
-                    <div class="col-span-full text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat data...</div>
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-shield-alt mr-2 text-cyan-400"></i> Monitoring Kode</h3>
+                        <div class="relative w-full md:w-auto">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari kode spesifik...">
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                                <tr>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Kode Referral (200 ⚡)</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Status & Pemakai</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-32 sm:w-40">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ref-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+            
+            <!-- SECTION 3: RIWAYAT TASK AI -->
+            <div id="section-history" class="hidden flex flex-col gap-4 sm:gap-6">
+                <div class="glass-panel p-4 sm:p-6 rounded-2xl sm:rounded-3xl border-l-4 border-l-purple-500 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4 sm:gap-5">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-purple-400 text-xl sm:text-2xl shadow-[inset_0_0_10px_rgba(168,85,247,0.2)]"><i class="fas fa-history"></i></div>
+                        <div><p class="text-xs sm:text-sm text-gray-400 font-medium mb-1">Riwayat Task Kie.ai</p><h3 class="text-lg sm:text-xl font-extrabold drop-shadow-md text-white">Pantau & Ambil Video</h3></div>
+                    </div>
+                    <button onclick="loadHistory()" class="glass-btn w-full sm:w-auto justify-center text-xs sm:text-sm px-4 sm:px-5 py-2.5 rounded-xl flex items-center shadow-lg font-bold">
+                        <i class="fas fa-sync-alt mr-2"></i> Refresh Riwayat
+                    </button>
+                </div>
 
+                <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
+                    <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
+                        <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-list-alt mr-2 text-purple-400"></i> Log Aktivitas User</h3>
+                        <div class="relative w-full md:w-auto">
+                            <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-xs"></i>
+                            <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari ID / Nama / Email...">
+                        </div>
+                    </div>
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[700px]">
+                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                                <tr>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/4">Info Klien</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/3">Detail Prompt & Engine</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Waktu</th>
+                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Aksi Bantuan</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
         </main>
     </div>
 
     <script>
-        const APP_ID = '1:290208256362:web:b5022be8bd57311f9cd513';
-        let adminCode = sessionStorage.getItem('ailabs_admin_code') || '';
+        let currentAdminSessionCode = '';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toast-icon');
-            document.getElementById('toast-message').innerText = msg;
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
             
-            if(type === 'error') {
-                icon.className = 'fas fa-exclamation-circle text-red-400';
-                toast.style.border = '1px solid rgba(248, 113, 113, 0.3)';
-            } else {
-                icon.className = 'fas fa-check-circle text-emerald-400';
-                toast.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-            }
+            toast.className = `fixed top-2 sm:top-5 right-2 sm:right-5 w-[calc(100%-16px)] sm:w-auto glass-panel px-4 sm:px-6 py-3 sm:py-4 rounded-xl flex items-center gap-3 sm:gap-4 transition-all duration-300 z-[999] border-l-4 ${type === 'success' ? 'border-l-emerald-500' : 'border-l-red-500'}`;
+            icon.className = `fas ${type === 'success' ? 'fa-check-circle text-emerald-400 text-lg sm:text-xl drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]' : 'fa-exclamation-circle text-red-400 text-lg sm:text-xl drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`;
 
-            toast.classList.remove('opacity-0', 'translate-y-4', 'pointer-events-none');
             setTimeout(() => {
-                toast.classList.add('opacity-0', 'translate-y-4', 'pointer-events-none');
+                toast.classList.add('opacity-0', 'pointer-events-none', 'translate-y-[-20px]');
             }, 3000);
         }
 
-        function checkLogin() {
-            const code = document.getElementById('login-code').value;
+        function loginAdmin() {
+            const code = document.getElementById('admin-password').value;
             if (code === 'admin123' || code === 'Kr333wol') {
-                adminCode = code;
-                sessionStorage.setItem('ailabs_admin_code', code);
-                document.getElementById('view-login').classList.add('hidden');
-                document.getElementById('view-main').classList.remove('hidden');
-                document.getElementById('view-main').classList.add('flex');
-                showToast('Login berhasil!');
-                initDashboard();
-            } else {
-                showToast('Sandi Salah!', 'error');
-            }
+                currentAdminSessionCode = code;
+                document.getElementById('login-view').classList.add('hidden');
+                document.getElementById('dashboard-view').classList.remove('hidden');
+                void document.getElementById('dashboard-view').offsetWidth;
+                document.getElementById('dashboard-view').style.opacity = '1';
+                loadUsers();
+            } else { showToast('Kode salah!', 'error'); }
         }
 
-        function logout() {
-            adminCode = '';
-            sessionStorage.removeItem('ailabs_admin_code');
-            document.getElementById('view-main').classList.add('hidden');
-            document.getElementById('view-main').classList.remove('flex');
-            document.getElementById('view-login').classList.remove('hidden');
-            document.getElementById('login-code').value = '';
-        }
+        function logoutAdmin() { location.reload(); }
 
-        if (adminCode === 'admin123' || adminCode === 'Kr333wol') {
-            document.getElementById('view-login').classList.add('hidden');
-            document.getElementById('view-main').classList.remove('hidden');
-            document.getElementById('view-main').classList.add('flex');
-            initDashboard();
-        }
-
-        function switchTab(tabId) {
-            ['users', 'history', 'referral'].forEach(id => {
-                const btn = document.getElementById(`tab-btn-${id}`);
-                const content = document.getElementById(`tab-${id}`);
-                
-                let activeColor = id === 'users' ? 'bg-emerald-600' : (id === 'history' ? 'bg-cyan-600' : 'bg-purple-600');
-
-                if (id === tabId) {
-                    content.classList.remove('hidden');
-                    btn.className = `px-4 py-2 text-xs sm:text-sm font-bold rounded-t-xl text-white transition-colors whitespace-nowrap ${activeColor}`;
-                } else {
-                    content.classList.add('hidden');
-                    btn.className = `px-4 py-2 text-xs sm:text-sm font-bold rounded-t-xl bg-white/5 text-gray-400 hover:bg-white/10 transition-colors whitespace-nowrap`;
-                }
-            });
-
-            if(tabId === 'users') loadUsers();
-            if(tabId === 'history') loadHistory();
-            if(tabId === 'referral') loadReferrals();
-        }
-
-        function initDashboard() {
-            document.getElementById('app-id-display').innerText = `AppID: ${APP_ID.substring(0,6)}...${APP_ID.substring(APP_ID.length-4)}`;
-            loadKieBalance();
-            loadUsers();
+        function switchTab(tab) {
+            document.getElementById('section-users').classList.toggle('hidden', tab !== 'users');
+            document.getElementById('section-referrals').classList.toggle('hidden', tab !== 'referrals');
+            document.getElementById('section-history').classList.toggle('hidden', tab !== 'history');
+            
+            document.getElementById('tab-users').classList.toggle('active-tab', tab === 'users');
+            document.getElementById('tab-referrals').classList.toggle('active-tab', tab === 'referrals');
+            document.getElementById('tab-history').classList.toggle('active-tab', tab === 'history');
+            
+            if(tab === 'referrals') loadReferrals();
+            if(tab === 'users') loadUsers();
+            if(tab === 'history') loadHistory();
         }
 
         async function loadKieBalance() {
-            const balEl = document.getElementById('kie-balance-text');
+            const el = document.getElementById('stat-total-credits');
+            el.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
             try {
                 const res = await fetch('/api/kie-balance', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode })
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode })
                 });
                 const data = await res.json();
-                if(data.success) {
-                    balEl.innerText = `$${data.balance}`;
+                if (data.success) {
+                    el.innerText = Number(data.balance).toLocaleString('id-ID') + ' ⚡';
                 } else {
-                    balEl.innerText = 'Err';
+                    el.innerText = 'Error';
                 }
-            } catch (e) { balEl.innerText = 'Err'; }
+            } catch(e) {
+                el.innerText = 'Offline';
+            }
         }
 
         async function loadUsers() {
             const tbody = document.getElementById('users-tbody');
-            tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Syncing...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data...</td></tr>';
             try {
+                loadKieBalance();
                 const res = await fetch('/api/get_users', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode, appId: APP_ID })
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
                 });
                 const data = await res.json();
                 if(data.success) {
-                    if(data.users.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500 text-xs">Belum ada user.</td></tr>';
+                    document.getElementById('stat-total-users').innerText = data.users.length;
+                    const totalKreditLokal = data.users.reduce((sum, user) => sum + (user.credits || 0), 0);
+                    document.getElementById('stat-total-local-credits').innerText = totalKreditLokal.toLocaleString('id-ID') + ' ⚡';
+                    
+                    if (data.users.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-gray-500 italic">Belum ada user.</td></tr>';
                         return;
                     }
-                    tbody.innerHTML = data.users.map(u => `
-                        <tr class="hover:bg-white/5 transition-colors border-b border-gray-800/50">
-                            <td class="p-3">
-                                <div class="font-bold text-white max-w-[120px] sm:max-w-[200px] truncate">${u.name}</div>
-                                <div class="text-[10px] text-gray-500 font-mono truncate max-w-[120px] sm:max-w-[200px]">${u.email}</div>
-                                <div class="text-[8px] text-gray-600 font-mono mt-0.5 truncate max-w-[100px] sm:max-w-xs" title="${u.uid}">${u.uid}</div>
-                            </td>
-                            <td class="p-3 text-center">
-                                ${u.isAnon 
-                                    ? '<span class="bg-gray-700/50 text-gray-300 px-2 py-0.5 rounded text-[9px] font-bold">ANONIM</span>' 
-                                    : '<span class="bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded text-[9px] font-bold">GOOGLE</span>'}
-                            </td>
-                            <td class="p-3 text-center">
-                                <span class="text-sm font-black ${u.credits > 0 ? 'text-yellow-400' : 'text-red-400'}">${u.credits}</span>
-                            </td>
-                            <td class="p-3 text-center">
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                  <input type="checkbox" class="sr-only peer" ${u.videoAccess !== false ? 'checked' : ''} onchange="toggleAccess('${u.uid}', this.checked)">
-                                  <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
-                                </label>
-                            </td>
-                            <td class="p-3 text-right">
-                                <div class="flex items-center justify-end gap-1 sm:gap-2">
-                                    <input type="number" id="topup-${u.uid}" class="w-16 bg-black border border-gray-700 rounded px-2 py-1 text-xs text-white focus:border-emerald-500 outline-none" placeholder="+Jml">
-                                    <button onclick="topupUser('${u.uid}')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded font-bold transition-colors">SET</button>
+
+                    tbody.innerHTML = data.users.map(u => {
+                        const isVideoOn = u.videoAccess !== false;
+                        return `
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 whitespace-nowrap">
+                                <div class="flex flex-col">
+                                    <span class="font-bold text-white text-xs sm:text-sm flex items-center gap-2 drop-shadow-md">
+                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[8px] sm:text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
+                                    </span>
+                                    <span class="text-[9px] sm:text-[10px] text-emerald-400/70 font-mono mt-0.5 truncate w-32 sm:w-auto">${u.email}</span>
+                                    <span class="text-[8px] sm:text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
                                 </div>
                             </td>
-                        </tr>
-                    `).join('');
-                } else {
-                    tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400 text-xs">${data.error}</td></tr>`;
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
+                                <span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] text-xs sm:text-sm">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
+                            </td>
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-16 sm:w-24 flex justify-center items-center gap-1 sm:gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40'}">
+                                    <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
+                                    ${isVideoOn ? 'ON' : 'OFF'}
+                                </button>
+                            </td>
+                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-right whitespace-nowrap">
+                                <div class="flex justify-end items-center gap-1.5 sm:gap-2">
+                                    <input type="number" id="in-${u.uid}" class="glass-input w-12 sm:w-16 rounded-lg sm:rounded-xl px-1 sm:px-2 py-1.5 sm:py-2 text-center text-xs font-mono" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-plus text-[10px] sm:text-xs"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-7 h-7 sm:w-8 sm:h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-minus text-[10px] sm:text-xs"></i></button>
+                                </div>
+                            </td>
+                        </tr>`}).join('');
                 }
-            } catch (e) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-red-400 text-xs">Network Error</td></tr>`;
-            }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-red-500">API Error.</td></tr>'; }
         }
 
-        async function topupUser(uid) {
-            const input = document.getElementById(`topup-${uid}`);
-            const amount = parseInt(input.value);
-            if(isNaN(amount)) return showToast('Masukkan angka yang valid', 'error');
-            
-            try {
-                const res = await fetch('/api/topup', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode, appId: APP_ID, targetUid: uid, amount })
-                });
-                const data = await res.json();
-                if(data.success) { showToast('Topup sukses!'); input.value = ''; loadUsers(); }
-                else { showToast(data.error, 'error'); }
-            } catch (e) { showToast('Error eksekusi', 'error'); }
-        }
-
-        async function toggleAccess(uid, status) {
+        async function toggleVideoAccess(uid, currentStatus) {
+            const newStatus = !currentStatus;
             try {
                 const res = await fetch('/api/toggle_access', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode, appId: APP_ID, targetUid: uid, videoAccess: status })
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: newStatus })
+                });
+                if((await res.json()).success) { showToast(`Akses diubah!`); loadUsers(); }
+            } catch(e) { showToast('Gagal!', 'error'); }
+        }
+
+        async function changeCredit(uid, action) {
+            const el = document.getElementById(`in-${uid}`);
+            const val = parseInt(el.value);
+            if(!val || val <= 0) return showToast('Isi angka!', 'error');
+            const amount = action === 'add' ? val : -val;
+            try {
+                const res = await fetch('/api/topup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
+                });
+                if((await res.json()).success) { showToast('Saldo diupdate!'); el.value = ''; loadUsers(); }
+            } catch(e) { showToast('Gagal!', 'error'); }
+        }
+
+        async function loadReferrals() {
+            const tbody = document.getElementById('ref-tbody');
+            tbody.innerHTML = '<tr><td colspan="3" class="p-6 sm:p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi...</td></tr>';
+            try {
+                const res = await fetch('/api/get_referrals', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
                 });
                 const data = await res.json();
-                if(data.success) showToast(status ? 'Akses Dibuka' : 'Akses Diblokir');
-                else showToast(data.error, 'error');
-            } catch (e) { showToast('Error eksekusi', 'error'); }
+                if(data.success) {
+                    tbody.innerHTML = data.codes.map(c => `
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 font-mono font-bold tracking-widest whitespace-nowrap ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-sm sm:text-lg'}">${c.code}</td>
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-center whitespace-nowrap">
+                                ${c.used ? '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[9px] sm:text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
+                                <div class="text-[9px] sm:text-[10px] text-gray-500 mt-2 truncate max-w-[150px] sm:max-w-[200px] mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
+                            </td>
+                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-right whitespace-nowrap">
+                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center gap-1 sm:gap-2"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/5 text-red-500/40 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase ml-auto">Hangus</span>`}
+                            </td>
+                        </tr>`).join('');
+                }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="3" class="p-6 sm:p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
         async function loadHistory() {
-            const container = document.getElementById('history-cards-container');
-            container.innerHTML = '<div class="text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Sinkronisasi Log...</div>';
+            const tbody = document.getElementById('history-tbody');
+            tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat...</td></tr>';
             try {
                 const res = await fetch('/api/history', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode, appId: APP_ID })
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
                 });
                 const data = await res.json();
                 if(data.success) {
-                    if(data.history.length === 0) {
-                        container.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs">Belum ada riwayat.</div>';
-                        return;
-                    }
-                    container.innerHTML = data.history.map(h => {
-                        let badgeColor = 'bg-gray-600';
-                        if(h.status === 'SUCCESS' || h.status === 'COMPLETED') badgeColor = 'bg-emerald-500';
-                        if(h.status === 'FAILED' || h.status === 'ERROR') badgeColor = 'bg-red-500';
-                        
+                    if (data.history.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-gray-500 italic">Kosong.</td></tr>'; return; }
+                    tbody.innerHTML = data.history.map(h => {
+                        const dateObj = new Date(h.timestamp);
                         return `
-                        <div class="bg-black/50 border border-gray-800 rounded-xl p-3 sm:p-4 hover:border-cyan-500/30 transition-colors history-item relative">
-                            <div class="absolute top-3 right-3 flex items-center gap-2">
-                                <span class="text-[9px] font-mono text-gray-500">${new Date(h.timestamp).toLocaleString('id-ID')}</span>
-                            </div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <div class="w-8 h-8 rounded-full bg-cyan-900/50 flex items-center justify-center border border-cyan-500/30 shrink-0">
-                                    <i class="fa-solid fa-user text-cyan-400 text-xs"></i>
+                        <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 whitespace-nowrap">
+                                <div class="font-bold text-white text-xs sm:text-sm">${h.userName}</div>
+                                <div class="text-[9px] sm:text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
+                                <div class="text-[8px] sm:text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
+                            </td>
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 min-w-[200px]">
+                                <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
+                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.type}</span>
+                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.engine}</span>
                                 </div>
-                                <div class="overflow-hidden">
-                                    <p class="text-xs font-bold text-white truncate max-w-[150px] sm:max-w-[200px]">${h.userName}</p>
-                                    <p class="text-[9px] text-gray-500 font-mono truncate max-w-[150px] sm:max-w-[200px]">${h.userEmail}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="bg-gray-900/80 rounded-lg p-2.5 mb-3 border border-gray-800">
-                                <p class="text-[10px] text-gray-400 mb-1 flex items-center gap-2">
-                                    <span class="bg-blue-900/50 text-blue-300 px-1.5 py-0.5 rounded text-[8px] border border-blue-500/30">${h.type}</span>
-                                    <span class="bg-purple-900/50 text-purple-300 px-1.5 py-0.5 rounded text-[8px] border border-purple-500/30">${h.engine}</span>
-                                    <span class="${badgeColor} text-white px-1.5 py-0.5 rounded text-[8px] font-bold ml-auto">${h.status}</span>
-                                </p>
-                                <p class="text-xs text-gray-300 line-clamp-2 search-text leading-relaxed">"${h.prompt}"</p>
-                            </div>
-                            
-                            <div class="flex justify-between items-end">
-                                <div class="text-[9px] text-gray-600 font-mono" title="${h.taskId}">ID: ${h.taskId.substring(0, 8)}...</div>
-                                <button id="btn-check-${h.taskId}" onclick="checkStatus('${h.taskId}', '${h.engine}', this)" class="px-3 py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold flex items-center gap-1 sm:gap-2 bg-white/10 hover:bg-white/20 text-white transition-colors border border-white/5 w-24 sm:w-32 justify-center shrink-0">
-                                    <i class="fa-solid fa-search"></i> Cek Hasil
+                                <p class="text-[10px] sm:text-xs text-gray-300 line-clamp-2 w-full whitespace-normal break-all">${h.prompt}</p>
+                            </td>
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-center text-gray-400 text-[10px] sm:text-xs whitespace-nowrap">
+                                <div class="font-bold text-white">${dateObj.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
+                                <div class="text-[9px] sm:text-[10px]">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
+                            </td>
+                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-right whitespace-nowrap">
+                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32">
+                                    <i class="fas fa-search"></i> Cek Server
                                 </button>
-                            </div>
-                        </div>
-                        `;
-                    }).join('');
-                } else {
-                    container.innerHTML = `<div class="text-center py-10 text-red-400 text-xs">${data.error}</div>`;
+                            </td>
+                        </tr>`}).join('');
                 }
-            } catch (e) {
-                container.innerHTML = `<div class="text-center py-10 text-red-400 text-xs">Network Error</div>`;
-            }
+            } catch(e) { tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-red-500">Error.</td></tr>'; }
         }
 
         // ========================================================
-        // PERBAIKAN LOGIKA PENGECEKAN STATUS & TEMPFILE DOWNLOAD
+        // LOGIKA PENGECEKAN STATUS & TEMPFILE DOWNLOAD (DIPERBARUI)
         // ========================================================
-        async function checkStatus(taskId, engine, btnElement) {
-            const originalHtml = btnElement.innerHTML;
-            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cek...';
-            btnElement.disabled = true;
-            
+        async function cekHasilKie(taskId, engine) {
+            const btn = document.getElementById(`btn-cek-${taskId}`);
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
             try {
                 const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
                 const data = await res.json();
                 
                 const status = String(data.data?.successFlag ?? data.successFlag ?? data.data?.status ?? data.status ?? '').toUpperCase();
                 
+                // Cek jika status GAGAL
                 if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED') {
-                    btnElement.innerHTML = '<i class="fas fa-times text-red-500"></i> Gagal';
-                    btnElement.className = 'px-3 py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-red-900/50 border border-red-500/50 text-red-300';
+                    btn.innerHTML = '<i class="fas fa-times text-red-500"></i> Gagal';
+                    btn.className = 'px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-red-900/50 border border-red-500/50 text-red-300';
                     showToast('Generasi gagal di server Kie.ai', 'error');
                     return;
                 }
 
-                // Ekstraksi URL Cerdas yang sama seperti di Dashboard Utama
+                // Ekstraksi URL Cerdas (Anti Salah Ambil Link Gambar Referensi)
                 let mediaUrl = data.data?.resultUrl || 
                                (data.data?.resultUrls && data.data.resultUrls[0]) || 
                                (data.data?.response?.resultUrls && data.data.response.resultUrls[0]) || 
@@ -447,12 +566,12 @@
                     mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg|jpeg)(\?.*)?$/i)) || validUrls[0];
                 }
 
-                // Tambahkan '100' sebagai status sukses (Kling AI)
+                // Status sukses termasuk '100' (Kling AI) dan URL berisi tempfile
                 if (mediaUrl && (status === '1' || status === '100' || status === 'SUCCESS' || status === 'COMPLETED' || mediaUrl.includes('tempfile'))) {
                     
                     let finalUrl = mediaUrl;
                     
-                    // Kalau linknya masih diblokir (tempfile), konversi dulu pakai backend kita
+                    // Kalau linknya adalah tempfile (masih diblokir CORS), konversi dulu pakai backend kita
                     if (mediaUrl.includes('tempfile')) {
                         try {
                             const dlRes = await fetch('/api/download', { 
@@ -467,19 +586,20 @@
                         }
                     }
 
-                    btnElement.innerHTML = '<i class="fa-solid fa-external-link-alt"></i> Lihat';
-                    btnElement.className = 'px-3 py-1.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-emerald-500 text-white hover:bg-emerald-600 transition';
-                    btnElement.onclick = () => window.open(finalUrl, '_blank');
-                    btnElement.disabled = false;
+                    // Tampilkan Tombol Sukses dengan efek kaca aslimu
+                    btn.innerHTML = '<i class="fa-solid fa-external-link-alt"></i> Lihat';
+                    btn.className = 'glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-emerald-500 text-white';
+                    btn.onclick = () => window.open(finalUrl, '_blank');
+                    btn.disabled = false;
                     showToast('Hasil ditemukan!');
                 } else {
-                    btnElement.innerHTML = originalHtml;
-                    btnElement.disabled = false;
+                    btn.innerHTML = originalHtml;
+                    btn.disabled = false;
                     showToast('Masih proses / Antri.', 'error');
                 }
             } catch (e) {
-                btnElement.innerHTML = originalHtml;
-                btnElement.disabled = false;
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
                 showToast('Gagal terhubung API.', 'error');
             }
         }
@@ -496,57 +616,10 @@
 
         function filterTable(tbodyId, inputId) {
             const filter = document.getElementById(inputId).value.toLowerCase();
-            if (tbodyId === 'history-tbody') {
-                const items = document.querySelectorAll('.history-item');
-                items.forEach(item => {
-                    const txt = item.innerText.toLowerCase();
-                    item.style.display = txt.includes(filter) ? '' : 'none';
-                });
-            } else {
-                const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
-                for (let row of rows) {
-                    const txt = row.innerText.toLowerCase();
-                    row.style.display = txt.includes(filter) ? '' : 'none';
-                }
-            }
-        }
-
-        async function loadReferrals() {
-            const container = document.getElementById('referral-grid');
-            container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500"><i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat Data...</div>';
-            try {
-                const res = await fetch('/api/get_referrals', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ adminCode, appId: APP_ID })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    container.innerHTML = data.codes.map(c => {
-                        if(c.used) {
-                            return `
-                            <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-2 text-center relative overflow-hidden group cursor-pointer" onclick="copyToClipboard('${c.usedBy}')" title="Diklaim oleh: ${c.usedBy}">
-                                <div class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-bl-lg flex items-center justify-center"><i class="fas fa-times text-[8px] text-white"></i></div>
-                                <p class="text-[10px] sm:text-xs font-bold text-red-300 mb-1 opacity-50 line-through">${c.code}</p>
-                                <p class="text-[8px] text-gray-500 truncate mt-1">Oleh: ${c.usedBy.split('@')[0]}</p>
-                            </div>
-                            `;
-                        } else {
-                            return `
-                            <div class="bg-emerald-900/20 border border-emerald-500/50 rounded-lg p-2 text-center relative hover:bg-emerald-800/40 transition-colors cursor-pointer group" onclick="copyToClipboard('${c.code}')">
-                                <div class="absolute top-0 right-0 w-4 h-4 bg-emerald-500 rounded-bl-lg flex items-center justify-center"><i class="fas fa-check text-[8px] text-white"></i></div>
-                                <p class="text-[10px] sm:text-xs font-bold text-emerald-300 mt-1">${c.code}</p>
-                                <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <span class="text-[10px] font-bold text-white"><i class="fas fa-copy"></i> Salin</span>
-                                </div>
-                            </div>
-                            `;
-                        }
-                    }).join('');
-                } else {
-                    container.innerHTML = `<div class="col-span-full text-center py-10 text-red-400 text-xs">${data.error}</div>`;
-                }
-            } catch (e) {
-                container.innerHTML = `<div class="col-span-full text-center py-10 text-red-400 text-xs">Network Error</div>`;
+            const rows = document.getElementById(tbodyId).getElementsByTagName('tr');
+            for (let row of rows) {
+                const txt = row.innerText.toLowerCase();
+                row.style.display = txt.includes(filter) ? '' : 'none';
             }
         }
     </script>
