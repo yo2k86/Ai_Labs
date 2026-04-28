@@ -129,7 +129,13 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId, cost } = req.body;
 
-    if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
+    // Validasi & Keamanan: Pastikan cost adalah Number asli dan tidak minus
+    const parsedCost = Number(cost) || 0;
+    if (parsedCost < 0) {
+        return res.status(400).json({ error: "Hayo mau ngapain? Parameter cost tidak valid." });
+    }
+
+    if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
         try {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             const userDoc = await userRef.get();
@@ -142,11 +148,11 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             }
 
             const currentCredits = userData.credits || 0;
-            if (currentCredits < cost) {
-                return res.status(403).json({ error: `Kredit habis. Sisa ${currentCredits} ⚡, butuh ${cost} ⚡.` });
+            if (currentCredits < parsedCost) {
+                return res.status(403).json({ error: `Kredit habis. Sisa ${currentCredits} ⚡, butuh ${parsedCost} ⚡.` });
             }
 
-            await userRef.update({ credits: admin.firestore.FieldValue.increment(-cost) });
+            await userRef.update({ credits: admin.firestore.FieldValue.increment(-parsedCost) });
         } catch (err) {
             console.error("Gagal potong kredit:", err);
             return res.status(500).json({ error: "Sistem kredit gagal. Cek konfigurasi Firebase." });
@@ -171,26 +177,56 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             }
         };
         if (isKling3 && background_source) payload.input.background_source = background_source;
+        
     } else if (engine && engine.toLowerCase() === 'grok') {
+        const hasImages = image_urls && image_urls.length > 0;
+        
         if (type === 'Video') {
-            const hasImages = image_urls && image_urls.length > 0;
             const modelName = hasImages ? "grok-imagine/image-to-video" : "grok-imagine/text-to-video";
+            
+            // Validasi ketat sesuai dokumentasi Grok Image-to-Video
+            let safeDuration = parseInt(duration) || 6;
+            safeDuration = Math.min(Math.max(safeDuration, 6), 30); // Durasi wajib 6-30 detik
+
+            let safeMode = mode || "normal";
+            if (hasImages && safeMode === 'spicy') safeMode = "normal"; // Mode spicy dilarang untuk external images
+
             payload = {
                 model: modelName,
                 input: {
-                    prompt: prompt || "Cinematic aesthetic movement",
+                    prompt: prompt ? prompt.substring(0, 4900) : "Cinematic aesthetic movement",
                     aspect_ratio: ratio || "16:9",
-                    mode: "normal",
-                    duration: duration ? String(duration) : "6",
+                    mode: safeMode,
+                    duration: String(safeDuration),
                     resolution: "720p",
                     nsfw_checker: false
                 }
             };
-            if (hasImages) payload.input.image_urls = image_urls.slice(0, 7);
+            if (hasImages) payload.input.image_urls = image_urls.slice(0, 7); // Maksimal 7 gambar
+            
         } else if (type === 'Gambar') {
-            payload = { model: "grok-imagine/text-to-image", input: { prompt: prompt, aspect_ratio: ratio || "16:9" } };
+            // PERBAIKAN: Gunakan grok-imagine/image-to-image jika user menyertakan gambar referensi
+            if (hasImages) {
+                payload = { 
+                    model: "grok-imagine/image-to-image", 
+                    input: { 
+                        prompt: prompt || "Maintain character consistency, enhance detail.", 
+                        image_urls: [image_urls[0]], // Hanya boleh 1 gambar untuk image-to-image Grok
+                        nsfw_checker: false
+                    } 
+                };
+            } else {
+                payload = { 
+                    model: "grok-imagine/text-to-image", 
+                    input: { 
+                        prompt: prompt, 
+                        aspect_ratio: ratio || "16:9" 
+                    } 
+                };
+            }
         }
     } else {
+        // Veo API Logic
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
         let veoModel = "veo3_fast"; 
         if (engine === 'veo3.1 lite') veoModel = "veo3_lite";
@@ -210,9 +246,10 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     const data = await response.json();
 
     if (!response.ok || (data.code && data.code !== 200)) {
-        if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
+        // Refund kredit jika API Kie gagal
+        if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
-            await userRef.update({ credits: admin.firestore.FieldValue.increment(cost) }); // Refund
+            await userRef.update({ credits: admin.firestore.FieldValue.increment(parsedCost) }); 
         }
         return res.status(400).json({ error: "Gagal membuat task di KIE AI", details: data });
     }
