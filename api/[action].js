@@ -296,6 +296,13 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         }
     }
 
+    // ---> 4. INJEKSI CALLBACK URL (AGAR WEBHOOK KEPANGGIL) <---
+    // Pastikan masukan URL API Backend kamu di Env Variables Vercel
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (webhookUrl) {
+        payload.callBackUrl = webhookUrl;
+    }
+
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -337,6 +344,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                 prompt: prompt || "Tanpa prompt",
                 engine: engine || "Kie.ai Engine",
                 type: type || "Video",
+                status: 'PROCESSING', // Tambahan kecil biar status awal jelas
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
         } catch (e) {
@@ -437,7 +445,7 @@ async function handleUpload(req, res, apiKey) {
     const { base64Data, uploadPath, fileName } = req.body;
     if (!base64Data) return res.status(400).json({ error: 'Data base64 tidak ditemukan' });
 
-    const response = await fetch('https://kieai.redpandaai.co/api/file-base64-upload', {
+    const response = await fetch('https://api.kie.ai/api/file-base64-upload', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ base64Data, uploadPath: uploadPath || 'ailabs-uploads', fileName: fileName || `upload_${Date.now()}.jpg` })
@@ -462,7 +470,7 @@ async function handleUploadUrl(req, res, apiKey) {
     const { fileUrl, uploadPath, fileName } = req.body;
     if (!fileUrl) return res.status(400).json({ error: 'URL file tidak ditemukan' });
 
-    const response = await fetch('https://kieai.redpandaai.co/api/file-url-upload', {
+    const response = await fetch('https://api.kie.ai/api/file-url-upload', {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ fileUrl, uploadPath: uploadPath || 'ailabs-url-uploads', fileName: fileName || `url_import_${Date.now()}.jpg` })
