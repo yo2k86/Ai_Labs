@@ -2,7 +2,6 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <!-- Memastikan scaling viewport benar untuk mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
     <!-- PWA Meta Tags -->
@@ -46,8 +45,8 @@
         body {
             background-color: #000;
             color: #fff;
-            overscroll-behavior: none; /* Mencegah pull-to-refresh di mobile */
-            -webkit-tap-highlight-color: transparent; /* Hilangkan flicker abu-abu saat tombol di-tap agar terasa native */
+            overscroll-behavior: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         /* --- Landing Page Styles --- */
@@ -64,7 +63,6 @@
             background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, transparent 20%, transparent 80%, rgba(0,0,0,0.95) 100%);
         }
         
-        /* OPTIMASI: Menggunakan translate3d untuk mengaktifkan Hardware Acceleration (GPU) di HP Android */
         @keyframes slowPan {
             0% { transform: translate3d(0px, 0px, 0) scale(1); }
             33% { transform: translate3d(-20px, -30px, 0) scale(1.05); }
@@ -77,7 +75,7 @@
             top: -5vh;
             left: -5vw;
             animation: slowPan 25s ease-in-out infinite;
-            will-change: transform; /* Memberitahu browser untuk bersiap merender animasi ini */
+            will-change: transform;
         }
 
         @keyframes rowSlideLeft {
@@ -119,12 +117,10 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
-
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
         }
 
-        /* View transition utility */
         .fade-enter {
             opacity: 0;
             transition: opacity 0.4s ease-in-out;
@@ -171,24 +167,6 @@
             animation: quantumBlink 1.5s ease-in-out infinite;
         }
         
-        /* --- Neon Buttons Animations --- */
-        @keyframes neonCyan {
-            0%, 100% { box-shadow: 0 0 5px rgba(6, 182, 212, 0.3); border-color: rgba(6, 182, 212, 0.4); text-shadow: 0 0 2px rgba(6, 182, 212, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(6, 182, 212, 0.8), inset 0 0 5px rgba(6, 182, 212, 0.3); border-color: rgba(6, 182, 212, 1); text-shadow: 0 0 8px rgba(6, 182, 212, 0.8); }
-        }
-        @keyframes neonPurple {
-            0%, 100% { box-shadow: 0 0 5px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 0.4); text-shadow: 0 0 2px rgba(168, 85, 247, 0.3); }
-            50% { box-shadow: 0 0 15px rgba(168, 85, 247, 0.8), inset 0 0 5px rgba(168, 85, 247, 0.3); border-color: rgba(168, 85, 247, 1); text-shadow: 0 0 8px rgba(168, 85, 247, 0.8); }
-        }
-        .neon-btn-cyan {
-            animation: neonCyan 2s ease-in-out infinite;
-        }
-        .neon-btn-purple {
-            animation: neonPurple 2s ease-in-out infinite;
-            animation-delay: 1s;
-        }
-        
-        /* --- Animasi Tombol CTA --- */
         @keyframes ctaMagic {
             0%, 100% { 
                 box-shadow: 0 0 15px rgba(168, 85, 247, 0.5); 
@@ -205,35 +183,6 @@
             animation: ctaMagic 2.5s ease-in-out infinite;
         }
 
-        /* --- Animasi Loading Kaca --- */
-        @keyframes shimmerGlass {
-            0% { transform: skewX(-25deg) translateX(-200%); }
-            100% { transform: skewX(-25deg) translateX(300%); }
-        }
-        .shimmer-glass {
-            position: absolute;
-            top: -20%; left: -20%; bottom: -20%;
-            width: 40%;
-            background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.6) 50%, transparent 80%);
-            box-shadow: 0 0 40px rgba(255, 255, 255, 0.4);
-            filter: blur(4px);
-            animation: shimmerGlass 2.5s infinite ease-in-out;
-            pointer-events: none;
-            z-index: 10;
-            mix-blend-mode: overlay;
-        }
-        @keyframes progressShimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        .progress-shimmer-fx {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-            animation: progressShimmer 1.5s infinite linear;
-        }
-
-        /* --- Glassmorphism Emerald Styles --- */
         .emerald-glow-bg {
             background-color: #020604;
             background-image: 
@@ -286,21 +235,20 @@
     <!-- VIEW 1: LANDING PAGE -->
     <!-- ========================================== -->
     <div id="view-landing" class="relative h-screen w-full overflow-hidden transition-opacity duration-500 fade-enter-active" style="opacity: 1;">
-        <!-- BACKGROUND IMAGE GRID: Menambahkan properti lazy loading -->
         <div class="absolute bg-grid-container z-0 flex flex-col gap-4 md:gap-6 opacity-60 pointer-events-none p-2 md:p-4">
             <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] opacity-90 slide-left">
-                <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
             </div>
             <div class="flex gap-4 md:gap-6 h-40 sm:h-64 md:h-96 lg:h-[28rem] -ml-8 md:-ml-32 opacity-100 slide-right">
-                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
-                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" decoding="async" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
+                <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?q=80&w=800&auto=format&fit=crop" loading="lazy" class="w-1/3 md:w-1/4 object-cover rounded-2xl md:rounded-[2rem]" alt="Bg">
             </div>
         </div>
 
@@ -444,7 +392,7 @@
                         </div>
 
                         <div class="min-w-full h-full relative flex items-center overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1552728089-5710d345f21f?q=80&w=2000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-70 banner-img-zoom" alt="Banner 2" style="animation-delay: -3s;">
+                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-70 banner-img-zoom" alt="Banner 2" style="animation-delay: -3s;">
                             <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a1a]/95 via-[#0a0a1a]/70 to-transparent"></div>
                             <div class="relative z-10 p-6 md:p-14 max-w-xs sm:max-w-md md:max-w-2xl">
                                 <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4 text-white drop-shadow-lg">Nano Banana 2 is Here!</h2>
@@ -462,7 +410,7 @@
                         </div>
 
                         <div class="min-w-full h-full relative flex items-center overflow-hidden">
-                            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-70 banner-img-zoom" alt="Banner 4" style="animation-delay: -9s;">
+                            <img src="https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2000&auto=format&fit=crop" class="absolute inset-0 w-full h-full object-cover opacity-70 banner-img-zoom" alt="Banner 4" style="animation-delay: -9s;">
                             <div class="absolute inset-0 bg-gradient-to-r from-[#0a0a1a]/95 via-[#0a0a1a]/70 to-transparent"></div>
                             <div class="relative z-10 p-6 md:p-14 max-w-xs sm:max-w-md md:max-w-2xl">
                                 <h2 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4 text-white drop-shadow-lg">Unlimited <span class="text-rose-400">Creativity</span></h2>
@@ -533,7 +481,7 @@
                 <button class="hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-2 pl-2 md:pl-3 border-l border-gray-700">
-                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] md:text-sm font-semibold hover:bg-gray-200 items-center gap-1 flex">
+                     <button id="login-btn-editor" onclick="signInWithGoogle()" class="bg-white text-black px-2 md:px-4 py-1 md:py-1.5 rounded-full text-[10px] md:text-sm font-semibold hover:bg-gray-200 hidden items-center gap-1">
                         <i class="fa-brands fa-google text-red-500"></i> <span class="hidden md:inline">Login</span>
                     </button>
                     
@@ -750,7 +698,6 @@
     <!-- SEMUA MODALS DIKUMPULKAN DI SINI           -->
     <!-- ========================================== -->
 
-    <!-- Modal Menu Project Baru -->
     <div id="new-project-menu" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur-md flex flex-col justify-end md:justify-center items-center p-0 md:p-4 transition-opacity duration-300 opacity-0" onclick="closeNewProjectMenu(event)">
         <div class="glass-card w-full max-w-md p-6 rounded-t-3xl md:rounded-3xl border-t border-emerald-500/50 transform translate-y-full md:translate-y-0 transition-transform duration-300 shadow-[0_-10px_40px_rgba(16,185,129,0.15)] bg-[#0a0a0a]" id="new-project-menu-content" onclick="event.stopPropagation()">
             <div class="flex justify-between items-center mb-6">
@@ -1738,6 +1685,7 @@
                     if(tipText) { tipText.style.opacity = 0; setTimeout(() => { tipText.innerText = tips[tipIdx]; tipText.style.opacity = 1; }, 500); }
                 }, 6000);
             }
+            
             function stopLoaderUX() {
                 clearInterval(progressInterval); clearInterval(tipInterval);
                 if(progressBar) progressBar.style.width = '100%'; if(pctText) pctText.innerText = '100%';
@@ -1799,7 +1747,11 @@
                     const taskId = data.data?.taskId || data.taskId || data.data?.task_id || data.task_id;
                     if (!taskId) throw new Error("Gagal dapat Task ID dari server AI.");
                     
+                    // ==============================================================
+                    // PERBAIKAN LOGIKA EKSTRAKTOR URL VIDEO CERDAS (ANTI STUCK 99%)
+                    // ==============================================================
                     let finalMediaUrl = null; let attempts = 0;
+                    
                     while (!finalMediaUrl && attempts < 180) { 
                         await new Promise(resolve => setTimeout(resolve, 5000));
                         attempts++;
@@ -1813,7 +1765,9 @@
                             continue;
                         }
 
+                        // Deteksi semua jenis Status Sukses (Veo: 1, Kling: 100/SUCCESS)
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
+                        const isSuccess = ['SUCCESS', 'COMPLETED', '100', '1', 'FINISHED', 'DONE'].includes(status);
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
                         
@@ -1821,35 +1775,45 @@
                             throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
-                        let mediaUrl = checkData.data?.resultUrl || 
-                                       (checkData.data?.resultUrls && checkData.data.resultUrls[0]) || 
-                                       (checkData.data?.response?.resultUrls && checkData.data.response.resultUrls[0]) || 
-                                       checkData.data?.response?.video_url || 
-                                       checkData.data?.video_url;
+                        if (isSuccess) {
+                            // Ekstraktor URL yang bisa menembus data Kling, Veo, maupun Grok
+                            let mediaUrl = checkData.data?.resultUrl || 
+                                           checkData.data?.resultUrls?.[0] || 
+                                           checkData.data?.response?.resultUrls?.[0] || 
+                                           checkData.data?.task_result?.videos?.[0]?.url ||  // KHUSUS KLING AI
+                                           checkData.data?.task_result?.images?.[0]?.url ||  // KHUSUS KLING AI
+                                           checkData.data?.response?.video_url || 
+                                           checkData.data?.video_url;
 
-                        if (!mediaUrl) {
-                            let foundUrls = [];
-                            JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
-                            const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org') && !videoImageUrls.includes(u) && !videoUrls.includes(u));
-                            mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov)(\?.*)?$/i)) || validUrls[0];
-                        }
-
-                        if (mediaUrl && (status === 'SUCCESS' || status === 'COMPLETED' || status === '100' || status === '1' || mediaUrl.includes('tempfile'))) {
-                            try {
-                                const dlRes = await fetch('/api/download', { 
-                                    method: 'POST', 
-                                    headers: { 'Content-Type': 'application/json' }, 
-                                    body: JSON.stringify({ url: mediaUrl }) 
-                                });
-                                const dlData = await dlRes.json();
-                                finalMediaUrl = dlData.data || dlData.url || mediaUrl;
-                            } catch(e) { 
-                                finalMediaUrl = mediaUrl; 
+                            if (!mediaUrl) {
+                                // Fallback Darurat: Cari string yang berawalan http
+                                let foundUrls = [];
+                                JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
+                                // Buang URL asli gambar yang diunggah agar tidak salah comot
+                                const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org') && !videoImageUrls.includes(u) && !videoUrls.includes(u));
+                                mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg)(\?.*)?$/i)) || validUrls[0];
                             }
-                            break;
+
+                            if (mediaUrl) {
+                                // Ubah Tempfile jadi Link yang bisa diputar
+                                try {
+                                    const dlRes = await fetch('/api/download', { 
+                                        method: 'POST', 
+                                        headers: { 'Content-Type': 'application/json' }, 
+                                        body: JSON.stringify({ url: mediaUrl }) 
+                                    });
+                                    const dlData = await dlRes.json();
+                                    finalMediaUrl = dlData.data || dlData.url || mediaUrl;
+                                } catch(e) { 
+                                    finalMediaUrl = mediaUrl; 
+                                }
+                                break; // Selesai, hentikan loop!
+                            }
                         }
                     }
+                    
                     if (!finalMediaUrl) throw new Error("Waktu tunggu habis! Hasil mungkin nyangkut di server.");
+                    
                     window.lastGenData.taskId = taskId; window.lastGenData.engine = genConfig.engine;
 
                     stopLoaderUX();
