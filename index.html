@@ -1772,22 +1772,22 @@
 
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
                         
-                        // Ekstrak URL lebih awal sebagai indikator sukses absolut
-                        let rawMediaUrl = checkData.data?.resultUrl ||
-                                       checkData.data?.resultUrls?.[0] ||
-                                       checkData.data?.response?.resultUrls?.[0] ||
-                                       checkData.data?.task_result?.videos?.[0]?.url ||
-                                       checkData.data?.task_result?.images?.[0]?.url ||
-                                       checkData.data?.response?.video_url ||
+                        // Ekstrak URL lebih awal sebagai indikator sukses mutlak
+                        let rawMediaUrl = checkData.data?.resultUrl || 
+                                       checkData.data?.resultUrls?.[0] || 
+                                       checkData.data?.response?.resultUrls?.[0] || 
+                                       checkData.data?.task_result?.videos?.[0]?.url ||  
+                                       checkData.data?.task_result?.images?.[0]?.url ||  
+                                       checkData.data?.response?.video_url || 
                                        checkData.data?.video_url;
 
-                        // Tambahkan '99' (Sering dipakai Kling) dan 'SUCCEED', atau jika URL sudah muncul kita anggap sukses
+                        // Perbaikan utama: Tambahkan deteksi status 99, SUCCEED, atau jika rawMediaUrl sudah ada
                         const isSuccess = ['SUCCESS', 'SUCCEED', 'SUCCEEDED', 'COMPLETED', '100', '99', '1', 'FINISHED', 'DONE'].includes(status) || !!rawMediaUrl;
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
-
-                        if (!isSuccess && (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED')) {
-                            throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini.");
+                        
+                        if (!isSuccess && (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED')) { 
+                            throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
                         if (isSuccess) {
