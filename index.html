@@ -559,15 +559,34 @@
                         <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
                     </div>
                     
-                    <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center p-4">
-                        <i class="fa-solid fa-wand-magic-sparkles text-emerald-400 text-3xl animate-bounce mb-3"></i>
-                        <p id="output-loading-text" class="text-xs md:text-sm text-emerald-300 font-bold mb-2 text-center">Memproses...</p>
-                        <div class="w-full max-w-[200px] bg-gray-800 rounded-full h-2 overflow-hidden mb-1">
-                            <div id="loading-progress-bar" class="bg-emerald-500 h-full w-0 transition-all"></div>
+                    <!-- LOADING GENERATE BARU -->
+                    <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/90 flex flex-col items-center justify-center p-4 backdrop-blur-sm">
+                        <div class="flex items-center justify-center gap-4 mb-5 bg-[#121212]/80 px-6 py-4 rounded-2xl border border-white/10 shadow-[0_0_30px_rgba(16,185,129,0.15)]">
+                            <!-- Logo dari Github -->
+                            <img src="logo.png" alt="Ailabs Logo" class="w-10 h-10 md:w-12 md:h-12 object-contain drop-shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                            
+                            <!-- Cahaya Berputar (Spinning Light Glow) -->
+                            <div class="relative w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+                                <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-400 border-r-cyan-400 animate-spin drop-shadow-[0_0_15px_rgba(16,185,129,0.9)]"></div>
+                                <div class="absolute inset-1 rounded-full border-4 border-transparent border-b-emerald-300 border-l-cyan-300 animate-spin reverse drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" style="animation-direction: reverse; animation-duration: 1.5s;"></div>
+                                <div class="absolute inset-3 rounded-full bg-emerald-500/30 blur-sm animate-pulse"></div>
+                            </div>
                         </div>
-                        <span id="loading-percentage" class="text-[10px] text-gray-300">0%</span>
-                        <p id="loading-tip-text" class="text-[9px] text-gray-400 mt-3 text-center max-w-[80%] italic"></p>
+                        
+                        <!-- Teks Render -->
+                        <p id="output-loading-text" class="text-xs md:text-sm text-emerald-300 font-bold mb-3 text-center uppercase tracking-[0.2em] animate-pulse drop-shadow-md">Ailabs sedang mereender...</p>
+                        
+                        <!-- Progress Bar (Dipercantik) -->
+                        <div class="w-full max-w-[250px] bg-gray-800 rounded-full h-2.5 overflow-hidden mb-1.5 border border-white/10">
+                            <div id="loading-progress-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full w-0 transition-all duration-300 shadow-[0_0_10px_rgba(16,185,129,0.8)] relative">
+                                <div class="absolute top-0 right-0 bottom-0 w-10 bg-gradient-to-r from-transparent to-white/50 animate-pulse"></div>
+                            </div>
+                        </div>
+                        <span id="loading-percentage" class="text-[10px] md:text-xs font-mono text-emerald-100 font-bold">0%</span>
+                        
+                        <p id="loading-tip-text" class="text-[9px] md:text-[10px] text-gray-400 mt-4 text-center max-w-[80%] italic leading-relaxed"></p>
                     </div>
+                    <!-- END LOADING -->
                 </div>
             </div>
         </main>
@@ -1797,7 +1816,6 @@
                             }
 
                             if (mediaUrl) {
-                                // KITA TUKAR LINK MENTAH MENJADI LINK TEMPORARY (20 Menit) SESUAI DOKUMENTASI
                                 try {
                                     const dlRes = await fetch('/api/action?action=download', {
                                         method: 'POST', 
@@ -1805,7 +1823,6 @@
                                         body: JSON.stringify({ url: mediaUrl })
                                     });
                                     const dlData = await dlRes.json();
-                                    // Gunakan link hasil tukaran, jika gagal fallback ke link awal
                                     finalMediaUrl = dlData.data || dlData.url || mediaUrl; 
                                 } catch(err) {
                                     console.warn("Gagal menukar link video:", err);
