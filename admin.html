@@ -364,8 +364,7 @@
             const el = document.getElementById('stat-total-credits');
             el.innerHTML = '<i class="fas fa-spinner fa-spin text-sm"></i>';
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=kie-balance', {
+                const res = await fetch('/api/kie-balance', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode })
@@ -386,8 +385,7 @@
             tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-emerald-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Memuat data...</td></tr>';
             try {
                 loadKieBalance();
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=get_users', {
+                const res = await fetch('/api/get_users', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
@@ -440,8 +438,7 @@
         async function toggleVideoAccess(uid, currentStatus) {
             const newStatus = !currentStatus;
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=toggle_access', {
+                const res = await fetch('/api/toggle_access', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, videoAccess: newStatus })
@@ -456,8 +453,7 @@
             if(!val || val <= 0) return showToast('Isi angka!', 'error');
             const amount = action === 'add' ? val : -val;
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=topup', {
+                const res = await fetch('/api/topup', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId, targetUid: uid, amount: amount })
@@ -470,8 +466,7 @@
             const tbody = document.getElementById('ref-tbody');
             tbody.innerHTML = '<tr><td colspan="3" class="p-6 sm:p-10 text-center text-cyan-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Sinkronisasi...</td></tr>';
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=get_referrals', {
+                const res = await fetch('/api/get_referrals', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
@@ -497,8 +492,7 @@
             const tbody = document.getElementById('history-tbody');
             tbody.innerHTML = '<tr><td colspan="4" class="p-6 sm:p-10 text-center text-purple-400"><i class="fas fa-spinner fa-spin mr-2 text-xl block mb-2"></i>Mengambil riwayat...</td></tr>';
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch('/api/action?action=history', {
+                const res = await fetch('/api/history', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: appId })
@@ -545,8 +539,7 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             try {
-                // Diperbarui ke action.js structure
-                const res = await fetch(`/api/action?action=check&taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
                 const data = await res.json();
                 
                 const status = String(data.data?.successFlag ?? data.successFlag ?? data.data?.status ?? data.status ?? '').toUpperCase();
@@ -581,8 +574,7 @@
                     // Kalau linknya adalah tempfile (masih diblokir CORS), konversi dulu pakai backend kita
                     if (mediaUrl.includes('tempfile')) {
                         try {
-                            // Diperbarui ke action.js structure
-                            const dlRes = await fetch('/api/action?action=download', { 
+                            const dlRes = await fetch('/api/download', { 
                                 method: 'POST', 
                                 headers: { 'Content-Type': 'application/json' }, 
                                 body: JSON.stringify({ url: mediaUrl }) 
