@@ -1802,9 +1802,11 @@
                                         headers: { 'Content-Type': 'application/json' }, 
                                         body: JSON.stringify({ url: mediaUrl }) 
                                     });
+                                    if (!dlRes.ok) throw new Error("Gagal konversi URL");
                                     const dlData = await dlRes.json();
                                     finalMediaUrl = dlData.data || dlData.url || mediaUrl;
                                 } catch(e) { 
+                                    console.warn("Gagal mendapatkan signed URL, menggunakan original URL", e);
                                     finalMediaUrl = mediaUrl; 
                                 }
                                 break; // Selesai, hentikan loop!
@@ -1823,7 +1825,15 @@
                         if (veoPanel) { if (genConfig.engine.toLowerCase().includes('veo')) { veoPanel.classList.remove('hidden'); veoPanel.classList.add('flex'); } else { veoPanel.classList.add('hidden'); veoPanel.classList.remove('flex'); } }
                         
                         const isResultVideo = finalMediaUrl.match(/\.(mp4|webm|mov)$/i) || genConfig.type !== 'Gambar';
-                        if (isResultVideo) { const vid = document.getElementById('result-video'); if (vid) { vid.src = finalMediaUrl; vid.classList.remove('hidden'); vid.play().catch(e=>e); } } 
+                        if (isResultVideo) { 
+                            const vid = document.getElementById('result-video'); 
+                            if (vid) { 
+                                vid.src = finalMediaUrl; 
+                                vid.classList.remove('hidden'); 
+                                vid.load(); // Wajib agar browser memuat ulang source video baru
+                                vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
+                            } 
+                        } 
                         else { const img = document.getElementById('result-image'); if (img) { img.src = finalMediaUrl; img.classList.remove('hidden'); } }
                         
                         const resOverlay = document.getElementById('result-overlay'); if(resOverlay) resOverlay.classList.remove('hidden');
@@ -2464,7 +2474,11 @@
 
                 if (outputLoading) outputLoading.classList.add('hidden');
                 const vid = document.getElementById('result-video');
-                if (vid) { vid.src = finalMediaUrl; vid.play().catch(e=>e); }
+                if (vid) { 
+                    vid.src = finalMediaUrl; 
+                    vid.load(); // Wajib agar browser memuat ulang source video baru
+                    vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
+                }
                 window.showToast(`Berhasil menerapkan ${actionType.toUpperCase()}!`);
                 if (actionType === 'extend') window.lastGenData.taskId = activeTaskId;
             } catch (error) {
