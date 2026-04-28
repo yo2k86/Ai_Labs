@@ -74,6 +74,12 @@ export default async function handler(req, res) {
 // 1. FUNGSI CHECK (Mengecek Status Task)
 // ==========================================
 async function handleCheck(req, res, apiKey) {
+  // PENTING: Mencegah Vercel CDN dan browser melakukan caching pada respons polling!
+  // Tanpa ini, Vercel akan terus membalas "PROCESSING" padahal aslinya sudah selesai.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   let taskId = req.query.taskId;
   let engine = req.query.engine;
 
@@ -87,19 +93,57 @@ async function handleCheck(req, res, apiKey) {
   if (!taskId) return res.status(400).json({ error: "Parameter taskId tidak ditemukan" });
 
   try {
-    let endpoint = `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${taskId}`;
+    // Tambahkan _t (timestamp) sebagai cache buster agar Kie AI selalu membalas data real-time terbaru
+    let cacheBuster = `&_t=${Date.now()}`;
+    let endpoint = `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${taskId}${cacheBuster}`;
     
     // KHUSUS VEO: record-info
     if ((engine && engine.toLowerCase().includes("veo")) || taskId.startsWith("veo_")) {
-        endpoint = `https://api.kie.ai/api/v1/veo/record-info?taskId=${taskId}`;
+        endpoint = `https://api.kie.ai/api/v1/veo/record-info?taskId=${taskId}${cacheBuster}`;
     }
 
     const response = await fetch(endpoint, {
       method: "GET", 
-      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      cache: 'no-store' // Paksa bypass fetch caching bawaan engine Node.js Vercel (Next.js 13+)
     });
 
     const data = await response.json();
+
+    // =========================================================================
+    // NORMALISASI RESPONSE: Supaya frontend Ailabs lu gak pernah stuck lagi
+    // =========================================================================
+    if (data && data.data) {
+        // 1. Normalisasi teks status menjadi format baku yang dimengerti frontend
+        let stateStr = String(data.data.state || data.data.task_status || data.data.status || data.data.successFlag || "").toUpperCase();
+        
+        if (['SUCCESS', 'COMPLETED', 'SUCCEEDED', 'SUCCESSFUL', '1'].includes(stateStr)) {
+            data.data.status = 'SUCCESS';
+            data.data.successFlag = 1;
+        } else if (['FAIL', 'FAILED', 'ERROR', '2', '3'].includes(stateStr)) {
+            data.data.status = 'FAIL';
+        } else if (stateStr) {
+            data.data.status = stateStr;
+        }
+
+        // 2. Normalisasi posisi Link Video agar frontend tidak bingung mencarinya
+        if (!data.data.resultUrl && data.data.status === 'SUCCESS') {
+            const possibleUrl = 
+                data.data.response?.fullResultUrls?.[0] || 
+                data.data.response?.resultUrls?.[0] || 
+                data.data.resultUrls?.[0] || 
+                data.data.task_result?.videos?.[0]?.url || 
+                data.data.task_result?.images?.[0]?.url ||
+                data.data.response?.video_url ||
+                data.data.video_url ||
+                data.data.url;
+                
+            if (possibleUrl) {
+                data.data.resultUrl = possibleUrl;
+            }
+        }
+    }
+
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({ error: "Gagal cek status dari Kie AI.", message: error.message });
