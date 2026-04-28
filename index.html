@@ -348,7 +348,7 @@
                         </div>
                         <img id="user-avatar-dashboard" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-gray-600">
                         
-                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-10 sm:top-12 w-52 sm:w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50 flex-col">
+                        <div id="dropdown-dashboard" class="hidden absolute right-0 top-10 sm:top-12 w-52 sm:w-56 bg-[#1e1e1e] border border-gray-700 rounded-lg shadow-xl py-2 z-50 flex flex-col">
                             <div class="px-4 py-2 sm:py-3 border-b border-gray-700 bg-white/5">
                                 <p id="user-name-dashboard" class="text-xs sm:text-sm font-bold text-white truncate">User Name</p>
                                 <p id="user-email-dashboard" class="text-[9px] sm:text-[10px] text-gray-400 truncate">email</p>
@@ -552,7 +552,8 @@
                     </div>
 
                     <img id="result-image" src="" class="hidden w-full h-full object-contain cursor-pointer">
-                    <video id="result-video" loop muted playsinline class="hidden w-full h-full object-contain cursor-pointer"></video>
+                    <!-- FIXED: Tambahkan tag pendukung untuk format Video -->
+                    <video id="result-video" autoplay loop muted playsinline crossorigin="anonymous" class="hidden w-full h-full object-contain cursor-pointer"></video>
                     
                     <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
                         <button id="btn-view-result" class="w-12 h-12 md:w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl"></i></button>
@@ -752,6 +753,7 @@
         <img id="modal-image-viewer" src="" class="max-w-full max-h-[85vh] rounded-xl object-contain">
     </div>
 
+    <!-- Extend Video Modal -->
     <div id="extend-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-[90%] md:max-w-sm p-4 md:p-6 rounded-xl md:rounded-2xl border-t border-purple-500/30">
             <h3 class="text-sm md:text-lg font-bold text-white mb-2"><i class="fa-solid fa-arrows-left-right text-purple-400 mr-2"></i>Extend Video</h3>
@@ -763,6 +765,7 @@
         </div>
     </div>
     
+    <!-- Redeem Code Modal -->
     <div id="redeem-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-[90%] md:max-w-sm p-4 md:p-6 rounded-xl border-t border-cyan-500/30">
             <h3 class="text-sm md:text-lg font-bold text-white mb-2"><i class="fas fa-key text-cyan-400 mr-2"></i>Aktivasi Kode</h3>
@@ -1225,7 +1228,8 @@
             const btn = document.getElementById('btn-submit-redeem');
             const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                const res = await fetch('/api/redeem', {
+                // FIXED API ROUTE: /api/action?action=redeem
+                const res = await fetch('/api/action?action=redeem', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: window.currentUserId, appId: window.appId, code: code })
                 });
@@ -1452,12 +1456,13 @@
                 }
                 resizeImage(file, 1024, 1024, async (resizedBase64) => {
                     try {
-                        const response = await fetch('/api/upload', {
+                        // FIXED API ROUTE: /api/action?action=upload
+                        const response = await fetch('/api/action?action=upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: resizedBase64, uploadPath: 'ailabs-editor', fileName: `canvas_${Date.now()}.jpg` })
                         });
                         const contentType = response.headers.get("content-type");
-                        if (!response.ok && response.status === 404) throw new Error("Endpoint /api/upload tidak ditemukan (404).");
+                        if (!response.ok && response.status === 404) throw new Error("Endpoint API tidak ditemukan (404). Pastikan route Vercel sudah benar.");
                         if (!contentType || !contentType.includes("application/json")) throw new Error("Server error (merespons bukan JSON).");
 
                         const result = await response.json();
@@ -1530,7 +1535,8 @@
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
-                        const response = await fetch('/api/upload', {
+                        // FIXED API ROUTE: /api/action?action=upload
+                        const response = await fetch('/api/action?action=upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: e.target.result, uploadPath: 'ailabs-editor-video', fileName: `video_${Date.now()}.${fileToUpload.type === 'video/webm' ? 'webm' : 'mp4'}` })
                         });
@@ -1702,9 +1708,9 @@
                     if (imageRefs.length > 1) finalEnhancedPrompt += "Tampilkan SEMUA KARAKTER. ";
                     finalEnhancedPrompt += promptText;
 
-                    const response = await fetch("/api/generate", {
+                    const response = await fetch("/api/action?action=generate", {
                         method: "POST", headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId, cost: cost })
+                        body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId })
                     });
                     
                     let data;
@@ -1730,10 +1736,10 @@
                     if (genConfig.type === 'Motion') { if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); if (editorImages['akhir']) videoUrls.push(editorImages['akhir']); } 
                     else { if (editorImages['mulai']) videoImageUrls.push(editorImages['mulai']); if (editorImages['akhir']) videoImageUrls.push(editorImages['akhir']); }
 
-                    const payload = { prompt: promptText, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, duration: genConfig.duration, image_urls: videoImageUrls, mode: genConfig.motionMode, character_orientation: genConfig.characterOrientation, background_source: genConfig.backgroundSource, userId: window.currentUserId, appId: window.appId, cost: cost };
+                    const payload = { prompt: promptText, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, duration: genConfig.duration, image_urls: videoImageUrls, mode: genConfig.motionMode, character_orientation: genConfig.characterOrientation, background_source: genConfig.backgroundSource, userId: window.currentUserId, appId: window.appId };
                     if (genConfig.type === 'Motion') payload.video_urls = videoUrls;
 
-                    const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                    const response = await fetch("/api/action?action=generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                     
                     let data;
                     try { 
@@ -1747,9 +1753,6 @@
                     const taskId = data.data?.taskId || data.taskId || data.data?.task_id || data.task_id;
                     if (!taskId) throw new Error("Gagal dapat Task ID dari server AI.");
                     
-                    // ==============================================================
-                    // PERBAIKAN LOGIKA EKSTRAKTOR URL VIDEO CERDAS (ANTI STUCK 99%)
-                    // ==============================================================
                     let finalMediaUrl = null; let attempts = 0;
                     
                     while (!finalMediaUrl && attempts < 180) { 
@@ -1758,14 +1761,13 @@
                         
                         let checkRes, checkData;
                         try {
-                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                            checkRes = await fetch(`/api/action?action=check&taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
                             continue;
                         }
 
-                        // Deteksi semua jenis Status Sukses (Veo: 1, Kling: 100/SUCCESS)
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
                         const isSuccess = ['SUCCESS', 'COMPLETED', '100', '1', 'FINISHED', 'DONE'].includes(status);
 
@@ -1776,40 +1778,27 @@
                         }
 
                         if (isSuccess) {
-                            // Ekstraktor URL yang bisa menembus data Kling, Veo, maupun Grok
                             let mediaUrl = checkData.data?.resultUrl || 
                                            checkData.data?.resultUrls?.[0] || 
                                            checkData.data?.response?.resultUrls?.[0] || 
-                                           checkData.data?.task_result?.videos?.[0]?.url ||  // KHUSUS KLING AI
-                                           checkData.data?.task_result?.images?.[0]?.url ||  // KHUSUS KLING AI
+                                           checkData.data?.task_result?.videos?.[0]?.url ||  
+                                           checkData.data?.task_result?.images?.[0]?.url ||  
                                            checkData.data?.response?.video_url || 
                                            checkData.data?.video_url;
 
                             if (!mediaUrl) {
-                                // Fallback Darurat: Cari string yang berawalan http
                                 let foundUrls = [];
                                 JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
-                                // Buang URL asli gambar yang diunggah agar tidak salah comot
                                 const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org') && !videoImageUrls.includes(u) && !videoUrls.includes(u));
                                 mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg)(\?.*)?$/i)) || validUrls[0];
                             }
 
                             if (mediaUrl) {
-                                // Ubah Tempfile jadi Link yang bisa diputar
-                                try {
-                                    const dlRes = await fetch('/api/download', { 
-                                        method: 'POST', 
-                                        headers: { 'Content-Type': 'application/json' }, 
-                                        body: JSON.stringify({ url: mediaUrl }) 
-                                    });
-                                    if (!dlRes.ok) throw new Error("Gagal konversi URL");
-                                    const dlData = await dlRes.json();
-                                    finalMediaUrl = dlData.data || dlData.url || mediaUrl;
-                                } catch(e) { 
-                                    console.warn("Gagal mendapatkan signed URL, menggunakan original URL", e);
-                                    finalMediaUrl = mediaUrl; 
-                                }
-                                break; // Selesai, hentikan loop!
+                                // PENTING: LANGSUNG GUNAKAN URL ASLI UNTUK PLAYER!
+                                // API download-url dari KIE mengubah link menjadi file tipe "attachment".
+                                // File bertipe attachment tidak bisa diputar oleh tag <video> dan akan jadi BLANK.
+                                finalMediaUrl = mediaUrl;
+                                break; 
                             }
                         }
                     }
@@ -1828,10 +1817,26 @@
                         if (isResultVideo) { 
                             const vid = document.getElementById('result-video'); 
                             if (vid) { 
+                                // Bersihkan video player lama & Force Load link baru
+                                vid.pause();
+                                vid.removeAttribute('src');
+                                vid.load();
+                                
                                 vid.src = finalMediaUrl; 
                                 vid.classList.remove('hidden'); 
-                                vid.load(); // Wajib agar browser memuat ulang source video baru
-                                vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
+                                
+                                // Detektor jika video gagal dimuat
+                                vid.onerror = () => {
+                                    console.error("Gagal memutar video dari URL secara langsung:", finalMediaUrl);
+                                    window.showCustomAlert("Browser tidak mendukung pemutaran langsung. Silakan klik tombol 'Unduh' untuk melihat hasilnya.");
+                                };
+                                
+                                // Mainkan hanya jika benar-benar bisa
+                                vid.oncanplay = () => {
+                                    vid.play().catch(e => console.warn("Autoplay dicegah browser", e)); 
+                                };
+                                
+                                vid.load(); 
                             } 
                         } 
                         else { const img = document.getElementById('result-image'); if (img) { img.src = finalMediaUrl; img.classList.remove('hidden'); } }
@@ -1849,7 +1854,13 @@
 
         window.openVideoModal = function() {
             const modal = document.getElementById('video-modal'); const modalPlayer = document.getElementById('modal-video-player');
-            if (modal && modalPlayer) { modal.classList.remove('hidden'); modalPlayer.currentTime = 0; modalPlayer.play(); }
+            const resultVideo = document.getElementById('result-video');
+            if (modal && modalPlayer && resultVideo) { 
+                modalPlayer.src = resultVideo.src;
+                modal.classList.remove('hidden'); 
+                modalPlayer.currentTime = 0; 
+                modalPlayer.play().catch(e=>e); 
+            }
         }
         window.closeVideoModal = function() {
             const modal = document.getElementById('video-modal'); const modalPlayer = document.getElementById('modal-video-player');
@@ -1872,11 +1883,27 @@
             const btn = e ? e.currentTarget : null; const icon = btn ? btn.querySelector('i') : null;
             try {
                 if (icon) icon.className = "fa-solid fa-spinner fa-spin text-white text-2xl";
-                const response = await fetch(urlToDownload);
+                
+                // BARU: Panggil API convert temp URL HANYA SAAT MENGUNDUH
+                let finalDlUrl = urlToDownload;
+                try {
+                    const dlRes = await fetch('/api/action?action=download', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlToDownload })
+                    });
+                    if (dlRes.ok) {
+                        const dlData = await dlRes.json();
+                        finalDlUrl = dlData.data || dlData.url || finalDlUrl;
+                    }
+                } catch(err) {
+                    console.warn("Gagal mendapatkan link clean download, memakai original url", err);
+                }
+
+                const response = await fetch(finalDlUrl);
                 if (!response.ok) throw new Error("CORS terblokir");
                 const blob = await response.blob(); const blobUrl = window.URL.createObjectURL(blob);
                 const a = document.createElement('a'); a.style.display = 'none'; a.href = blobUrl; a.download = `Ailabs_${Date.now()}.${isFileVideo ? 'mp4' : 'png'}`;
                 document.body.appendChild(a); a.click(); window.URL.revokeObjectURL(blobUrl);
+                
                 setTimeout(() => { if (icon) icon.className = "fa-solid fa-download text-white text-2xl"; }, 1000);
             } catch (error) {
                 window.open(urlToDownload, '_blank');
@@ -2039,7 +2066,8 @@
             const container = document.getElementById('admin-users-list'); if(!container) return;
             container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs italic"><i class="fas fa-spinner fa-spin text-emerald-500 mb-2 text-lg block"></i> Mengambil data...</div>';
             try {
-                const res = await fetch('/api/admin/users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId }) });
+                // FIXED API ROUTE: /api/action?action=get_users
+                const res = await fetch('/api/action?action=get_users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId }) });
                 if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
                 const data = await res.json();
                 if(data.users && data.users.length > 0) {
@@ -2067,7 +2095,8 @@
             if (isNaN(amount)) return window.showCustomAlert("Masukkan angka yang benar.");
             const btn = event.currentTarget; const originalText = btn.innerText; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                const res = await fetch('/api/admin/topup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId, targetUid: uid, amount: amount }) });
+                // FIXED API ROUTE: /api/action?action=topup
+                const res = await fetch('/api/action?action=topup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId, targetUid: uid, amount: amount }) });
                 const data = await res.json();
                 if (data.success) { window.showToast("Sukses!"); input.value = ''; loadAllUsersForAdmin(); } 
                 else window.showCustomAlert(data.error);
@@ -2418,7 +2447,8 @@
             let attempts = 0; const maxAttempts = actionType === 'extend' ? 180 : 120; let finalMediaUrl = null;
 
             try {
-                const initRes = await fetch('/api/veo-action', {
+                // FIXED API ROUTE: /api/action?action=veo-action
+                const initRes = await fetch('/api/action?action=veo-action', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: actionType, taskId: taskId, prompt: extendPrompt })
                 });
@@ -2437,7 +2467,8 @@
                     if (actionType === 'extend') {
                         let checkData;
                         try {
-                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
+                            // FIXED API ROUTE: /api/action?action=check
+                            const checkRes = await fetch(`/api/action?action=check&taskId=${activeTaskId}&engine=veo`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             continue;
@@ -2448,17 +2479,15 @@
                         if (status === '1') {
                             const resultUrls = checkData.data?.response?.fullResultUrls || checkData.data?.response?.resultUrls;
                             if (resultUrls && resultUrls.length > 0) {
-                                finalMediaUrl = await fetch('/api/download', {
-                                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ url: resultUrls[0] })
-                                }).then(r => r.json()).then(d => d.data || resultUrls[0]).catch(() => resultUrls[0]);
+                                finalMediaUrl = resultUrls[0];
                             }
                             break;
                         } else if (status === '2' || status === '3') { throw new Error(checkData.errorMessage || "Gagal memperpanjang video."); }
                     } else {
                         let checkRes, checkData;
                         try {
-                            checkRes = await fetch('/api/veo-action', {
+                            // FIXED API ROUTE: /api/action?action=veo-action
+                            checkRes = await fetch('/api/action?action=veo-action', {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ action: actionType, taskId: taskId })
                             });
@@ -2475,9 +2504,23 @@
                 if (outputLoading) outputLoading.classList.add('hidden');
                 const vid = document.getElementById('result-video');
                 if (vid) { 
+                    vid.pause();
+                    vid.removeAttribute('src');
+                    vid.load();
+                    
                     vid.src = finalMediaUrl; 
-                    vid.load(); // Wajib agar browser memuat ulang source video baru
-                    vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
+                    vid.classList.remove('hidden'); 
+                    
+                    vid.onerror = () => {
+                        console.error("Gagal memutar video secara langsung dari URL:", finalMediaUrl);
+                        window.showCustomAlert("Format video tidak didukung oleh browser untuk diputar langsung. Klik 'Unduh' untuk melihatnya.");
+                    };
+                    
+                    vid.oncanplay = () => {
+                        vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
+                    };
+                    
+                    vid.load();
                 }
                 window.showToast(`Berhasil menerapkan ${actionType.toUpperCase()}!`);
                 if (actionType === 'extend') window.lastGenData.taskId = activeTaskId;
