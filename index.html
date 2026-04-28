@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- PWA Meta Tags -->
+    <!-- PWA Meta Tags (Wajib untuk APK) -->
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
@@ -457,7 +457,6 @@
         </main>
 
         <div class="fixed bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 z-50">
-            <!-- MENGUBAH ACTION TOMBOL MENJADI BUKA MENU -->
             <button onclick="openNewProjectMenu()" class="cta-kelap-kelip bg-black/80 backdrop-blur-xl border border-emerald-500/50 text-white rounded-full px-8 py-3 md:px-12 md:py-5 text-sm md:text-base font-bold flex items-center gap-2 hover:scale-105 active:scale-95 shadow-2xl whitespace-nowrap">
                 <i class="fa-solid fa-plus"></i> Project baru
             </button>
@@ -552,8 +551,8 @@
                     </div>
 
                     <img id="result-image" src="" class="hidden w-full h-full object-contain cursor-pointer">
-                    <!-- FIXED: Tambahkan tag pendukung untuk format Video -->
-                    <video id="result-video" autoplay loop muted playsinline crossorigin="anonymous" class="hidden w-full h-full object-contain cursor-pointer"></video>
+                    <!-- VIDEO TAG - Crossorigin dihilangkan agar video gampang diputar -->
+                    <video id="result-video" autoplay loop muted playsinline class="hidden w-full h-full object-contain cursor-pointer"></video>
                     
                     <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
                         <button id="btn-view-result" class="w-12 h-12 md:w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl"></i></button>
@@ -960,6 +959,7 @@
 
                     if (creditUnsubscribe) creditUnsubscribe();
                     try {
+                        // SINKRONISASI KREDIT OTOMATIS: Angka ini akan otomatis berkurang saat backend Vercel memotong kredit
                         creditUnsubscribe = onSnapshot(userRef, (snapshot) => {
                             if (snapshot.exists()) {
                                 window.currentUserCredits = snapshot.data().credits || 0;
@@ -1228,7 +1228,6 @@
             const btn = document.getElementById('btn-submit-redeem');
             const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                // FIXED API ROUTE: /api/action?action=redeem
                 const res = await fetch('/api/action?action=redeem', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: window.currentUserId, appId: window.appId, code: code })
@@ -1456,7 +1455,6 @@
                 }
                 resizeImage(file, 1024, 1024, async (resizedBase64) => {
                     try {
-                        // FIXED API ROUTE: /api/action?action=upload
                         const response = await fetch('/api/action?action=upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: resizedBase64, uploadPath: 'ailabs-editor', fileName: `canvas_${Date.now()}.jpg` })
@@ -1535,7 +1533,6 @@
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
-                        // FIXED API ROUTE: /api/action?action=upload
                         const response = await fetch('/api/action?action=upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: e.target.result, uploadPath: 'ailabs-editor-video', fileName: `video_${Date.now()}.${fileToUpload.type === 'video/webm' ? 'webm' : 'mp4'}` })
@@ -1794,9 +1791,7 @@
                             }
 
                             if (mediaUrl) {
-                                // PENTING: LANGSUNG GUNAKAN URL ASLI UNTUK PLAYER!
-                                // API download-url dari KIE mengubah link menjadi file tipe "attachment".
-                                // File bertipe attachment tidak bisa diputar oleh tag <video> dan akan jadi BLANK.
+                                // PENTING: URL ASLI LANGSUNG DIGUNAKAN DI SINI, ANTI BLANK!
                                 finalMediaUrl = mediaUrl;
                                 break; 
                             }
@@ -1817,7 +1812,6 @@
                         if (isResultVideo) { 
                             const vid = document.getElementById('result-video'); 
                             if (vid) { 
-                                // Bersihkan video player lama & Force Load link baru
                                 vid.pause();
                                 vid.removeAttribute('src');
                                 vid.load();
@@ -1825,18 +1819,16 @@
                                 vid.src = finalMediaUrl; 
                                 vid.classList.remove('hidden'); 
                                 
-                                // Detektor jika video gagal dimuat
                                 vid.onerror = () => {
-                                    console.error("Gagal memutar video dari URL secara langsung:", finalMediaUrl);
-                                    window.showCustomAlert("Browser tidak mendukung pemutaran langsung. Silakan klik tombol 'Unduh' untuk melihat hasilnya.");
+                                    console.error("Gagal memutar video secara langsung dari URL:", finalMediaUrl);
+                                    window.showCustomAlert("Format video tidak didukung oleh browser untuk diputar langsung. Klik 'Unduh' untuk melihatnya.");
                                 };
                                 
-                                // Mainkan hanya jika benar-benar bisa
                                 vid.oncanplay = () => {
-                                    vid.play().catch(e => console.warn("Autoplay dicegah browser", e)); 
+                                    vid.play().catch(e=>console.warn("Autoplay dicegah browser", e)); 
                                 };
                                 
-                                vid.load(); 
+                                vid.load();
                             } 
                         } 
                         else { const img = document.getElementById('result-image'); if (img) { img.src = finalMediaUrl; img.classList.remove('hidden'); } }
