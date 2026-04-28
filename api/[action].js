@@ -41,7 +41,7 @@ export default async function handler(req, res) {
         if (action === 'topup') return await handleTopup(req, res, db);
         if (action === 'toggle_access') return await handleToggleAccess(req, res, db);
         if (action === 'get_referrals') return await handleGetReferrals(req, res, db);
-        if (action === 'webhook') return await handleWebhook(req, res, db); // Endpoint baru untuk Kie AI
+        if (action === 'webhook') return await handleWebhook(req, res, db);
     } catch (error) {
         console.error(`Error on DB route /api/${action}:`, error);
         return res.status(500).json({ error: "Internal Server Error", message: error.message });
@@ -129,12 +129,12 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId, cost } = req.body;
 
-    // Validasi & Keamanan: Pastikan cost adalah Number asli dan tidak minus
     const parsedCost = Number(cost) || 0;
     if (parsedCost < 0) {
-        return res.status(400).json({ error: "Hayo mau ngapain? Parameter cost tidak valid." });
+        return res.status(400).json({ error: "Parameter cost tidak valid." });
     }
 
+    // PENGECEKAN KREDIT
     if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
         try {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
@@ -164,13 +164,14 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
+    // 1. KLING & MOTION
     if (type === 'Motion' || (engine && engine.includes('Kling'))) {
         const isKling3 = engine === 'Kling 3.0';
         payload = {
             model: isKling3 ? "kling-3.0/motion-control" : "kling-2.6/motion-control",
             input: {
                 prompt: prompt || "No distortion, the character's movements are consistent with the video.",
-                input_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
+                image_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
                 video_urls: video_urls.length > 0 ? [video_urls[0]] : [],
                 character_orientation: character_orientation || "video",
                 mode: mode || "720p" 
@@ -178,18 +179,18 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         };
         if (isKling3 && background_source) payload.input.background_source = background_source;
         
-    } else if (engine && engine.toLowerCase() === 'grok') {
+    // 2. GROK
+    } else if (engine && engine.toLowerCase().includes('grok')) {
         const hasImages = image_urls && image_urls.length > 0;
         
         if (type === 'Video') {
             const modelName = hasImages ? "grok-imagine/image-to-video" : "grok-imagine/text-to-video";
             
-            // Validasi ketat sesuai dokumentasi Grok Image-to-Video
             let safeDuration = parseInt(duration) || 6;
-            safeDuration = Math.min(Math.max(safeDuration, 6), 30); // Durasi wajib 6-30 detik
+            safeDuration = Math.min(Math.max(safeDuration, 6), 30); 
 
             let safeMode = mode || "normal";
-            if (hasImages && safeMode === 'spicy') safeMode = "normal"; // Mode spicy dilarang untuk external images
+            if (hasImages && safeMode === 'spicy') safeMode = "normal"; 
 
             payload = {
                 model: modelName,
@@ -202,16 +203,15 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                     nsfw_checker: false
                 }
             };
-            if (hasImages) payload.input.image_urls = image_urls.slice(0, 7); // Maksimal 7 gambar
+            if (hasImages) payload.input.image_urls = image_urls.slice(0, 7);
             
         } else if (type === 'Gambar') {
-            // PERBAIKAN: Gunakan grok-imagine/image-to-image jika user menyertakan gambar referensi
             if (hasImages) {
                 payload = { 
                     model: "grok-imagine/image-to-image", 
                     input: { 
                         prompt: prompt || "Maintain character consistency, enhance detail.", 
-                        image_urls: [image_urls[0]], // Hanya boleh 1 gambar untuk image-to-image Grok
+                        image_urls: [image_urls[0]], 
                         nsfw_checker: false
                     } 
                 };
@@ -219,24 +219,33 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                 payload = { 
                     model: "grok-imagine/text-to-image", 
                     input: { 
-                        prompt: prompt, 
+                        prompt: prompt || "Cinematic masterpiece", 
                         aspect_ratio: ratio || "16:9" 
                     } 
                 };
             }
         }
+    // 3. VEO
     } else {
-        // Veo API Logic
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
         let veoModel = "veo3_fast"; 
         if (engine === 'veo3.1 lite') veoModel = "veo3_lite";
         else if (engine === 'veo3.1 quality') veoModel = "veo3";
         else if (engine === 'veo3.1 fast') veoModel = "veo3_fast";
 
-        payload = { model: veoModel, prompt: prompt || "Cinematic aesthetic generation", aspect_ratio: ratio || "16:9" };
-        if (image_urls && image_urls.length > 0) payload.imageUrls = image_urls;
+        payload = { 
+            model: veoModel, 
+            prompt: prompt || "Cinematic aesthetic generation", 
+            aspect_ratio: ratio || "16:9" 
+        };
+        // Perbaikan vital untuk Veo: Memastikan pengiriman parameter gambar
+        if (image_urls && image_urls.length > 0) {
+            payload.imageUrls = image_urls; // Standard Veo Kie.ai
+            payload.image_urls = image_urls; // Fallback jika Veo minta snake_case
+        }
     }
 
+    // EKSEKUSI KE KIE AI
     const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
@@ -245,17 +254,34 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const data = await response.json();
 
+    // PENANGANAN JIKA GAGAL DARI KIE AI (Error 400 dll)
     if (!response.ok || (data.code && data.code !== 200)) {
-        // Refund kredit jika API Kie gagal
+        
+        // --- SISTEM LOGGING UNTUK DEBUGGING DI VERCEL ---
+        console.error("🔴 KIE AI REJECTED THE REQUEST!");
+        console.error("Endpoint:", endpoint);
+        console.error("Payload Sent:", JSON.stringify(payload));
+        console.error("Kie AI Response:", JSON.stringify(data));
+        // ------------------------------------------------
+
+        // Refund kredit
         if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             await userRef.update({ credits: admin.firestore.FieldValue.increment(parsedCost) }); 
         }
-        return res.status(400).json({ error: "Gagal membuat task di KIE AI", details: data });
+        
+        // Memunculkan pesan error ASLI dari Kie AI ke pengguna
+        let errorMsg = "Gagal memproses task.";
+        if (data.msg) errorMsg = data.msg;
+        else if (data.message) errorMsg = data.message;
+        else if (data.error && data.error.message) errorMsg = data.error.message;
+        else errorMsg = JSON.stringify(data);
+
+        return res.status(400).json({ error: `Kie AI: ${errorMsg}` });
     }
 
     // =========================================================
-    // MENCATAT RIWAYAT SETELAH BERHASIL DIKIRIM KE KIE AI
+    // MENCATAT RIWAYAT SETELAH BERHASIL
     // =========================================================
     try {
         const historyAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
@@ -282,11 +308,11 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             prompt: prompt || 'Tanpa prompt',
             engine: engine || 'Unknown',
             type: type || 'Unknown',
-            status: 'PROCESSING', // Status awal
+            status: 'PROCESSING', 
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         });
     } catch (err) {
-        console.error("❌ Gagal simpan history:", err);
+        console.error("Gagal simpan history:", err);
     }
     // =========================================================
 
@@ -720,7 +746,7 @@ async function handleGetReferrals(req, res, db) {
 async function handleWebhook(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
 
-    const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; // Tambahkan ini di Vercel Env jika mau pakai verifikasi
+    const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; 
     const timestamp = req.headers['x-webhook-timestamp'];
     const receivedSignature = req.headers['x-webhook-signature'];
 
@@ -728,22 +754,18 @@ async function handleWebhook(req, res, db) {
     const taskId = data.data?.task_id || data.taskId;
     const code = data.code;
 
-    // 1. Verifikasi Keamanan Signature dari Kie AI (Opsional tapi direkomendasikan)
     if (webhookHmacKey && timestamp && receivedSignature && taskId) {
         const message = `${taskId}.${timestamp}`;
         const expectedSignature = crypto.createHmac('sha256', webhookHmacKey).update(message).digest('base64');
         
-        // Membandingkan signature
         if (expectedSignature.length !== receivedSignature.length || !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
             console.error("Webhook signature invalid!");
             return res.status(401).json({ error: 'Invalid signature' });
         }
     }
 
-    // 2. Simpan Laporan Status ke Firebase
     if (taskId) {
         try {
-            // Kita cari taskId ini di seluruh database history kita
             const historyQuery = await db.collectionGroup('history').where('taskId', '==', taskId).get();
             
             if (!historyQuery.empty) {
