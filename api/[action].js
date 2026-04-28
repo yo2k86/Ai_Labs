@@ -55,7 +55,7 @@ export default async function handler(req, res) {
 
     try {
         switch (action) {
-            case 'check': return await handleCheck(req, res, apiKey);
+            case 'check': return await handleCheck(req, res, apiKey, db); // Ditambah db untuk Jalur VIP
             case 'download': return await handleDownload(req, res, apiKey);
             case 'generate': return await handleGenerate(req, res, apiKey, db, admin);
             case 'upload': return await handleUpload(req, res, apiKey);
@@ -73,9 +73,8 @@ export default async function handler(req, res) {
 // ==========================================
 // 1. FUNGSI CHECK (Mengecek Status Task)
 // ==========================================
-async function handleCheck(req, res, apiKey) {
-  // PENTING: Mencegah Vercel CDN dan browser melakukan caching pada respons polling!
-  // Tanpa ini, Vercel akan terus membalas "PROCESSING" padahal aslinya sudah selesai.
+async function handleCheck(req, res, apiKey, db) {
+  // PENTING: Mencegah Vercel CDN dan browser melakukan caching
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
@@ -83,7 +82,6 @@ async function handleCheck(req, res, apiKey) {
   let taskId = req.query.taskId;
   let engine = req.query.engine;
 
-  // PENGAMAN KHUSUS VERCEL: Paksa ambil dari raw URL jika req.query.taskId kosong
   if (!taskId && req.url && req.url.includes('?')) {
       const urlParams = new URLSearchParams(req.url.split('?')[1]);
       taskId = taskId || urlParams.get('taskId');
@@ -92,12 +90,41 @@ async function handleCheck(req, res, apiKey) {
 
   if (!taskId) return res.status(400).json({ error: "Parameter taskId tidak ditemukan" });
 
+  // -----------------------------------------------------------------------------------
+  // FITUR BARU: JALUR VIP VIA FIREBASE!
+  // Karena webhook lu jalan, kita cek Firebase dulu sebelum nanya ke Kie AI yang suka ngaco
+  // -----------------------------------------------------------------------------------
+  if (taskId && db) {
+      try {
+          const historyQuery = await db.collectionGroup('history').where('taskId', '==', taskId).get();
+          if (!historyQuery.empty) {
+              const hData = historyQuery.docs[0].data();
+              // Jika Webhook sudah mengisi status SUCCESS dan ada resultUrl-nya
+              if (hData.status === 'SUCCESS' && hData.resultUrl) {
+                  return res.status(200).json({
+                      code: 200, msg: "success",
+                      data: { status: "SUCCESS", successFlag: 1, resultUrl: hData.resultUrl }
+                  });
+              }
+              // Jika Webhook melaporkan FAILED
+              if (hData.status === 'FAILED' || hData.status === 'FAIL') {
+                  return res.status(200).json({
+                      code: 500, msg: "failed",
+                      data: { status: "FAIL", successFlag: 2 }
+                  });
+              }
+          }
+      } catch (err) {
+          console.error("Firebase VIP Check Error:", err);
+      }
+  }
+  // -----------------------------------------------------------------------------------
+
+  // Jika Webhook belum update Firebase, baru kita polling manual ke API Kie
   try {
-    // Tambahkan _t (timestamp) sebagai cache buster agar Kie AI selalu membalas data real-time terbaru
     let cacheBuster = `&_t=${Date.now()}`;
     let endpoint = `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${taskId}${cacheBuster}`;
     
-    // KHUSUS VEO: record-info
     if ((engine && engine.toLowerCase().includes("veo")) || taskId.startsWith("veo_")) {
         endpoint = `https://api.kie.ai/api/v1/veo/record-info?taskId=${taskId}${cacheBuster}`;
     }
@@ -105,16 +132,12 @@ async function handleCheck(req, res, apiKey) {
     const response = await fetch(endpoint, {
       method: "GET", 
       headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      cache: 'no-store' // Paksa bypass fetch caching bawaan engine Node.js Vercel (Next.js 13+)
+      cache: 'no-store' 
     });
 
     const data = await response.json();
 
-    // =========================================================================
-    // NORMALISASI RESPONSE: Supaya frontend Ailabs lu gak pernah stuck lagi
-    // =========================================================================
     if (data && data.data) {
-        // 1. Normalisasi teks status menjadi format baku yang dimengerti frontend
         let stateStr = String(data.data.state || data.data.task_status || data.data.status || data.data.successFlag || "").toUpperCase();
         
         if (['SUCCESS', 'COMPLETED', 'SUCCEEDED', 'SUCCESSFUL', '1'].includes(stateStr)) {
@@ -126,12 +149,12 @@ async function handleCheck(req, res, apiKey) {
             data.data.status = stateStr;
         }
 
-        // 2. Normalisasi posisi Link Video agar frontend tidak bingung mencarinya
+        // Cari URL Video dari objek data Kie AI (Mendukung format stringified array)
         if (!data.data.resultUrl && data.data.status === 'SUCCESS') {
-            const possibleUrl = 
-                data.data.response?.fullResultUrls?.[0] || 
-                data.data.response?.resultUrls?.[0] || 
-                data.data.resultUrls?.[0] || 
+            let possibleUrl = 
+                data.data.response?.fullResultUrls || 
+                data.data.response?.resultUrls || 
+                data.data.resultUrls || 
                 data.data.task_result?.videos?.[0]?.url || 
                 data.data.task_result?.images?.[0]?.url ||
                 data.data.response?.video_url ||
@@ -139,7 +162,16 @@ async function handleCheck(req, res, apiKey) {
                 data.data.url;
                 
             if (possibleUrl) {
-                data.data.resultUrl = possibleUrl;
+                if (Array.isArray(possibleUrl) && possibleUrl.length > 0) {
+                    data.data.resultUrl = possibleUrl[0];
+                } else if (typeof possibleUrl === 'string') {
+                    if (possibleUrl.startsWith('[')) {
+                        try { data.data.resultUrl = JSON.parse(possibleUrl.replace(/'/g, '"'))[0]; }
+                        catch(e) { data.data.resultUrl = possibleUrl.replace(/\[|\]|'/g, ''); }
+                    } else {
+                        data.data.resultUrl = possibleUrl;
+                    }
+                }
             }
         }
     }
@@ -171,7 +203,6 @@ async function handleDownload(req, res, apiKey) {
 
         const result = await response.json();
         
-        // PENGAMAN: Jika 422 (External URL) atau Error lain, fallback ke URL asli
         if (result.code !== 200) {
             console.warn("Kie Download URL warning:", result.msg);
             return res.status(200).json({ data: req.body.url, warning: result.msg });
@@ -180,7 +211,6 @@ async function handleDownload(req, res, apiKey) {
         return res.status(200).json({ data: result.data || req.body.url });
 
     } catch (e) {
-        // Fallback kembalikan URL aslinya walau error agar gambar/video tetap tampil
         console.error("Error on download convert:", e.message);
         return res.status(200).json({ data: req.body.url, error: e.message });
     }
@@ -194,9 +224,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
   const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId } = req.body;
 
-  // ==========================================
-  // HITUNG BIAYA (COST) SINKRON DENGAN KIE.AI
-  // ==========================================
   let cost = 1; 
   const engineName = (engine || '').toLowerCase();
   
@@ -219,7 +246,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
       cost = 5; 
   }
 
-  // POTONG KREDIT VIA FIREBASE ADMIN
   if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
       try {
           const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
@@ -243,16 +269,12 @@ async function handleGenerate(req, res, apiKey, db, admin) {
       return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
   }
 
-  // ==========================================
-  // LOGIKA PAYLOAD KIE AI
-  // ==========================================
   try {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
     let incomingMode = String(mode || "720p").toLowerCase();
 
-    // ---> 1. KLING & MOTION
     if (type === 'Motion' || (engine && engine.includes('Kling'))) {
         const isKling3 = engine === 'Kling 3.0';
         
@@ -281,7 +303,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             payload.input.background_source = background_source;
         }
     }
-    // ---> 2. GROK
     else if (engine && engine.toLowerCase().includes('grok')) {
         const hasImages = image_urls && image_urls.length > 0;
         if (type === 'Video') {
@@ -321,7 +342,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             }
         }
     } 
-    // ---> 3. VEO 3.1
     else {
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
         let veoModel = "veo3_fast"; 
@@ -333,15 +353,12 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             prompt: prompt || "Cinematic aesthetic generation",
             aspect_ratio: ratio || "16:9"
         };
-        // VEO minta imageUrls (CamelCase)
         if (image_urls && image_urls.length > 0) {
             payload.imageUrls = image_urls;
-            payload.image_urls = image_urls; // Backup
+            payload.image_urls = image_urls; 
         }
     }
 
-    // ---> 4. INJEKSI CALLBACK URL (AGAR WEBHOOK KEPANGGIL) <---
-    // Pastikan masukan URL API Backend kamu di Env Variables Vercel
     const webhookUrl = process.env.WEBHOOK_URL;
     if (webhookUrl) {
         payload.callBackUrl = webhookUrl;
@@ -355,7 +372,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     const data = await response.json();
 
-    // REFUND JIKA GAGAL DARI KIE AI
     if (!response.ok || (data.code && data.code !== 200)) {
         console.error("🔴 KIE AI REJECTED REQUEST:", JSON.stringify(data));
         
@@ -371,7 +387,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
         return res.status(400).json({ error: `Kie AI Error: ${errorMsg}` });
     }
 
-    // SIMPAN HISTORY
     const taskId = data.data?.taskId || data.taskId || data.task_id;
     if (process.env.FIREBASE_PROJECT_ID && userId && appId && taskId) {
         try {
@@ -388,7 +403,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                 prompt: prompt || "Tanpa prompt",
                 engine: engine || "Kie.ai Engine",
                 type: type || "Video",
-                status: 'PROCESSING', // Tambahan kecil biar status awal jelas
+                status: 'PROCESSING', 
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
         } catch (e) {
@@ -404,7 +419,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 }
 
 // ==========================================
-// 4. FUNGSI REDEEM KODE PROMO (LENGKAP 150+ KODE)
+// 4. FUNGSI REDEEM KODE PROMO
 // ==========================================
 async function handleRedeem(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
@@ -673,7 +688,6 @@ async function handleGetReferrals(req, res, db) {
             }
         }
         
-        // KODE LENGKAP UNTUK DASHBOARD ADMIN
         const allCodes = [
             "AL-9A2X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
             "AL-2L7C", "AL-8M4D", "AL-3N9F", "AL-5P6G", "AL-7Q2H", "AL-1R8J", "AL-6T5K", "AL-4V1L", "AL-9W3M", "AL-2X7N",
@@ -720,10 +734,7 @@ async function handleGetReferrals(req, res, db) {
 async function handleWebhook(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     
-    // Ambil Secret Key dari environment Vercel
     const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; 
-    
-    // Header yang dikirim oleh Kie AI
     const timestamp = req.headers['x-webhook-timestamp'];
     const receivedSignature = req.headers['x-webhook-signature'];
     const data = req.body;
@@ -731,7 +742,6 @@ async function handleWebhook(req, res, db) {
     const taskId = data.data?.task_id || data.data?.taskId || data.taskId || data.task_id;
     const code = data.code;
 
-    // VERIFIKASI KEAMANAN: Wajib lolos pengecekan jika WEBHOOK_HMAC_KEY dipasang di Vercel
     if (webhookHmacKey) {
         if (!timestamp || !receivedSignature) {
             console.warn("Webhook Ditolak: Header signature/timestamp hilang.");
@@ -741,30 +751,68 @@ async function handleWebhook(req, res, db) {
         const message = `${taskId}.${timestamp}`;
         const expectedSignature = crypto.createHmac('sha256', webhookHmacKey).update(message).digest('base64');
         
-        // Cek Panjang Signature untuk mencegah error pada saat buffer di-compare
         if (expectedSignature.length !== receivedSignature.length) {
             console.warn("Webhook Ditolak: Panjang signature tidak sesuai.");
             return res.status(401).json({ error: 'Invalid signature length' });
         }
         
-        // Pengecekan Aman (Constant-time comparison agar kebal dari Timing Attacks)
         if (!crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
             console.warn("Webhook Ditolak: Signature tidak cocok dengan HMAC.");
             return res.status(401).json({ error: 'Invalid signature' });
         }
     }
 
-    // Jika aman (atau jika WEBHOOK_HMAC_KEY sengaja tidak dipasang), lanjut perbarui Database
+    // -----------------------------------------------------------------------------------
+    // FITUR BARU: MENGAMBIL URL VIDEO DARI WEBHOOK
+    // Jadi URL-nya langsung disimpen ke Firebase saat video kelar dari Kie AI
+    // -----------------------------------------------------------------------------------
+    let extractedUrl = "";
+    try {
+        const cbData = data.data;
+        if (cbData) {
+            const info = cbData.info || cbData.response || cbData.task_result || cbData;
+            let rawUrl = info.fullResultUrls || info.resultUrls || info.video_url || info.resultUrl || info.url || cbData.resultUrl;
+            
+            if (Array.isArray(rawUrl) && rawUrl.length > 0) {
+                extractedUrl = rawUrl[0];
+            } else if (typeof rawUrl === 'string') {
+                if (rawUrl.startsWith('[')) {
+                    try { extractedUrl = JSON.parse(rawUrl.replace(/'/g, '"'))[0]; } 
+                    catch(e) { extractedUrl = rawUrl.replace(/\[|\]|'/g, ''); }
+                } else {
+                    extractedUrl = rawUrl;
+                }
+            }
+            
+            // Pencarian URL pamungkas kalau metode di atas gagal
+            if (!extractedUrl) {
+                const str = JSON.stringify(cbData);
+                const urls = str.match(/https?:\/\/[^\s"'\]]+/g);
+                if (urls) {
+                    const valid = urls.find(u => u.includes('tempfile') || u.match(/\.(mp4|webm|mov|png|jpg)/i));
+                    if (valid) extractedUrl = valid;
+                }
+            }
+        }
+    } catch(e) {
+        console.error("Error extract URL dari Webhook:", e);
+    }
+
+    // Simpan ke Firebase (Status + URL Videonya)
     if (taskId) {
         try {
             const historyQuery = await db.collectionGroup('history').where('taskId', '==', taskId).get();
             if (!historyQuery.empty) {
                 const batch = db.batch();
                 historyQuery.docs.forEach(doc => {
-                    batch.update(doc.ref, {
+                    let updateData = {
                         status: code === 200 ? 'SUCCESS' : 'FAILED',
                         updatedAt: admin.firestore.FieldValue.serverTimestamp()
-                    });
+                    };
+                    if (extractedUrl && code === 200) {
+                        updateData.resultUrl = extractedUrl;
+                    }
+                    batch.update(doc.ref, updateData);
                 });
                 await batch.commit();
             }
@@ -773,6 +821,5 @@ async function handleWebhook(req, res, db) {
         }
     }
     
-    // Wajib kembalikan 200 agar Kie AI tahu webhook sudah diterima
     return res.status(200).json({ status: 'received' });
 }
