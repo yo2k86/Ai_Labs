@@ -56,22 +56,14 @@ export default async function handler(req, res) {
 
     try {
         switch (action) {
-            case 'check':
-                return await handleCheck(req, res, apiKey);
-            case 'download':
-                return await handleDownload(req, res, apiKey);
-            case 'generate':
-                return await handleGenerate(req, res, apiKey, db, admin);
-            case 'upload':
-                return await handleUpload(req, res, apiKey);
-            case 'upload-url':
-                return await handleUploadUrl(req, res, apiKey);
-            case 'veo-action':
-                return await handleVeoAction(req, res, apiKey);
-            case 'kie-balance':
-                return await handleKieBalance(req, res, apiKey);
-            default:
-                return res.status(404).json({ error: `Endpoint /api/${action} tidak ditemukan.` });
+            case 'check': return await handleCheck(req, res, apiKey);
+            case 'download': return await handleDownload(req, res, apiKey);
+            case 'generate': return await handleGenerate(req, res, apiKey, db, admin);
+            case 'upload': return await handleUpload(req, res, apiKey);
+            case 'upload-url': return await handleUploadUrl(req, res, apiKey);
+            case 'veo-action': return await handleVeoAction(req, res, apiKey);
+            case 'kie-balance': return await handleKieBalance(req, res, apiKey);
+            default: return res.status(404).json({ error: `Endpoint /api/${action} tidak ditemukan.` });
         }
     } catch (error) {
         console.error(`Error on AI route /api/${action}:`, error);
@@ -80,256 +72,265 @@ export default async function handler(req, res) {
 }
 
 // ==========================================
-// 1. FUNGSI CHECK (/api/check)
+// 1. FUNGSI CHECK (Persis dari check.js.txt)
 // ==========================================
 async function handleCheck(req, res, apiKey) {
-    const { taskId, engine } = req.query;
-    if (!taskId) return res.status(400).json({ error: "Parameter taskId tidak ditemukan" });
+  const { taskId, engine } = req.query;
 
+  if (!taskId) return res.status(400).json({ error: "Parameter taskId tidak ditemukan" });
+
+  try {
     let endpoint = `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${taskId}`;
     
+    // KHUSUS VEO: record-info
     if ((engine && engine.toLowerCase().includes("veo")) || taskId.startsWith("veo_")) {
         endpoint = `https://api.kie.ai/api/v1/veo/record-info?taskId=${taskId}`;
     }
 
     const response = await fetch(endpoint, {
-        method: "GET", 
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
+      method: "GET", 
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
     });
+
     const data = await response.json();
     return res.status(200).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: "Gagal cek status dari Kie AI.", message: error.message });
+  }
 }
 
 // ==========================================
-// 2. FUNGSI DOWNLOAD (/api/download)
+// 2. FUNGSI CONVERT TEMPFILE (Persis download.js.txt)
 // ==========================================
 async function handleDownload(req, res, apiKey) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     
-    const response = await fetch("https://api.kie.ai/api/v1/common/download-url", {
-        method: "POST",
-        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ url: req.body.url })
-    });
+    try {
+        const response = await fetch("https://api.kie.ai/api/v1/common/download-url", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ url: req.body.url })
+        });
 
-    const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Respons dari KIE bukan JSON (mungkin server KIE sedang sibuk).");
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            throw new Error("Respons dari KIE bukan JSON (mungkin server KIE sedang sibuk).");
+        }
+
+        const result = await response.json();
+        return res.status(200).json({ data: result.data || req.body.url });
+
+    } catch (e) {
+        return res.status(500).json({ error: e.message });
     }
-
-    const result = await response.json();
-    return res.status(200).json({ data: result.data || req.body.url });
 }
 
 // ==========================================
-// 3. FUNGSI GENERATE (/api/generate)
+// 3. FUNGSI UTAMA GENERATE (Dari generate.js.txt + Pengaman Grok)
 // ==========================================
 async function handleGenerate(req, res, apiKey, db, admin) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Metode harus POST' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Metode harus POST' });
 
-    const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId, cost } = req.body;
+  const { image_urls = [], video_urls = [], prompt, engine, ratio, type, duration, mode, character_orientation, background_source, userId, appId } = req.body;
 
-    const parsedCost = Number(cost) || 0;
-    if (parsedCost < 0) {
-        return res.status(400).json({ error: "Parameter cost tidak valid." });
-    }
+  // ==========================================
+  // HITUNG BIAYA (COST) SINKRON DENGAN KIE.AI
+  // ==========================================
+  let cost = 1; 
+  const engineName = (engine || '').toLowerCase();
+  
+  if (type === 'Gambar') {
+      cost = 1;
+  } else if (engineName === 'grok') {
+      const dur = parseInt(duration) || 6;
+      cost = (dur / 6) * 18; 
+  } else if (engineName.includes('veo3.1 lite')) {
+      cost = 30; 
+  } else if (engineName.includes('veo3.1 fast')) {
+      cost = 30;
+  } else if (engineName.includes('veo3.1 quality')) {
+      cost = 50; 
+  } else if (engineName.includes('kling 3.0')) {
+      cost = 15;
+  } else if (engineName.includes('kling')) { 
+      cost = 10;
+  } else if (type === 'Video' || type === 'Motion') {
+      cost = 5; 
+  }
 
-    // PENGECEKAN KREDIT
-    if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
-        try {
-            const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
-            const userDoc = await userRef.get();
-            
-            if (!userDoc.exists) return res.status(403).json({ error: "Akun tidak ditemukan. Silakan reload aplikasi." });
-            
-            const userData = userDoc.data();
-            if ((type === 'Video' || type === 'Motion') && userData.videoAccess === false) {
-                return res.status(403).json({ error: "Akses pembuatan video untuk akun kamu sedang dibekukan oleh Admin." });
-            }
+  // POTONG KREDIT VIA FIREBASE ADMIN
+  if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
+      try {
+          const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
+          const userDoc = await userRef.get();
+          
+          if (!userDoc.exists) return res.status(403).json({ error: "Akun tidak ditemukan. Silakan reload aplikasi." });
+          
+          const userData = userDoc.data();
+          if ((type === 'Video' || type === 'Motion') && userData.videoAccess === false) {
+              return res.status(403).json({ error: "Akses pembuatan video untuk akun kamu sedang dibekukan oleh Admin." });
+          }
 
-            const currentCredits = userData.credits || 0;
-            if (currentCredits < parsedCost) {
-                return res.status(403).json({ error: `Kredit habis. Sisa ${currentCredits} ⚡, butuh ${parsedCost} ⚡.` });
-            }
+          const currentCredits = userData.credits || 0;
+          if (currentCredits < cost) return res.status(403).json({ error: `Kredit habis. Sisa ${currentCredits} ⚡, butuh ${cost} ⚡.` });
 
-            await userRef.update({ credits: admin.firestore.FieldValue.increment(-parsedCost) });
-        } catch (err) {
-            console.error("Gagal potong kredit:", err);
-            return res.status(500).json({ error: "Sistem kredit gagal. Cek konfigurasi Firebase." });
-        }
-    } else if (!userId) {
-        return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
-    }
+          await userRef.update({ credits: admin.firestore.FieldValue.increment(-cost) });
+      } catch (err) {
+          return res.status(500).json({ error: "Sistem kredit gagal. Cek konfigurasi Firebase." });
+      }
+  } else if (!userId) {
+      return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
+  }
 
+  // ==========================================
+  // LOGIKA PAYLOAD KIE AI
+  // ==========================================
+  try {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
-    // 1. KLING & MOTION
+    // ---> 1. KLING & MOTION
     if (type === 'Motion' || (engine && engine.includes('Kling'))) {
         const isKling3 = engine === 'Kling 3.0';
         payload = {
             model: isKling3 ? "kling-3.0/motion-control" : "kling-2.6/motion-control",
             input: {
                 prompt: prompt || "No distortion, the character's movements are consistent with the video.",
-                image_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
+                // VITAL: Kling asli menggunakan input_urls
+                input_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
                 video_urls: video_urls.length > 0 ? [video_urls[0]] : [],
                 character_orientation: character_orientation || "video",
-                mode: mode || "720p" 
+                mode: mode || "720p" // Dibiarkan sesuai kode aslimu
             }
         };
-        if (isKling3 && background_source) payload.input.background_source = background_source;
-        
-    // 2. GROK
-    } else if (engine && engine.toLowerCase().includes('grok')) {
-        const hasImages = image_urls && image_urls.length > 0;
-        
+        if (isKling3 && background_source) {
+            payload.input.background_source = background_source;
+        }
+    }
+    // ---> 2. GROK
+    else if (engine && engine.toLowerCase() === 'grok') {
         if (type === 'Video') {
+            const hasImages = image_urls && image_urls.length > 0;
             const modelName = hasImages ? "grok-imagine/image-to-video" : "grok-imagine/text-to-video";
             
-            let safeDuration = parseInt(duration) || 6;
-            safeDuration = Math.min(Math.max(safeDuration, 6), 30); 
-
-            let safeMode = mode || "normal";
-            if (hasImages && safeMode === 'spicy') safeMode = "normal"; 
+            // PENGAMAN: Grok menolak mode "720p" atau "1080p". Harus "normal", "spicy", "fun".
+            let safeMode = "normal";
+            if (String(mode).toLowerCase() === "spicy") safeMode = "spicy";
+            if (String(mode).toLowerCase() === "fun") safeMode = "fun";
+            if (hasImages && safeMode === 'spicy') safeMode = "normal";
 
             payload = {
                 model: modelName,
                 input: {
-                    prompt: prompt ? prompt.substring(0, 4900) : "Cinematic aesthetic movement",
+                    prompt: prompt || "Cinematic aesthetic movement",
                     aspect_ratio: ratio || "16:9",
-                    mode: safeMode,
-                    duration: String(safeDuration),
+                    mode: safeMode, // Menggunakan safeMode agar tidak Error 500
+                    duration: duration ? String(duration) : "6",
                     resolution: "720p",
                     nsfw_checker: false
                 }
             };
             if (hasImages) payload.input.image_urls = image_urls.slice(0, 7);
-            
         } else if (type === 'Gambar') {
+            const hasImages = image_urls && image_urls.length > 0;
             if (hasImages) {
-                payload = { 
-                    model: "grok-imagine/image-to-image", 
-                    input: { 
-                        prompt: prompt || "Maintain character consistency, enhance detail.", 
-                        image_urls: [image_urls[0]], 
-                        nsfw_checker: false
-                    } 
+                payload = {
+                    model: "grok-imagine/image-to-image",
+                    input: { prompt: prompt || "Maintain consistency", image_urls: [image_urls[0]], nsfw_checker: false }
                 };
             } else {
-                payload = { 
-                    model: "grok-imagine/text-to-image", 
-                    input: { 
-                        prompt: prompt || "Cinematic masterpiece", 
-                        aspect_ratio: ratio || "16:9" 
-                    } 
+                payload = {
+                    model: "grok-imagine/text-to-image",
+                    input: { prompt: prompt, aspect_ratio: ratio || "16:9" }
                 };
             }
         }
-    // 3. VEO
-    } else {
+    } 
+    // ---> 3. VEO
+    else {
         endpoint = 'https://api.kie.ai/api/v1/veo/generate';
         let veoModel = "veo3_fast"; 
         if (engine === 'veo3.1 lite') veoModel = "veo3_lite";
         else if (engine === 'veo3.1 quality') veoModel = "veo3";
         else if (engine === 'veo3.1 fast') veoModel = "veo3_fast";
 
-        payload = { 
-            model: veoModel, 
-            prompt: prompt || "Cinematic aesthetic generation", 
-            aspect_ratio: ratio || "16:9" 
+        payload = {
+            model: veoModel,
+            prompt: prompt || "Cinematic aesthetic generation",
+            aspect_ratio: ratio || "16:9"
         };
-        // Perbaikan vital untuk Veo: Memastikan pengiriman parameter gambar
-        if (image_urls && image_urls.length > 0) {
-            payload.imageUrls = image_urls; // Standard Veo Kie.ai
-            payload.image_urls = image_urls; // Fallback jika Veo minta snake_case
-        }
+        // VITAL: Veo menggunakan imageUrls (camelCase)
+        if (image_urls && image_urls.length > 0) payload.imageUrls = image_urls;
     }
 
-    // EKSEKUSI KE KIE AI
     const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
 
-    // PENANGANAN JIKA GAGAL DARI KIE AI (Error 400 dll)
+    // REFUND JIKA GAGAL DARI KIE
     if (!response.ok || (data.code && data.code !== 200)) {
+        console.error("KIE AI REJECTED:", JSON.stringify(data)); // Log Error 
         
-        // --- SISTEM LOGGING UNTUK DEBUGGING DI VERCEL ---
-        console.error("🔴 KIE AI REJECTED THE REQUEST!");
-        console.error("Endpoint:", endpoint);
-        console.error("Payload Sent:", JSON.stringify(payload));
-        console.error("Kie AI Response:", JSON.stringify(data));
-        // ------------------------------------------------
-
-        // Refund kredit
-        if (process.env.FIREBASE_PROJECT_ID && userId && appId && parsedCost > 0) {
+        if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
-            await userRef.update({ credits: admin.firestore.FieldValue.increment(parsedCost) }); 
+            await userRef.update({ credits: admin.firestore.FieldValue.increment(cost) });
         }
         
-        // Memunculkan pesan error ASLI dari Kie AI ke pengguna
         let errorMsg = "Gagal memproses task.";
         if (data.msg) errorMsg = data.msg;
         else if (data.message) errorMsg = data.message;
         else if (data.error && data.error.message) errorMsg = data.error.message;
         else errorMsg = JSON.stringify(data);
 
-        return res.status(400).json({ error: `Kie AI: ${errorMsg}` });
+        return res.status(400).json({ error: `Kie AI Error: ${errorMsg}` });
     }
 
-    // =========================================================
-    // MENCATAT RIWAYAT SETELAH BERHASIL
-    // =========================================================
-    try {
-        const historyAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
-        const historyUserId = userId || 'anonymous';
-        let userName = 'User Anonim';
-        let userEmail = 'Tidak Ada Email';
-
-        if (process.env.FIREBASE_PROJECT_ID && userId) {
-            const userRef = db.collection('artifacts').doc(historyAppId).collection('users').doc(userId).collection('profile').doc('data');
+    // SIMPAN HISTORY
+    const taskId = data.data?.taskId || data.taskId || data.task_id;
+    if (process.env.FIREBASE_PROJECT_ID && userId && appId && taskId) {
+        try {
+            const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             const userDoc = await userRef.get();
-            if (userDoc.exists) {
-                userName = userDoc.data().name || userName;
-                userEmail = userDoc.data().email || userEmail;
-            }
-        }
+            const uName = userDoc.exists ? userDoc.data().name : 'User';
+            const uEmail = userDoc.exists ? userDoc.data().email : 'No Email';
 
-        const taskId = data.data?.taskId || data.taskId || data.task_id || 'unknown';
-        
-        await db.collection('artifacts').doc(historyAppId).collection('history').add({
-            taskId: taskId,
-            userId: historyUserId,
-            userName: userName,
-            userEmail: userEmail,
-            prompt: prompt || 'Tanpa prompt',
-            engine: engine || 'Unknown',
-            type: type || 'Unknown',
-            status: 'PROCESSING', 
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
-        });
-    } catch (err) {
-        console.error("Gagal simpan history:", err);
+            await db.collection('artifacts').doc(appId).collection('history').doc(taskId).set({
+                taskId: taskId,
+                userId: userId,
+                userName: uName,
+                userEmail: uEmail,
+                prompt: prompt || "Tanpa prompt",
+                engine: engine || "Kie.ai Engine",
+                type: type || "Video",
+                timestamp: admin.firestore.FieldValue.serverTimestamp()
+            });
+        } catch (e) {
+            console.error("Gagal simpan riwayat:", e);
+        }
     }
-    // =========================================================
 
     return res.status(response.status).json(data);
+
+  } catch (error) {
+    return res.status(500).json({ error: 'Terjadi kesalahan sistem di Vercel', message: error.message });
+  }
 }
 
 // ==========================================
-// 4. FUNGSI REDEEM (/api/redeem)
+// 4. FUNGSI REDEEM (Persis redeem.js.txt)
 // ==========================================
 async function handleRedeem(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { userId, appId, code } = req.body;
 
-    if (!userId || !appId || !code) return res.status(400).json({ error: "Data tidak lengkap" });
+    if (!userId || !appId || !code) return res.status(400).json({ error: "Data tidak lengkap (userId, appId, atau kode kosong)" });
 
     const validCodes = [
-        "AL-NEW1X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
+        "AL-9A2X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
         "AL-2L7C", "AL-8M4D", "AL-3N9F", "AL-5P6G", "AL-7Q2H", "AL-1R8J", "AL-6T5K", "AL-4V1L", "AL-9W3M", "AL-2X7N",
         "AL-8Y4P", "AL-3Z9Q", "AL-5A6R", "AL-7B2T", "AL-1C8V", "AL-6D5W", "AL-4E1X", "AL-9F3Y", "AL-2G7Z", "AL-8H4A",
         "VIP-A1X9", "VIP-B2Y8", "VIP-C3Z7", "VIP-D4A6", "VIP-E5B5", "VIP-F6C4", "VIP-G7D3", "VIP-H8E2", "VIP-J9F1", "VIP-K1G9",
@@ -362,6 +363,7 @@ async function handleRedeem(req, res, db) {
     ];
 
     const inputCode = code.toUpperCase();
+
     if (!validCodes.includes(inputCode)) {
         return res.status(400).json({ success: false, error: "Kode tidak valid! Periksa kembali penulisan kodenya." });
     }
@@ -397,72 +399,81 @@ async function handleRedeem(req, res, db) {
 }
 
 // ==========================================
-// 5. FUNGSI UPLOAD (/api/upload)
+// 5. FUNGSI UPLOAD IMAGE (Persis upload.js.txt)
 // ==========================================
 async function handleUpload(req, res, apiKey) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
+  
+  try {
     const { base64Data, uploadPath, fileName } = req.body;
     if (!base64Data) return res.status(400).json({ error: 'Data base64 tidak ditemukan' });
 
     const response = await fetch('https://kieai.redpandaai.co/api/file-base64-upload', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64Data: base64Data, uploadPath: uploadPath || 'ailabs-uploads', fileName: fileName || `upload_${Date.now()}.jpg` })
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ base64Data, uploadPath: uploadPath || 'ailabs-uploads', fileName: fileName || `upload_${Date.now()}.jpg` })
     });
 
     const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Gagal mengunggah, respons server KIE bukan JSON.");
-    }
+    if (!contentType || !contentType.includes("application/json")) throw new Error("Gagal mengunggah, respons server KIE bukan JSON.");
+    
     const data = await response.json();
     return res.status(response.status).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: 'Gagal mengunggah ke Kie AI', message: error.message });
+  }
 }
 
 // ==========================================
-// 6. FUNGSI UPLOAD URL (/api/upload-url)
+// 6. FUNGSI UPLOAD URL / VIDEO (Persis upload-url.js.txt)
 // ==========================================
 async function handleUploadUrl(req, res, apiKey) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Metode tidak diizinkan, harus POST' });
+
+  try {
     const { fileUrl, uploadPath, fileName } = req.body;
     if (!fileUrl) return res.status(400).json({ error: 'URL file tidak ditemukan' });
 
     const response = await fetch('https://kieai.redpandaai.co/api/file-url-upload', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileUrl: fileUrl, uploadPath: uploadPath || 'ailabs-url-uploads', fileName: fileName || `url_import_${Date.now()}.jpg` })
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fileUrl, uploadPath: uploadPath || 'ailabs-url-uploads', fileName: fileName || `url_import_${Date.now()}.jpg` })
     });
 
     const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Gagal import URL, respons server KIE bukan JSON.");
-    }
+    if (!contentType || !contentType.includes("application/json")) throw new Error("Gagal import URL, respons server KIE bukan JSON.");
+
     const data = await response.json();
     return res.status(response.status).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: 'Gagal import URL ke Kie AI', message: error.message });
+  }
 }
 
 // ==========================================
-// 7. FUNGSI VEO ACTION (/api/veo-action)
+// 7. FUNGSI VEO ACTION (Persis veo-action.js.txt)
 // ==========================================
 async function handleVeoAction(req, res, apiKey) {
-    if (req.method !== 'POST') return res.status(405).json({ error: 'Metode harus POST' });
-    const { action, taskId, prompt } = req.body;
-    if (!taskId) return res.status(400).json({ error: 'taskId wajib diisi!' });
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Metode harus POST' });
+  const { action, taskId, prompt } = req.body;
+  if (!taskId) return res.status(400).json({ error: 'taskId wajib diisi!' });
 
+  try {
     let endpoint = '';
     let method = 'POST';
     let payload = null;
 
     if (action === 'extend') {
-        endpoint = 'https://api.kie.ai/api/v1/veo/extend';
-        payload = { taskId, prompt: prompt || "Continue the video naturally", model: "fast" };
+      endpoint = 'https://api.kie.ai/api/v1/veo/extend';
+      payload = { taskId, prompt: prompt || "Continue the video naturally", model: "fast" };
     } else if (action === '1080p') {
-        endpoint = `https://api.kie.ai/api/v1/veo/get-1080p-video?taskId=${taskId}`;
-        method = 'GET'; 
+      endpoint = `https://api.kie.ai/api/v1/veo/get-1080p-video?taskId=${taskId}`;
+      method = 'GET';
     } else if (action === '4k') {
-        endpoint = 'https://api.kie.ai/api/v1/veo/get-4k-video';
-        payload = { taskId, index: 0 }; 
+      endpoint = 'https://api.kie.ai/api/v1/veo/get-4k-video';
+      payload = { taskId, index: 0 };
     } else {
-        return res.status(400).json({ error: 'Action tidak valid' });
+      return res.status(400).json({ error: 'Action tidak valid' });
     }
 
     const options = { method, headers: { 'Authorization': `Bearer ${apiKey}`, 'Content-Type': 'application/json' } };
@@ -470,229 +481,168 @@ async function handleVeoAction(req, res, apiKey) {
 
     const response = await fetch(endpoint, options);
     const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Respons dari server KIE bukan JSON (Mungkin sedang maintenance).");
-    }
+    if (!contentType || !contentType.includes("application/json")) throw new Error("Respons dari server KIE bukan JSON (Mungkin sedang maintenance).");
 
     const data = await response.json();
 
     if (action === '1080p' || action === '4k') {
-        if (response.status === 200 && data.data?.resultUrl) {
-            return res.status(200).json({ url: data.data.resultUrl });
-        } else if (response.status === 200 && data.data?.resultUrls?.length > 0) {
-            return res.status(200).json({ url: data.data.resultUrls[0] });
-        } else if (response.status === 400 || response.status === 422) {
-            if (data.msg && data.msg.toLowerCase().includes('processing')) {
-                return res.status(200).json({ processing: true, msg: data.msg });
-            } else if (data.msg && data.msg.includes('successfully') && data.data?.resultUrls?.length > 0) {
-                return res.status(200).json({ url: data.data.resultUrls[0] });
-            }
-        }
+      if (response.status === 200 && data.data?.resultUrl) {
+         return res.status(200).json({ url: data.data.resultUrl });
+      } else if (response.status === 200 && data.data?.resultUrls?.length > 0) {
+         return res.status(200).json({ url: data.data.resultUrls[0] });
+      } else if (response.status === 400 || response.status === 422) {
+         if (data.msg && data.msg.toLowerCase().includes('processing')) {
+             return res.status(200).json({ processing: true, msg: data.msg });
+         } else if (data.msg && data.msg.includes('successfully') && data.data?.resultUrls?.length > 0) {
+             return res.status(200).json({ url: data.data.resultUrls[0] });
+         }
+      }
     }
     return res.status(response.status).json(data);
+  } catch (error) {
+    return res.status(500).json({ error: 'Gagal request Veo Action', message: error.message });
+  }
 }
 
 // ==========================================
-// 8. FUNGSI HISTORY ADMIN (/api/history)
+// 8. FUNGSI HISTORY ADMIN
 // ==========================================
 async function handleHistory(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
-
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
     
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
-
     try {
-        const historySnapshot = await db.collection('artifacts').doc(targetAppId)
-                                        .collection('history')
-                                        .orderBy('timestamp', 'desc')
-                                        .limit(50)
-                                        .get();
-        
+        const historySnapshot = await db.collection('artifacts').doc(targetAppId).collection('history').orderBy('timestamp', 'desc').limit(50).get();
         let historyList = [];
         historySnapshot.forEach(doc => {
             const data = doc.data();
             historyList.push({
-                id: doc.id,
-                taskId: data.taskId,
-                userName: data.userName || 'Anonim',
-                userEmail: data.userEmail || 'Tidak ada',
-                prompt: data.prompt || '-',
-                engine: data.engine || '-',
-                type: data.type || '-',
+                id: doc.id, taskId: data.taskId, userName: data.userName || 'Anonim',
+                userEmail: data.userEmail || 'Tidak ada', prompt: data.prompt || '-',
+                engine: data.engine || '-', type: data.type || '-',
                 timestamp: data.timestamp ? data.timestamp.toDate().toISOString() : new Date().toISOString()
             });
         });
-
         return res.status(200).json({ success: true, history: historyList });
     } catch (error) {
-        console.error("History Fetch Error:", error);
         return res.status(500).json({ error: "Gagal mengambil riwayat: " + error.message });
     }
 }
 
 // ==========================================
-// 9. FUNGSI KIE BALANCE ADMIN (/api/kie-balance)
+// 9. FUNGSI KIE BALANCE ADMIN
 // ==========================================
 async function handleKieBalance(req, res, apiKey) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode } = req.body;
-    
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
 
     try {
         const response = await fetch("https://api.kie.ai/api/v1/chat/credit", {
-            method: "GET",
-            headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
+            method: "GET", headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" }
         });
         const data = await response.json();
-
-        if (data.code === 200) {
-            return res.status(200).json({ success: true, balance: data.data });
-        } else {
-            return res.status(400).json({ success: false, error: data.msg || "Gagal mengambil kredit dari Kie.ai" });
-        }
+        if (data.code === 200) return res.status(200).json({ success: true, balance: data.data });
+        else return res.status(400).json({ success: false, error: data.msg || "Gagal mengambil kredit dari Kie.ai" });
     } catch (error) {
-        console.error("Kie Balance Error:", error);
         return res.status(500).json({ success: false, error: error.message });
     }
 }
 
 // ==========================================
-// 10. FUNGSI GET USERS ADMIN (/api/get_users)
+// 10. FUNGSI GET USERS ADMIN
 // ==========================================
 async function handleGetUsers(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
-
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
     
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
-
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
         let usersList = [];
-
         for (const profileDoc of profilesSnapshot.docs) {
             const pathSegments = profileDoc.ref.path.split('/');
             if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
-                const uid = pathSegments[3];
-                const data = profileDoc.data();
-                
+                const uid = pathSegments[3]; const data = profileDoc.data();
                 usersList.push({
-                    uid: uid,
-                    name: data.name || 'User',
-                    email: data.email || 'Anonim',
-                    isAnon: data.isAnon || false,
-                    credits: data.credits || 0,
-                    videoAccess: data.videoAccess !== false // default true (ON)
+                    uid: uid, name: data.name || 'User', email: data.email || 'Anonim',
+                    isAnon: data.isAnon || false, credits: data.credits || 0,
+                    videoAccess: data.videoAccess !== false
                 });
             }
         }
         return res.status(200).json({ success: true, users: usersList });
     } catch (error) {
-        console.error("Users Sync Error:", error);
         return res.status(500).json({ error: "Gagal mengambil data user: " + error.message });
     }
 }
 
 // ==========================================
-// 11. FUNGSI TOPUP ADMIN (/api/topup)
+// 11. FUNGSI TOPUP ADMIN
 // ==========================================
 async function handleTopup(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId, targetUid, amount } = req.body;
-
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
-    if (!appId || !targetUid || typeof amount !== 'number') {
-        return res.status(400).json({ error: "Data tidak lengkap" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
+    if (!appId || !targetUid || typeof amount !== 'number') return res.status(400).json({ error: "Data tidak lengkap" });
 
     try {
         const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('profile').doc('data');
-        
         await db.runTransaction(async (t) => {
             const doc = await t.get(profileRef);
             if (!doc.exists) throw new Error("User tidak ditemukan di database");
-            
             const currentCredits = doc.data().credits || 0;
             const newCredits = Math.max(0, currentCredits + amount); 
-            
             t.update(profileRef, { credits: newCredits });
         });
-
         return res.status(200).json({ success: true, message: "Topup berhasil dieksekusi" });
     } catch (error) {
-        console.error("Topup Error:", error);
         return res.status(500).json({ error: "Gagal topup: " + error.message });
     }
 }
 
 // ==========================================
-// 12. FUNGSI TOGGLE ACCESS ADMIN (/api/toggle_access)
+// 12. FUNGSI TOGGLE ACCESS ADMIN
 // ==========================================
 async function handleToggleAccess(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId, targetUid, videoAccess } = req.body;
-
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
-    if (!appId || !targetUid || typeof videoAccess !== 'boolean') {
-        return res.status(400).json({ error: "Data tidak lengkap" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
+    if (!appId || !targetUid || typeof videoAccess !== 'boolean') return res.status(400).json({ error: "Data tidak lengkap" });
 
     try {
         const profileRef = db.collection('artifacts').doc(appId).collection('users').doc(targetUid).collection('profile').doc('data');
         await profileRef.update({ videoAccess: videoAccess });
-
         return res.status(200).json({ success: true, message: "Akses video berhasil diupdate" });
     } catch (error) {
-        console.error("Toggle Access Error:", error);
         return res.status(500).json({ error: "Gagal update akses: " + error.message });
     }
 }
 
 // ==========================================
-// 13. FUNGSI GET REFERRALS ADMIN (/api/get_referrals)
+// 13. FUNGSI GET REFERRALS ADMIN
 // ==========================================
 async function handleGetReferrals(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
     const { adminCode, appId } = req.body;
-
-    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') {
-        return res.status(403).json({ error: "Akses Ditolak" });
-    }
+    if (adminCode !== 'admin123' && adminCode !== 'Kr333wol') return res.status(403).json({ error: "Akses Ditolak" });
     
     const targetAppId = appId || '1:290208256362:web:b5022be8bd57311f9cd513';
-
     try {
         const profilesSnapshot = await db.collectionGroup('profile').get();
         let usedCodesMap = {};
-        
         for (const profileDoc of profilesSnapshot.docs) {
             const pathSegments = profileDoc.ref.path.split('/');
             if (pathSegments.length >= 4 && pathSegments[1] === targetAppId) {
-                const uid = pathSegments[3];
-                const data = profileDoc.data();
-                
-                if (data.redeemedCode) {
-                    usedCodesMap[data.redeemedCode.toUpperCase()] = data.email || uid;
-                }
+                const uid = pathSegments[3]; const data = profileDoc.data();
+                if (data.redeemedCode) usedCodesMap[data.redeemedCode.toUpperCase()] = data.email || uid;
             }
         }
-
         const allCodes = [
-            "AL-NEW1X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
+            "AL-9A2X", "AL-3B7K", "AL-8C4M", "AL-1D9P", "AL-5E6R", "AL-7F3T", "AL-2G8V", "AL-6H5Y", "AL-4J1Z", "AL-9K3B",
             "AL-2L7C", "AL-8M4D", "AL-3N9F", "AL-5P6G", "AL-7Q2H", "AL-1R8J", "AL-6T5K", "AL-4V1L", "AL-9W3M", "AL-2X7N",
             "AL-8Y4P", "AL-3Z9Q", "AL-5A6R", "AL-7B2T", "AL-1C8V", "AL-6D5W", "AL-4E1X", "AL-9F3Y", "AL-2G7Z", "AL-8H4A",
             "VIP-A1X9", "VIP-B2Y8", "VIP-C3Z7", "VIP-D4A6", "VIP-E5B5", "VIP-F6C4", "VIP-G7D3", "VIP-H8E2", "VIP-J9F1", "VIP-K1G9",
@@ -723,33 +673,24 @@ async function handleGetReferrals(req, res, db) {
             "GROK-13L", "GROK-24M", "GROK-35N", "GROK-46P", "GROK-57Q", "GROK-68R", "GROK-79T", "GROK-80V", "GROK-91W", "GROK-02X",
             "GROK-14Y", "GROK-25Z", "GROK-36A", "GROK-47B", "GROK-58C", "GROK-69D", "GROK-70E", "GROK-81F", "GROK-92G", "GROK-03H"
         ];
-
         const result = allCodes.map(code => {
             const upperCode = code.toUpperCase();
-            return {
-                code: upperCode,
-                used: !!usedCodesMap[upperCode],
-                usedBy: usedCodesMap[upperCode] || null
-            };
+            return { code: upperCode, used: !!usedCodesMap[upperCode], usedBy: usedCodesMap[upperCode] || null };
         });
-
         return res.status(200).json({ success: true, codes: result });
     } catch (error) {
-        console.error("Referrals Sync Error:", error);
         return res.status(500).json({ error: "Gagal mensinkronkan status kode: " + error.message });
     }
 }
 
 // ==========================================
-// 14. FUNGSI WEBHOOK KIE AI (/api/webhook)
+// 14. FUNGSI WEBHOOK KIE AI
 // ==========================================
 async function handleWebhook(req, res, db) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Harus POST' });
-
     const webhookHmacKey = process.env.WEBHOOK_HMAC_KEY; 
     const timestamp = req.headers['x-webhook-timestamp'];
     const receivedSignature = req.headers['x-webhook-signature'];
-
     const data = req.body;
     const taskId = data.data?.task_id || data.taskId;
     const code = data.code;
@@ -757,9 +698,7 @@ async function handleWebhook(req, res, db) {
     if (webhookHmacKey && timestamp && receivedSignature && taskId) {
         const message = `${taskId}.${timestamp}`;
         const expectedSignature = crypto.createHmac('sha256', webhookHmacKey).update(message).digest('base64');
-        
         if (expectedSignature.length !== receivedSignature.length || !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(receivedSignature))) {
-            console.error("Webhook signature invalid!");
             return res.status(401).json({ error: 'Invalid signature' });
         }
     }
@@ -767,7 +706,6 @@ async function handleWebhook(req, res, db) {
     if (taskId) {
         try {
             const historyQuery = await db.collectionGroup('history').where('taskId', '==', taskId).get();
-            
             if (!historyQuery.empty) {
                 const batch = db.batch();
                 historyQuery.docs.forEach(doc => {
@@ -777,12 +715,8 @@ async function handleWebhook(req, res, db) {
                     });
                 });
                 await batch.commit();
-                console.log(`Webhook diterima: Task ${taskId} berstatus ${code === 200 ? 'SUCCESS' : 'FAILED'}`);
             }
-        } catch (err) {
-            console.error("Webhook Firebase Error:", err);
-        }
+        } catch (err) {}
     }
-
     return res.status(200).json({ status: 'received' });
 }
