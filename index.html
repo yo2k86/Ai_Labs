@@ -1656,11 +1656,6 @@
 
             if (!promptText) promptText = "Tingkatkan kualitas sinematik.";
 
-            // Menerapkan instruksi konsistensi wajah yang ketat (Preferensi Personalisasi)
-            if (genConfig.type !== 'Gambar' && editorImages['mulai']) {
-                promptText = "Aktifkan mode konsistensi wajah yang ketat. Prioritaskan fitur wajah dari gambar referensi. Pertahankan identitas subjek secara akurat sambil hanya menyesuaikan pose, pencahayaan, dan latar belakang. Jangan mengubah struktur inti wajah. " + promptText;
-            }
-
             ['output-placeholder', 'result-video', 'result-image', 'result-overlay'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.classList.add('hidden');
             });
@@ -1771,27 +1766,22 @@
                         }
 
                         let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
-                        
-                        // Ekstrak URL lebih awal sebagai indikator sukses mutlak
-                        let rawMediaUrl = checkData.data?.resultUrl || 
-                                       checkData.data?.resultUrls?.[0] || 
-                                       checkData.data?.response?.resultUrls?.[0] || 
-                                       checkData.data?.task_result?.videos?.[0]?.url ||  
-                                       checkData.data?.task_result?.images?.[0]?.url ||  
-                                       checkData.data?.response?.video_url || 
-                                       checkData.data?.video_url;
-
-                        // Perbaikan utama: Tambahkan deteksi status 99, SUCCEED, atau jika rawMediaUrl sudah ada
-                        const isSuccess = ['SUCCESS', 'SUCCEED', 'SUCCEEDED', 'COMPLETED', '100', '99', '1', 'FINISHED', 'DONE'].includes(status) || !!rawMediaUrl;
+                        const isSuccess = ['SUCCESS', 'COMPLETED', '100', '1', 'FINISHED', 'DONE'].includes(status);
 
                         if (status === '404' || checkData.error === 'Not Found') continue;
                         
-                        if (!isSuccess && (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED')) { 
+                        if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED') { 
                             throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
                         if (isSuccess) {
-                            let mediaUrl = rawMediaUrl;
+                            let mediaUrl = checkData.data?.resultUrl || 
+                                           checkData.data?.resultUrls?.[0] || 
+                                           checkData.data?.response?.resultUrls?.[0] || 
+                                           checkData.data?.task_result?.videos?.[0]?.url ||  
+                                           checkData.data?.task_result?.images?.[0]?.url ||  
+                                           checkData.data?.response?.video_url || 
+                                           checkData.data?.video_url;
 
                             if (!mediaUrl) {
                                 let foundUrls = [];
