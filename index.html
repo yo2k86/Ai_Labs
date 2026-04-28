@@ -1791,8 +1791,20 @@
                             }
 
                             if (mediaUrl) {
-                                // PENTING: URL ASLI LANGSUNG DIGUNAKAN DI SINI, ANTI BLANK!
-                                finalMediaUrl = mediaUrl;
+                                // KITA TUKAR LINK MENTAH MENJADI LINK TEMPORARY (20 Menit) SESUAI DOKUMENTASI
+                                try {
+                                    const dlRes = await fetch('/api/action?action=download', {
+                                        method: 'POST', 
+                                        headers: { 'Content-Type': 'application/json' }, 
+                                        body: JSON.stringify({ url: mediaUrl })
+                                    });
+                                    const dlData = await dlRes.json();
+                                    // Gunakan link hasil tukaran, jika gagal fallback ke link awal
+                                    finalMediaUrl = dlData.data || dlData.url || mediaUrl; 
+                                } catch(err) {
+                                    console.warn("Gagal menukar link video:", err);
+                                    finalMediaUrl = mediaUrl; 
+                                }
                                 break; 
                             }
                         }
