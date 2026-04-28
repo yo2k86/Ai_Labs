@@ -551,7 +551,7 @@
                     </div>
 
                     <img id="result-image" src="" class="hidden w-full h-full object-contain cursor-pointer">
-                    <!-- VIDEO TAG - Crossorigin dihilangkan agar video gampang diputar -->
+                    <!-- VIDEO TAG -->
                     <video id="result-video" autoplay loop muted playsinline class="hidden w-full h-full object-contain cursor-pointer"></video>
                     
                     <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
@@ -559,14 +559,22 @@
                         <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
                     </div>
                     
-                    <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center p-4">
-                        <i class="fa-solid fa-wand-magic-sparkles text-emerald-400 text-3xl animate-bounce mb-3"></i>
-                        <p id="output-loading-text" class="text-xs md:text-sm text-emerald-300 font-bold mb-2 text-center">Memproses...</p>
-                        <div class="w-full max-w-[200px] bg-gray-800 rounded-full h-2 overflow-hidden mb-1">
-                            <div id="loading-progress-bar" class="bg-emerald-500 h-full w-0 transition-all"></div>
+                    <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md">
+                        <!-- Custom Logo Loading Animation -->
+                        <div class="relative w-20 h-20 md:w-24 md:h-24 mb-5 flex items-center justify-center">
+                            <!-- Cahaya berputar luar (Searah jarum jam) -->
+                            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-emerald-400 border-l-emerald-400 animate-spin drop-shadow-[0_0_15px_rgba(16,185,129,0.8)]"></div>
+                            <!-- Cahaya berputar dalam (Berlawanan arah jarum jam) -->
+                            <div class="absolute inset-2 rounded-full border-4 border-transparent border-b-cyan-400 border-r-cyan-400 animate-[spin_1.5s_linear_infinite_reverse] drop-shadow-[0_0_15px_rgba(6,182,212,0.8)]"></div>
+                            <!-- Logo custom -->
+                            <img src="logo.png" alt="Loading Ailabs" class="w-10 h-10 md:w-12 md:h-12 object-contain relative z-10 animate-pulse drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
                         </div>
-                        <span id="loading-percentage" class="text-[10px] text-gray-300">0%</span>
-                        <p id="loading-tip-text" class="text-[9px] text-gray-400 mt-3 text-center max-w-[80%] italic"></p>
+                        <p id="output-loading-text" class="text-xs md:text-sm text-emerald-300 font-bold mb-2 text-center drop-shadow-md">Memproses...</p>
+                        <div class="w-full max-w-[200px] bg-gray-800 border border-white/10 rounded-full h-2 overflow-hidden mb-1 shadow-inner">
+                            <div id="loading-progress-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-full w-0 transition-all duration-300"></div>
+                        </div>
+                        <span id="loading-percentage" class="text-[10px] text-emerald-200 font-bold tracking-widest mt-1">0%</span>
+                        <p id="loading-tip-text" class="text-[9px] text-gray-400 mt-3 text-center max-w-[80%] italic bg-black/40 px-3 py-1 rounded-full border border-white/5"></p>
                     </div>
                 </div>
             </div>
@@ -1656,11 +1664,6 @@
 
             if (!promptText) promptText = "Tingkatkan kualitas sinematik.";
 
-            // Menerapkan instruksi konsistensi wajah yang ketat (Preferensi Personalisasi)
-            if (genConfig.type !== 'Gambar' && editorImages['mulai']) {
-                promptText = "Aktifkan mode konsistensi wajah yang ketat. Prioritaskan fitur wajah dari gambar referensi. Pertahankan identitas subjek secara akurat sambil hanya menyesuaikan pose, pencahayaan, dan latar belakang. Jangan mengubah struktur inti wajah. " + promptText;
-            }
-
             ['output-placeholder', 'result-video', 'result-image', 'result-overlay'].forEach(id => {
                 const el = document.getElementById(id); if(el) el.classList.add('hidden');
             });
@@ -1770,29 +1773,49 @@
                             continue;
                         }
 
-                        let status = String(checkData.data?.status || checkData.status || checkData.data?.successFlag || checkData.successFlag || "").toUpperCase();
-                        
-                        // Ekstrak URL lebih awal sebagai indikator sukses mutlak
-                        let rawMediaUrl = checkData.data?.resultUrl || 
-                                       checkData.data?.resultUrls?.[0] || 
-                                       checkData.data?.response?.resultUrls?.[0] || 
-                                       checkData.data?.task_result?.videos?.[0]?.url ||  
-                                       checkData.data?.task_result?.images?.[0]?.url ||  
-                                       checkData.data?.response?.video_url || 
-                                       checkData.data?.video_url;
+                        // =========================================================
+                        // PERBAIKAN BUG UTAMA: EKSTRAKSI STATUS & URL YANG BENAR
+                        // =========================================================
 
-                        // Perbaikan utama: Tambahkan deteksi status 99, SUCCEED, atau jika rawMediaUrl sudah ada
-                        const isSuccess = ['SUCCESS', 'SUCCEED', 'SUCCEEDED', 'COMPLETED', '100', '99', '1', 'FINISHED', 'DONE'].includes(status) || !!rawMediaUrl;
-
-                        if (status === '404' || checkData.error === 'Not Found') continue;
+                        // 1. Ambil status yang benar (Kling/Grok pakai 'state', Veo pakai 'successFlag')
+                        let stateStr = checkData.data?.state; 
+                        let successFlagStr = checkData.data?.successFlag;
+                        let rawStatus = stateStr || successFlagStr || checkData.status || "";
+                        let statusStr = String(rawStatus).toLowerCase();
                         
-                        if (!isSuccess && (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED')) { 
-                            throw new Error(checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
+                        // Menambahkan status '99' (sukses khusus Kling) dan 'succeeded'
+                        const isSuccess = ['success', 'succeeded', 'completed', '1', '100', '99', 'finished', 'done'].includes(statusStr);
+                        const isFail = ['fail', 'failed', 'error', '2', '3'].includes(statusStr);
+
+                        if (statusStr === '404' || checkData.error === 'Not Found') continue;
+                        
+                        if (isFail) { 
+                            throw new Error(checkData.data?.failMsg || checkData.errorMessage || checkData.error || "AI gagal memproses tugas ini."); 
                         }
 
                         if (isSuccess) {
-                            let mediaUrl = rawMediaUrl;
+                            let mediaUrl = null;
 
+                            // 2A. Ekstraksi Hasil Veo 3.1 (Langsung objek)
+                            if (checkData.data?.response) {
+                                let veoResp = checkData.data.response;
+                                mediaUrl = veoResp.fullResultUrls?.[0] || veoResp.resultUrls?.[0];
+                            }
+                            // 2B. Ekstraksi Hasil Kling / Grok (Berupa string JSON di dalam resultJson)
+                            else if (checkData.data?.resultJson) {
+                                try {
+                                    let parsedResult = JSON.parse(checkData.data.resultJson);
+                                    mediaUrl = parsedResult.resultUrls?.[0] || parsedResult.resultUrl || parsedResult.video_url;
+                                } catch(e) {
+                                    console.warn("Gagal ekstrak JSON dari resultJson", e);
+                                }
+                            }
+                            // 2C. Fallback metode lama
+                            if (!mediaUrl) {
+                                mediaUrl = checkData.data?.resultUrl || checkData.resultUrls?.[0] || checkData.url;
+                            }
+
+                            // 2D. Fallback sapu bersih semua link dari payload
                             if (!mediaUrl) {
                                 let foundUrls = [];
                                 JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
@@ -1801,7 +1824,7 @@
                             }
 
                             if (mediaUrl) {
-                                // KITA TUKAR LINK MENTAH MENJADI LINK TEMPORARY (20 Menit) SESUAI DOKUMENTASI
+                                // TUKAR LINK MENTAH MENJADI LINK TEMPORARY (20 Menit)
                                 try {
                                     const dlRes = await fetch('/api/action?action=download', {
                                         method: 'POST', 
@@ -1809,7 +1832,6 @@
                                         body: JSON.stringify({ url: mediaUrl })
                                     });
                                     const dlData = await dlRes.json();
-                                    // Gunakan link hasil tukaran, jika gagal fallback ke link awal
                                     finalMediaUrl = dlData.data || dlData.url || mediaUrl; 
                                 } catch(err) {
                                     console.warn("Gagal menukar link video:", err);
@@ -1821,6 +1843,11 @@
                     }
                     
                     if (!finalMediaUrl) throw new Error("Waktu tunggu habis! Hasil mungkin nyangkut di server.");
+                    
+                    // PERLINDUNGAN MIXED CONTENT: Otomatis ubah protokol http jadi https agar video bisa ter-load di web https
+                    if (finalMediaUrl && finalMediaUrl.startsWith('http://')) {
+                        finalMediaUrl = finalMediaUrl.replace(/^http:\/\//i, 'https://');
+                    }
                     
                     window.lastGenData.taskId = taskId; window.lastGenData.engine = genConfig.engine;
 
@@ -2488,15 +2515,18 @@
                             continue;
                         }
 
-                        let status = String(checkData.data?.successFlag ?? checkData.successFlag ?? "").toUpperCase();
+                        let rawStatus = checkData.data?.status ?? checkData.status ?? checkData.data?.successFlag ?? checkData.successFlag ?? "";
+                        let status = String(rawStatus).toUpperCase();
                         
-                        if (status === '1') {
-                            const resultUrls = checkData.data?.response?.fullResultUrls || checkData.data?.response?.resultUrls;
+                        if (['1', 'SUCCESS', 'SUCCEEDED', 'COMPLETED', '99', '100', 'FINISHED', 'DONE'].includes(status)) {
+                            const resultUrls = checkData.data?.response?.fullResultUrls || checkData.data?.response?.resultUrls || checkData.data?.resultUrls;
                             if (resultUrls && resultUrls.length > 0) {
                                 finalMediaUrl = resultUrls[0];
                             }
                             break;
-                        } else if (status === '2' || status === '3') { throw new Error(checkData.errorMessage || "Gagal memperpanjang video."); }
+                        } else if (status === '2' || status === '3' || status === 'FAIL' || status === 'FAILED' || status === 'ERROR') { 
+                            throw new Error(checkData.errorMessage || "Gagal memperpanjang video."); 
+                        }
                     } else {
                         let checkRes, checkData;
                         try {
@@ -2514,6 +2544,10 @@
                     }
                 }
                 if (!finalMediaUrl) throw new Error("Waktu tunggu habis!");
+                
+                if (finalMediaUrl && finalMediaUrl.startsWith('http://')) {
+                    finalMediaUrl = finalMediaUrl.replace(/^http:\/\//i, 'https://');
+                }
 
                 if (outputLoading) outputLoading.classList.add('hidden');
                 const vid = document.getElementById('result-video');
