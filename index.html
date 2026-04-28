@@ -1236,7 +1236,7 @@
             const btn = document.getElementById('btn-submit-redeem');
             const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                const res = await fetch('/api/action?action=redeem', {
+                const res = await fetch('/api/redeem', {
                     method: 'POST', headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ userId: window.currentUserId, appId: window.appId, code: code })
                 });
@@ -1463,17 +1463,21 @@
                 }
                 resizeImage(file, 1024, 1024, async (resizedBase64) => {
                     try {
-                        const response = await fetch('/api/action?action=upload', {
+                        const response = await fetch('/api/upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: resizedBase64, uploadPath: 'ailabs-editor', fileName: `canvas_${Date.now()}.jpg` })
                         });
-                        const contentType = response.headers.get("content-type");
-                        if (!response.ok && response.status === 404) throw new Error("Endpoint API tidak ditemukan (404). Pastikan route Vercel sudah benar.");
-                        if (!contentType || !contentType.includes("application/json")) throw new Error("Server error (merespons bukan JSON).");
+                        
+                        let result;
+                        try {
+                            result = await response.json();
+                        } catch (e) {
+                            if (response.status === 404) throw new Error("File backend 404. Pastikan file di Vercel bernama 'action.js' di dalam folder 'api' (/api/action.js).");
+                            throw new Error("Server API merespons error yang tidak terduga.");
+                        }
 
-                        const result = await response.json();
                         if (targetContainer) targetContainer.innerHTML = originalHtml;
-                        if (!response.ok || (!result.success && !result.data)) throw new Error(result.msg || result.error || "Upload Fail");
+                        if (!response.ok || (!result.success && !result.data && !result.url)) throw new Error(result.msg || result.error || "Upload Gagal, server API error.");
 
                         const directUrl = result.data?.downloadUrl || result.data?.fileUrl || result.url || result.data;
                         if (directUrl && directUrl.startsWith('http')) {
@@ -1482,7 +1486,7 @@
                             } else {
                                 editorImages[currentEditorTab] = directUrl; window.updateCanvasPreview();
                             }
-                        } else { throw new Error("Format URL tidak valid."); }
+                        } else { throw new Error("Format URL gambar tidak valid dari server API."); }
                     } catch (error) {
                         console.error("Upload error:", error);
                         if (targetContainer && targetContainer.innerHTML.includes('MENGUNGGAH')) targetContainer.innerHTML = originalHtml;
@@ -1541,17 +1545,25 @@
                 const reader = new FileReader();
                 reader.onload = async function(e) {
                     try {
-                        const response = await fetch('/api/action?action=upload', {
+                        const response = await fetch('/api/upload', {
                             method: 'POST', headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ base64Data: e.target.result, uploadPath: 'ailabs-editor-video', fileName: `video_${Date.now()}.${fileToUpload.type === 'video/webm' ? 'webm' : 'mp4'}` })
                         });
-                        const result = await response.json();
+                        
+                        let result;
+                        try {
+                            result = await response.json();
+                        } catch(err) {
+                            if (response.status === 404) throw new Error("File backend 404. Pastikan file Vercel bernama 'action.js' di dalam folder 'api' (/api/action.js).");
+                            throw new Error("Server API merespons error yang tidak terduga.");
+                        }
+
                         if (targetContainer) targetContainer.innerHTML = originalHtml;
-                        if (!response.ok || (!result.success && !result.data)) throw new Error(result.error || "Upload Fail");
+                        if (!response.ok || (!result.success && !result.data && !result.url)) throw new Error(result.error || result.msg || "Upload Gagal, server API error.");
                         
                         const directUrl = result.data?.downloadUrl || result.url || result.data;
                         if (directUrl && directUrl.startsWith('http')) { editorImages['akhir'] = directUrl; window.updateCanvasPreview(); } 
-                        else throw new Error("Format URL invalid.");
+                        else throw new Error("Format URL invalid dari server API.");
                     } catch (error) {
                         if (targetContainer) targetContainer.innerHTML = originalHtml;
                         window.showCustomAlert("Gagal upload: " + error.message);
@@ -1713,7 +1725,7 @@
                     if (imageRefs.length > 1) finalEnhancedPrompt += "Tampilkan SEMUA KARAKTER. ";
                     finalEnhancedPrompt += promptText;
 
-                    const response = await fetch("/api/action?action=generate", {
+                    const response = await fetch("/api/generate", {
                         method: "POST", headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ image_urls: imageRefs, prompt: finalEnhancedPrompt, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, userId: window.currentUserId, appId: window.appId })
                     });
@@ -1744,7 +1756,7 @@
                     const payload = { prompt: promptText, engine: genConfig.engine, ratio: genConfig.ratio, type: genConfig.type, duration: genConfig.duration, image_urls: videoImageUrls, mode: genConfig.motionMode, character_orientation: genConfig.characterOrientation, background_source: genConfig.backgroundSource, userId: window.currentUserId, appId: window.appId };
                     if (genConfig.type === 'Motion') payload.video_urls = videoUrls;
 
-                    const response = await fetch("/api/action?action=generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+                    const response = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
                     
                     let data;
                     try { 
@@ -1766,7 +1778,7 @@
                         
                         let checkRes, checkData;
                         try {
-                            checkRes = await fetch(`/api/action?action=check&taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
@@ -1826,7 +1838,7 @@
                             if (mediaUrl) {
                                 // TUKAR LINK MENTAH MENJADI LINK TEMPORARY (20 Menit)
                                 try {
-                                    const dlRes = await fetch('/api/action?action=download', {
+                                    const dlRes = await fetch('/api/download', {
                                         method: 'POST', 
                                         headers: { 'Content-Type': 'application/json' }, 
                                         body: JSON.stringify({ url: mediaUrl })
@@ -1928,7 +1940,7 @@
                 // BARU: Panggil API convert temp URL HANYA SAAT MENGUNDUH
                 let finalDlUrl = urlToDownload;
                 try {
-                    const dlRes = await fetch('/api/action?action=download', {
+                    const dlRes = await fetch('/api/download', {
                         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlToDownload })
                     });
                     if (dlRes.ok) {
@@ -2107,8 +2119,8 @@
             const container = document.getElementById('admin-users-list'); if(!container) return;
             container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs italic"><i class="fas fa-spinner fa-spin text-emerald-500 mb-2 text-lg block"></i> Mengambil data...</div>';
             try {
-                // FIXED API ROUTE: /api/action?action=get_users
-                const res = await fetch('/api/action?action=get_users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId }) });
+                // FIXED API ROUTE: /api/get_users
+                const res = await fetch('/api/get_users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId }) });
                 if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
                 const data = await res.json();
                 if(data.users && data.users.length > 0) {
@@ -2136,8 +2148,8 @@
             if (isNaN(amount)) return window.showCustomAlert("Masukkan angka yang benar.");
             const btn = event.currentTarget; const originalText = btn.innerText; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                // FIXED API ROUTE: /api/action?action=topup
-                const res = await fetch('/api/action?action=topup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId, targetUid: uid, amount: amount }) });
+                // FIXED API ROUTE: /api/topup
+                const res = await fetch('/api/topup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId, targetUid: uid, amount: amount }) });
                 const data = await res.json();
                 if (data.success) { window.showToast("Sukses!"); input.value = ''; loadAllUsersForAdmin(); } 
                 else window.showCustomAlert(data.error);
@@ -2488,8 +2500,8 @@
             let attempts = 0; const maxAttempts = actionType === 'extend' ? 180 : 120; let finalMediaUrl = null;
 
             try {
-                // FIXED API ROUTE: /api/action?action=veo-action
-                const initRes = await fetch('/api/action?action=veo-action', {
+                // FIXED API ROUTE: /api/veo-action
+                const initRes = await fetch('/api/veo-action', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: actionType, taskId: taskId, prompt: extendPrompt })
                 });
@@ -2508,8 +2520,8 @@
                     if (actionType === 'extend') {
                         let checkData;
                         try {
-                            // FIXED API ROUTE: /api/action?action=check
-                            const checkRes = await fetch(`/api/action?action=check&taskId=${activeTaskId}&engine=veo`);
+                            // FIXED API ROUTE: /api/check
+                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             continue;
@@ -2530,8 +2542,8 @@
                     } else {
                         let checkRes, checkData;
                         try {
-                            // FIXED API ROUTE: /api/action?action=veo-action
-                            checkRes = await fetch('/api/action?action=veo-action', {
+                            // FIXED API ROUTE: /api/veo-action
+                            checkRes = await fetch('/api/veo-action', {
                                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ action: actionType, taskId: taskId })
                             });
