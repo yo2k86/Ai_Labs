@@ -176,7 +176,14 @@ async function handleGenerate(req, res, apiKey, db, admin) {
   }
 
   // POTONG KREDIT VIA FIREBASE ADMIN
-  if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
+  if (!userId) {
+      return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
+  }
+  if (!appId) {
+      return res.status(400).json({ error: "appId tidak ditemukan dari aplikasi frontend. Silakan refresh aplikasi." });
+  }
+
+  if (cost) {
       try {
           const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
           const userDoc = await userRef.get();
@@ -195,8 +202,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
       } catch (err) {
           return res.status(500).json({ error: "Sistem kredit gagal. Cek konfigurasi Firebase." });
       }
-  } else if (!userId) {
-      return res.status(401).json({ error: "Unauthorized. Harap login kembali." });
   }
 
   // ==========================================
@@ -308,7 +313,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     if (!response.ok || (data.code && data.code !== 200)) {
         console.error("🔴 KIE AI REJECTED REQUEST:", JSON.stringify(data));
         
-        if (process.env.FIREBASE_PROJECT_ID && userId && appId && cost) {
+        if (userId && appId && cost) {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             await userRef.update({ credits: admin.firestore.FieldValue.increment(cost) });
         }
@@ -322,7 +327,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
 
     // SIMPAN HISTORY
     const taskId = data.data?.taskId || data.taskId || data.task_id;
-    if (process.env.FIREBASE_PROJECT_ID && userId && appId && taskId) {
+    if (userId && appId && taskId) {
         try {
             const userRef = db.collection('artifacts').doc(appId).collection('users').doc(userId).collection('profile').doc('data');
             const userDoc = await userRef.get();
