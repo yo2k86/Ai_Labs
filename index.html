@@ -923,6 +923,10 @@
         
         let app, auth, db;
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
+        
+        // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API Generate & Redeem
+        window.appId = appId;
+        
         const provider = new GoogleAuthProvider();
         
         window.currentUserCredits = 0;
