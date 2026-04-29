@@ -314,9 +314,41 @@
         </main>
     </div>
 
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq_zB0KHCqVKgouKBLUw1obq6KU0HZHvc",
+            authDomain: "ailabs-6f8b1.firebaseapp.com",
+            projectId: "ailabs-6f8b1",
+            storageBucket: "ailabs-6f8b1.firebasestorage.app",
+            messagingSenderId: "290208256362",
+            appId: "1:290208256362:web:b5022be8bd57311f9cd513",
+            measurementId: "G-4QQCLCWJF0"
+        };
+        
+        let app, auth, db;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
+        
+        // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API
+        window.appId = appId;
+        
+        const provider = new GoogleAuthProvider();
+        
+        window.currentUserCredits = 0;
+        window.currentUserId = null;
+        let creditUnsubscribe = null;
+    </script>
+
     <script>
         let currentAdminSessionCode = '';
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
+        
+        // PERBAIKAN: Ekspos appId ke window
+        window.appId = appId;
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
