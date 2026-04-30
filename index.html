@@ -1793,10 +1793,8 @@
                         // PERBAIKAN BUG UTAMA: EKSTRAKSI STATUS & URL YANG BENAR
                         // =========================================================
 
-                        // 1. Ambil status yang benar (Kling/Grok pakai 'state', Veo pakai 'successFlag')
-                        let stateStr = checkData.data?.state; 
-                        let successFlagStr = checkData.data?.successFlag;
-                        let rawStatus = stateStr || successFlagStr || checkData.status || "";
+                        // 1. Ambil status yang benar (Kling/Grok pakai 'state', Veo pakai 'successFlag' atau 'status')
+                        let rawStatus = checkData.data?.state ?? checkData.data?.successFlag ?? checkData.data?.status ?? checkData.status ?? checkData.successFlag ?? "";
                         let statusStr = String(rawStatus).toLowerCase();
                         
                         // Menambahkan status '99' (sukses khusus Kling) dan 'succeeded'
@@ -1826,9 +1824,9 @@
                                     console.warn("Gagal ekstrak JSON dari resultJson", e);
                                 }
                             }
-                            // 2C. Fallback metode lama
+                            // 2C. Fallback metode lama (Diperbarui untuk Veo)
                             if (!mediaUrl) {
-                                mediaUrl = checkData.data?.resultUrl || checkData.resultUrls?.[0] || checkData.url;
+                                mediaUrl = checkData.data?.resultUrl || checkData.data?.resultUrls?.[0] || checkData.resultUrls?.[0] || checkData.url;
                             }
 
                             // 2D. Fallback sapu bersih semua link dari payload
