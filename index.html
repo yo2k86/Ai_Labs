@@ -668,20 +668,33 @@
                     <div class="flex flex-col gap-1.5 relative">
                         <div class="flex justify-between items-center">
                             <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">AI Engine</label>
-                            <span id="engine-info-text" class="text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold tracking-wide shadow-[0_0_10px_rgba(16,185,129,0.2)]">8 dtk • 30 ⚡</span>
+                            <span id="engine-info-text" class="text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold tracking-wide shadow-[0_0_10px_rgba(16,185,129,0.2)]">6 dtk • 18 ⚡</span>
                         </div>
                         <button id="engine-select-btn" onclick="toggleDropdown('engine-options-dropdown', event)" class="w-full bg-black/80 hover:bg-black border border-white/20 hover:border-emerald-500/50 rounded-xl px-3 py-2.5 text-sm flex justify-between items-center transition-all group shadow-inner">
                             <div class="flex items-center gap-2">
                                 <span id="engine-select-icon" class="flex items-center justify-center w-6 h-6 rounded-md bg-white/5 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
-                                    <svg class="w-3.5 h-3.5 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>
+                                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
                                 </span>
-                                <span id="engine-select-text" class="font-bold tracking-wide">veo3.1 lite</span>
+                                <span id="engine-select-text" class="font-bold tracking-wide">grok</span>
                             </div>
                             <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 group-hover:text-emerald-400 transition-colors"></i>
                         </button>
                         
                         <!-- Dropdown Options -->
                         <div id="engine-options-dropdown" class="hidden absolute top-[105%] left-0 w-full bg-[#121212] border border-emerald-500/40 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.9)] z-[70] flex flex-col overflow-hidden">
+                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
+                                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">grok</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Fast Generation AI</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">18 ⚡</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                             <button onclick="setGenEngine('veo3.1 lite'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
@@ -695,17 +708,56 @@
                                 <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">30 ⚡</span>
                             </button>
                             <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group">
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
                                 <div class="flex items-center gap-3">
-                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
-                                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-compact-disc text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.8)] text-[14px]"></i>
                                     </span>
                                     <div class="flex flex-col">
-                                        <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">grok</span>
-                                        <span class="text-[9px] text-gray-500 mt-0.5">Fast Generation AI</span>
+                                        <span class="text-xs font-bold text-gray-300">Seedance</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">AI Dance Video</span>
                                     </div>
                                 </div>
-                                <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">18 ⚡</span>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-clapperboard text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Kling</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Kuaishou AI Video</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-bolt text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Wan</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Alibaba Wan 2.1</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-video text-purple-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Sora</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">OpenAI Sora</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
                             </button>
                         </div>
                     </div>
@@ -737,7 +789,7 @@
                     </div>
 
                     <div id="btn-open-settings" onclick="toggleSettingsMenu(event)" class="flex flex-col items-center justify-center border border-cyan-500 bg-cyan-900/20 px-2 sm:px-3 py-1 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer transition-all duration-300">
-                        <span id="ai-btn-engine" class="text-[6px] sm:text-[7px] text-cyan-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-cyan-900/40 px-1 py-0.5 rounded border border-cyan-500/30">veo3.1 lite</span>
+                        <span id="ai-btn-engine" class="text-[6px] sm:text-[7px] text-cyan-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-cyan-900/40 px-1 py-0.5 rounded border border-cyan-500/30">grok</span>
                         <div class="flex items-center gap-1.5">
                             <span id="setting-type-label">Video</span> <i id="setting-icon" class="fa-solid fa-mobile-screen"></i>
                         </div>
@@ -1462,7 +1514,7 @@
             }
         }
 
-        let genConfig = { type: 'Video', ratio: '9:16', engine: 'veo3.1 lite', duration: '5', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
+        let genConfig = { type: 'Video', ratio: '9:16', engine: 'grok', duration: '5', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
         window.lastGenData = { taskId: null, engine: null };
 
         window.setMotionParam = function(param, value) {
@@ -1530,13 +1582,13 @@
             
             // Auto reset engine jika berasal dari mode Motion
             if (genConfig.engine.includes('Kling')) {
-                genConfig.engine = 'veo3.1 lite';
+                genConfig.engine = 'grok';
                 const selectText = document.getElementById('engine-select-text');
-                if (selectText) selectText.innerText = 'veo3.1 lite';
+                if (selectText) selectText.innerText = 'grok';
                 const selectIcon = document.getElementById('engine-select-icon');
-                if (selectIcon) selectIcon.innerHTML = `<svg class="w-3.5 h-3.5 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>`;
+                if (selectIcon) selectIcon.innerHTML = `<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>`;
                 const infoText = document.getElementById('engine-info-text');
-                if (infoText) infoText.innerText = '8 dtk • 30 ⚡';
+                if (infoText) infoText.innerText = '6 dtk • 18 ⚡';
                 
                 const btnK2 = document.getElementById('btn-motion-kling2');
                 const btnK3 = document.getElementById('btn-motion-kling3');
@@ -1544,7 +1596,7 @@
                 if(btnK3) btnK3.classList.remove('border-emerald-500/50');
                 
                 const aiBtnEngine = document.getElementById('ai-btn-engine');
-                if (aiBtnEngine) aiBtnEngine.innerText = 'veo3.1 lite';
+                if (aiBtnEngine) aiBtnEngine.innerText = 'grok';
             }
 
             ['Gambar', 'Video'].forEach(t => {
