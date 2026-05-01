@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- Meta Tags Anti-Cache (Memaksa browser ngecek Vercel) -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
     <!-- PWA Meta Tags (Wajib untuk APK) -->
     <meta name="theme-color" content="#000000">
     <link rel="manifest" href="manifest.json">
@@ -2681,11 +2686,63 @@
             }
         };
 
+        // ==========================================
+        // SISTEM AUTO-UPDATE PWA / SERVICE WORKER
+        // ==========================================
         if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope))
+                    .then(reg => {
+                        console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope);
+                        
+                        // 1. Cek update secara berkala setiap 1 jam di background
+                        setInterval(() => {
+                            reg.update();
+                        }, 1000 * 60 * 60);
+
+                        // 2. Deteksi jika ada versi baru yang masuk
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            if (installingWorker == null) return;
+
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        // Versi baru ditemukan dan sudah siap diunduh!
+                                        console.log('PWA: Versi baru tersedia!');
+                                        
+                                        // Munculkan notifikasi ke pengguna lalu auto-reload
+                                        if (window.showToast) {
+                                            window.showToast("Menerapkan pembaruan aplikasi...");
+                                        }
+                                        
+                                        // Paksa update ke versi baru
+                                        if (installingWorker.postMessage) {
+                                            installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        }
+
+                                        // Reload halaman setelah 1.5 detik
+                                        setTimeout(() => {
+                                            window.location.reload(true);
+                                        }, 1500);
+                                        
+                                    } else {
+                                        console.log('PWA: Aplikasi siap digunakan offline.');
+                                    }
+                                }
+                            };
+                        };
+                    })
                     .catch(err => console.warn('PWA: Service Worker gagal didaftarkan (Abaikan jika di preview).', err.message));
+
+                // Pastikan halaman di-reload saat Service Worker baru mengambil alih
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        window.location.reload(true);
+                        refreshing = true;
+                    }
+                });
             });
         } else {
             console.log('PWA: Pendaftaran Service Worker dilewati di environment preview/lokal ini.');
