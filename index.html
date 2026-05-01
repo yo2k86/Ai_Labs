@@ -609,14 +609,14 @@
                         <span class="text-sm font-bold tracking-wide">Engine Motion</span>
                     </div>
                     <div class="flex flex-col gap-2">
-                        <button onclick="setMotionControlMode('Kling 2.6')" id="btn-motion-kling2" class="flex justify-between items-center text-left p-3 bg-black/60 hover:bg-emerald-900/20 border border-white/10 rounded-xl transition-colors group shadow-inner">
+                        <button onclick="setMotionControlMode('Kling 2.6')" id="btn-motion-kling2" class="flex justify-between items-center text-left p-3 bg-black/60 hover:bg-emerald-900/20 border border-emerald-500/50 rounded-xl transition-colors group shadow-inner">
                             <div class="flex items-center gap-3">
                                 <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
                                     <i class="fa-solid fa-clapperboard text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]"></i>
                                 </span>
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Kling 2.6</span>
-                                    <span class="text-[9px] text-gray-500 mt-0.5">Standard Motion AI</span>
+                                    <span class="text-[9px] text-emerald-400 mt-0.5">11 ⚡ / Detik</span>
                                 </div>
                             </div>
                             <span class="text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-1 rounded border border-emerald-500/30 font-bold shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">Ready</span>
@@ -628,11 +628,29 @@
                                 </span>
                                 <div class="flex flex-col">
                                     <span class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Kling 3.0</span>
-                                    <span class="text-[9px] text-gray-500 mt-0.5">Advanced Pro Motion</span>
+                                    <span class="text-[9px] text-purple-400 mt-0.5">720p: 20⚡ | 1080p: 27⚡ / dtk</span>
                                 </div>
                             </div>
                             <span class="text-[9px] bg-purple-900/40 text-purple-300 px-2 py-1 rounded border border-purple-500/30 font-bold shrink-0 shadow-[0_0_10px_rgba(168,85,247,0.2)]">Baru!</span>
                         </button>
+                    </div>
+
+                    <!-- Options Resolusi & Durasi -->
+                    <div class="flex flex-col gap-3 mt-1 pt-3 border-t border-white/10">
+                        <div id="motion-resolution-options" class="hidden">
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Resolusi (Kling 3.0)</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setMotionParam('mode', '720p')" id="btn-motion-720p" class="flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1">720p</button>
+                                <button onclick="setMotionParam('mode', '1080p')" id="btn-motion-1080p" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1">1080p</button>
+                            </div>
+                        </div>
+                        <div id="motion-duration-options">
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Durasi Motion</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setMotionParam('duration', '5')" id="btn-motion-5s" class="flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center">5 Detik</button>
+                                <button onclick="setMotionParam('duration', '10')" id="btn-motion-10s" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center">10 Detik</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -706,12 +724,18 @@
                 </div>
 
                 <div class="flex gap-1.5 sm:gap-2">
-                    <div id="btn-motion-control" onclick="toggleMotionControlMenu(event)" class="flex items-center gap-1.5 border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer">
-                        <span>Motion</span><i class="fa-solid fa-person-running"></i>
+                    <div id="btn-motion-control" onclick="toggleMotionControlMenu(event)" class="flex flex-col items-center justify-center border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer transition-all duration-300">
+                        <span id="motion-btn-engine" class="text-[6px] sm:text-[7px] text-emerald-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-emerald-900/40 px-1 py-0.5 rounded border border-emerald-500/30">Kling 2.6</span>
+                        <div class="flex items-center gap-1.5">
+                            <span>Motion</span><i class="fa-solid fa-person-running"></i>
+                        </div>
                     </div>
 
-                    <div id="btn-open-settings" onclick="toggleSettingsMenu(event)" class="flex items-center gap-1.5 border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer">
-                        <span id="setting-type-label">Video</span> <i id="setting-icon" class="fa-solid fa-mobile-screen"></i>
+                    <div id="btn-open-settings" onclick="toggleSettingsMenu(event)" class="flex flex-col items-center justify-center border border-cyan-500 bg-cyan-900/20 px-2 sm:px-3 py-1 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer transition-all duration-300">
+                        <span id="ai-btn-engine" class="text-[6px] sm:text-[7px] text-cyan-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-cyan-900/40 px-1 py-0.5 rounded border border-cyan-500/30">veo3.1 lite</span>
+                        <div class="flex items-center gap-1.5">
+                            <span id="setting-type-label">Video</span> <i id="setting-icon" class="fa-solid fa-mobile-screen"></i>
+                        </div>
                     </div>
                 </div>
                 
@@ -1405,22 +1429,34 @@
             }
         }
 
-        let genConfig = { type: 'Video', ratio: '9:16', engine: 'veo3.1 lite', duration: '6', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
+        let genConfig = { type: 'Video', ratio: '9:16', engine: 'veo3.1 lite', duration: '5', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
         window.lastGenData = { taskId: null, engine: null };
 
         window.setMotionParam = function(param, value) {
             if (param === 'mode') {
                 genConfig.motionMode = value;
-                document.getElementById('btn-motion-720p').className = value === '720p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-motion-1080p').className = value === '1080p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btn720p = document.getElementById('btn-motion-720p');
+                const btn1080p = document.getElementById('btn-motion-1080p');
+                if (btn720p) btn720p.className = value === '720p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1";
+                if (btn1080p) btn1080p.className = value === '1080p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1";
+            } else if (param === 'duration') {
+                genConfig.duration = value;
+                const btn5s = document.getElementById('btn-motion-5s');
+                const btn10s = document.getElementById('btn-motion-10s');
+                if (btn5s) btn5s.className = value === '5' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center";
+                if (btn10s) btn10s.className = value === '10' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center";
             } else if (param === 'orientation') {
                 genConfig.characterOrientation = value;
-                document.getElementById('btn-ori-video').className = value === 'video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-ori-image').className = value === 'image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btnVid = document.getElementById('btn-ori-video');
+                const btnImg = document.getElementById('btn-ori-image');
+                if (btnVid) btnVid.className = value === 'video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                if (btnImg) btnImg.className = value === 'image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
             } else if (param === 'bg') {
                 genConfig.backgroundSource = value;
-                document.getElementById('btn-bg-video').className = value === 'input_video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-bg-image').className = value === 'input_image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btnBgVid = document.getElementById('btn-bg-video');
+                const btnBgImg = document.getElementById('btn-bg-image');
+                if (btnBgVid) btnBgVid.className = value === 'input_video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                if (btnBgImg) btnBgImg.className = value === 'input_image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
             }
         };
 
@@ -1439,13 +1475,45 @@
             const btnK2 = document.getElementById('btn-motion-kling2'); const btnK3 = document.getElementById('btn-motion-kling3');
             if(btnK2) btnK2.classList.toggle('border-emerald-500/50', engine === 'Kling 2.6');
             if(btnK3) btnK3.classList.toggle('border-emerald-500/50', engine === 'Kling 3.0');
-            const bgOption = document.getElementById('kling3-bg-option');
-            if (bgOption) { if (engine === 'Kling 3.0') bgOption.classList.remove('hidden'); else bgOption.classList.add('hidden'); }
+            
+            const resOptions = document.getElementById('motion-resolution-options');
+            if (resOptions) {
+                if (engine === 'Kling 3.0') {
+                    resOptions.classList.remove('hidden');
+                } else {
+                    resOptions.classList.add('hidden');
+                    window.setMotionParam('mode', '720p'); // default Kling 2.6
+                }
+            }
+            
+            const motBtnEngine = document.getElementById('motion-btn-engine');
+            if (motBtnEngine) motBtnEngine.innerText = engine;
+
             window.updateMainSettingButton(); window.updateCanvasPreview();
         };
 
         window.setGenType = function(type) {
             genConfig.type = type;
+            
+            // Auto reset engine jika berasal dari mode Motion
+            if (genConfig.engine.includes('Kling')) {
+                genConfig.engine = 'veo3.1 lite';
+                const selectText = document.getElementById('engine-select-text');
+                if (selectText) selectText.innerText = 'veo3.1 lite';
+                const selectIcon = document.getElementById('engine-select-icon');
+                if (selectIcon) selectIcon.innerHTML = `<svg class="w-3.5 h-3.5 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>`;
+                const infoText = document.getElementById('engine-info-text');
+                if (infoText) infoText.innerText = '8 dtk • 30 ⚡';
+                
+                const btnK2 = document.getElementById('btn-motion-kling2');
+                const btnK3 = document.getElementById('btn-motion-kling3');
+                if(btnK2) btnK2.classList.remove('border-emerald-500/50');
+                if(btnK3) btnK3.classList.remove('border-emerald-500/50');
+                
+                const aiBtnEngine = document.getElementById('ai-btn-engine');
+                if (aiBtnEngine) aiBtnEngine.innerText = 'veo3.1 lite';
+            }
+
             ['Gambar', 'Video'].forEach(t => {
                 const btn = document.getElementById(`btn-type-${t}`);
                 const icon = t === 'Gambar' ? 'fa-image' : 'fa-film';
@@ -1487,6 +1555,36 @@
 
         window.setGenEngine = function(engine) {
             genConfig.engine = engine;
+            
+            // Otomatis kembalikan mode ke Video jika memilih Engine AI saat sedang berada di Motion
+            if (genConfig.type === 'Motion') {
+                genConfig.type = 'Video';
+                ['Gambar', 'Video'].forEach(t => {
+                    const btn = document.getElementById(`btn-type-${t}`);
+                    const icon = t === 'Gambar' ? 'fa-image' : 'fa-film';
+                    const styleIcon = t === 'Gambar' ? 'fa-regular' : 'fa-solid';
+                    const shortText = t === 'Gambar' ? 'Img' : 'Vid';
+                    
+                    if (btn) {
+                        if (t === 'Video') {
+                            btn.className = "flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5";
+                            btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                        } else {
+                            btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5";
+                            btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                        }
+                    }
+                });
+                
+                const btnK2 = document.getElementById('btn-motion-kling2');
+                const btnK3 = document.getElementById('btn-motion-kling3');
+                if(btnK2) btnK2.classList.remove('border-emerald-500/50');
+                if(btnK3) btnK3.classList.remove('border-emerald-500/50');
+
+                window.updateMainSettingButton(); 
+                window.updateCanvasPreview();
+            }
+
             const selectText = document.getElementById('engine-select-text');
             const selectIcon = document.getElementById('engine-select-icon');
             
@@ -1506,6 +1604,9 @@
                 else if (engine === 'grok') infoText.innerText = '6 dtk • 18 ⚡';
                 else infoText.innerText = '';
             }
+            
+            const aiBtnEngine = document.getElementById('ai-btn-engine');
+            if (aiBtnEngine) aiBtnEngine.innerText = engine;
         };
 
         window.updateMainSettingButton = function() {
@@ -1513,6 +1614,25 @@
             const icn = document.getElementById('setting-icon');
             if (lbl) lbl.innerText = genConfig.type === 'Motion' ? 'Motion' : genConfig.type;
             if (icn) icn.className = genConfig.type === 'Motion' ? "fa-solid fa-person-running" : (genConfig.ratio === '9:16' ? "fa-solid fa-mobile-screen" : "fa-solid fa-desktop");
+
+            const btnMot = document.getElementById('btn-motion-control');
+            const btnAi = document.getElementById('btn-open-settings');
+            
+            if (btnMot && btnAi) {
+                if (genConfig.type === 'Motion') {
+                    btnMot.classList.replace('border-gray-600', 'border-emerald-500');
+                    btnMot.classList.replace('bg-black/60', 'bg-emerald-900/20');
+                    
+                    btnAi.classList.replace('border-cyan-500', 'border-gray-600');
+                    btnAi.classList.replace('bg-cyan-900/20', 'bg-black/60');
+                } else {
+                    btnAi.classList.replace('border-gray-600', 'border-cyan-500');
+                    btnAi.classList.replace('bg-black/60', 'bg-cyan-900/20');
+                    
+                    btnMot.classList.replace('border-emerald-500', 'border-gray-600');
+                    btnMot.classList.replace('bg-emerald-900/20', 'bg-black/60');
+                }
+            }
 
             const outputLabel = document.getElementById('output-label');
             const outputPlaceholderIcon = document.getElementById('output-placeholder-icon');
@@ -1780,14 +1900,23 @@
             }
 
             let cost = 1; const engineName = genConfig.engine.toLowerCase();
-            if (genConfig.type === 'Gambar') cost = 1;
-            else if (engineName === 'grok') cost = (parseInt(genConfig.duration) || 6) / 6 * 18;
-            else if (engineName.includes('veo3.1 lite')) cost = 30;
-            else if (engineName.includes('veo3.1 fast')) cost = 30;
-            else if (engineName.includes('veo3.1 quality')) cost = 50;
-            else if (engineName.includes('kling 3.0')) cost = 15;
-            else if (engineName.includes('kling')) cost = 10;
-            else cost = 5;
+            let durationVal = parseInt(genConfig.duration) || 5;
+
+            if (genConfig.type === 'Gambar') {
+                cost = 1;
+            } else if (genConfig.type === 'Motion') {
+                if (engineName.includes('kling 3.0')) {
+                    cost = genConfig.motionMode === '1080p' ? durationVal * 27 : durationVal * 20;
+                } else {
+                    cost = durationVal * 11;
+                }
+            } else {
+                if (engineName === 'grok') cost = (durationVal || 6) / 6 * 18;
+                else if (engineName.includes('veo3.1 lite')) cost = 30;
+                else if (engineName.includes('veo3.1 fast')) cost = 30;
+                else if (engineName.includes('veo3.1 quality')) cost = 50;
+                else cost = 5;
+            }
             
             if (window.currentUserCredits < cost) {
                 window.showCustomAlert(`Kredit tidak cukup! Butuh ${cost} ⚡, sisa kredit ${window.currentUserCredits} ⚡.`); return;
