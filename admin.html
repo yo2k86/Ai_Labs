@@ -99,7 +99,7 @@
             border-top: 1px solid rgba(255, 255, 255, 0.6);
         }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
         ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
@@ -210,7 +210,6 @@
                 </div>
 
                 <div class="glass-panel rounded-2xl sm:rounded-3xl flex flex-col h-[65vh] border border-white/10">
-                    <!-- Title dan Search dibuat tumpuk (col) di hp, sejajar (row) di desktop -->
                     <div class="p-4 sm:p-5 border-b border-white/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3 md:gap-0 bg-white/5 backdrop-blur-md z-20 rounded-t-2xl sm:rounded-t-3xl shadow-sm">
                         <h3 class="font-bold text-base sm:text-lg tracking-wide"><i class="fas fa-server mr-2 text-emerald-400"></i> Daftar Klien Ailabs</h3>
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full md:w-auto">
@@ -223,15 +222,15 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Tabel disetting agar bisa horizontal scroll rapih di HP -->
-                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar relative z-10 w-full">
-                        <table class="w-full text-left border-collapse min-w-[650px]">
-                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <!-- Overflow X Hidden + Table Fixed agar pas di HP seperti screenshot -->
+                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar relative z-10 w-full">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead class="text-[7px] sm:text-[10px] uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Profil & ID</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Sisa Kredit</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Akses Video</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Top-up Manual</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[35%]">Profil & ID</th>
+                                    <th class="px-1 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center w-[20%]">Sisa Kredit</th>
+                                    <th class="px-1 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center w-[20%]">Akses Video</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-[25%]">Top-up Manual</th>
                                 </tr>
                             </thead>
                             <tbody id="users-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
@@ -260,13 +259,13 @@
                             <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari kode spesifik...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
-                        <table class="w-full text-left border-collapse min-w-[500px]">
-                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead class="text-[7px] sm:text-[10px] uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider">Kode Referral (200 ⚡)</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Status & Pemakai</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-32 sm:w-40">Aksi</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[40%]">Kode Referral (200 ⚡)</th>
+                                    <th class="px-1 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center w-[35%]">Status & Pemakai</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-[25%]">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="ref-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
@@ -295,14 +294,14 @@
                             <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input w-full sm:w-64 rounded-xl pl-9 pr-4 py-2 text-sm" placeholder="Cari ID / Nama / Email...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
-                        <table class="w-full text-left border-collapse min-w-[700px]">
-                            <thead class="text-[10px] sm:text-xs uppercase text-gray-400 sticky top-0 z-30">
+                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse table-fixed">
+                            <thead class="text-[7px] sm:text-[10px] uppercase text-gray-400 sticky top-0 z-30">
                                 <tr>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/4">Info Klien</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-1/3">Detail Prompt & Engine</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center">Waktu</th>
-                                    <th class="px-4 py-3 sm:px-6 sm:py-4 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right">Aksi Bantuan</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[30%]">Info Klien</th>
+                                    <th class="px-1 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[35%]">Detail Prompt</th>
+                                    <th class="px-1 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-center w-[15%]">Waktu</th>
+                                    <th class="px-2 py-3 bg-[#1a1c23]/90 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider text-right w-[20%]">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="history-tbody" class="text-xs sm:text-sm divide-y divide-white/5"></tbody>
@@ -401,33 +400,34 @@
                         return;
                     }
 
+                    // GENERASI HTML ROW DENGAN TRUNCATE & FLEX AGAR PAS DI HP (TIDAK SCROLL)
                     tbody.innerHTML = data.users.map(u => {
                         const isVideoOn = u.videoAccess !== false;
                         return `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-4 py-3 sm:px-6 sm:py-4 whitespace-nowrap">
+                            <td class="px-2 py-3 sm:px-4 sm:py-4 align-middle overflow-hidden">
                                 <div class="flex flex-col">
-                                    <span class="font-bold text-white text-xs sm:text-sm flex items-center gap-2 drop-shadow-md">
-                                        ${u.name} ${u.isAnon ? '<span class="px-1.5 py-0.5 rounded bg-gray-600/30 text-[8px] sm:text-[9px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
+                                    <span class="font-bold text-white text-[10px] sm:text-sm flex items-center gap-1 drop-shadow-md truncate">
+                                        ${u.name} ${u.isAnon ? '<span class="px-1 py-0.5 rounded bg-gray-600/30 text-[6px] sm:text-[8px] text-gray-400 border border-gray-600">ANONIM</span>' : ''}
                                     </span>
-                                    <span class="text-[9px] sm:text-[10px] text-emerald-400/70 font-mono mt-0.5 truncate w-32 sm:w-auto">${u.email}</span>
-                                    <span class="text-[8px] sm:text-[9px] text-gray-600 font-mono">UID: ${u.uid}</span>
+                                    <span class="text-[8px] sm:text-[10px] text-emerald-400/80 font-mono mt-0.5 truncate">${u.email}</span>
+                                    <span class="text-[7px] sm:text-[9px] text-gray-600 font-mono mt-0.5 truncate">UID: ${u.uid}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
-                                <span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-black/40 font-black text-yellow-400 border border-yellow-500/20 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] text-xs sm:text-sm">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
+                            <td class="px-1 py-3 sm:px-4 sm:py-4 text-center align-middle overflow-hidden">
+                                <span class="font-black text-yellow-400 text-[10px] sm:text-sm drop-shadow-md truncate">${Number(u.credits || 0).toLocaleString('id-ID')} ⚡</span>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-center whitespace-nowrap">
-                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-16 sm:w-24 flex justify-center items-center gap-1 sm:gap-2 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/50 hover:bg-red-500/40'}">
-                                    <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'}"></i>
+                            <td class="px-1 py-3 sm:px-4 sm:py-4 text-center align-middle">
+                                <button id="btn-toggle-${u.uid}" onclick="toggleVideoAccess('${u.uid}', ${isVideoOn})" class="px-1.5 py-1 sm:px-3 sm:py-1.5 rounded md:rounded-lg text-[8px] sm:text-[10px] font-bold uppercase tracking-wider transition-all shadow-md w-10 sm:w-20 flex justify-center items-center gap-1 mx-auto ${isVideoOn ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/40' : 'bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/40'}">
+                                    <i class="fas ${isVideoOn ? 'fa-video' : 'fa-video-slash'} hidden sm:inline"></i>
                                     ${isVideoOn ? 'ON' : 'OFF'}
                                 </button>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-4 text-right whitespace-nowrap">
-                                <div class="flex justify-end items-center gap-1.5 sm:gap-2">
-                                    <input type="number" id="in-${u.uid}" class="glass-input w-12 sm:w-16 rounded-lg sm:rounded-xl px-1 sm:px-2 py-1.5 sm:py-2 text-center text-xs font-mono" placeholder="0">
-                                    <button onclick="changeCredit('${u.uid}','add')" class="w-7 h-7 sm:w-8 sm:h-8 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-plus text-[10px] sm:text-xs"></i></button>
-                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-7 h-7 sm:w-8 sm:h-8 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded-lg sm:rounded-xl transition-all flex items-center justify-center"><i class="fas fa-minus text-[10px] sm:text-xs"></i></button>
+                            <td class="px-2 py-3 sm:px-4 sm:py-4 text-right align-middle">
+                                <div class="flex justify-end items-center gap-1 sm:gap-2">
+                                    <input type="number" id="in-${u.uid}" class="bg-black/40 border border-white/10 w-6 sm:w-12 rounded px-1 py-1 text-center text-[9px] sm:text-xs font-mono text-white focus:outline-none focus:border-emerald-500/50" placeholder="0">
+                                    <button onclick="changeCredit('${u.uid}','add')" class="w-5 h-5 sm:w-7 sm:h-7 bg-emerald-500/20 hover:bg-emerald-500/40 border border-emerald-500/30 text-emerald-400 rounded flex items-center justify-center transition-all shrink-0"><i class="fas fa-plus text-[8px] sm:text-[10px]"></i></button>
+                                    <button onclick="changeCredit('${u.uid}','sub')" class="w-5 h-5 sm:w-7 sm:h-7 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-red-400 rounded flex items-center justify-center transition-all shrink-0"><i class="fas fa-minus text-[8px] sm:text-[10px]"></i></button>
                                 </div>
                             </td>
                         </tr>`}).join('');
@@ -475,13 +475,13 @@
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-4 py-4 sm:px-6 sm:py-5 font-mono font-bold tracking-widest whitespace-nowrap ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-sm sm:text-lg'}">${c.code}</td>
-                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-center whitespace-nowrap">
-                                ${c.used ? '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[9px] sm:text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] sm:text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
-                                <div class="text-[9px] sm:text-[10px] text-gray-500 mt-2 truncate max-w-[150px] sm:max-w-[200px] mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
+                            <td class="px-2 py-3 sm:px-4 sm:py-5 font-mono font-bold tracking-wider truncate align-middle ${c.used ? 'text-gray-600 line-through' : 'text-emerald-400 text-[10px] sm:text-lg'}">${c.code}</td>
+                            <td class="px-1 py-3 sm:px-4 sm:py-5 text-center align-middle overflow-hidden">
+                                ${c.used ? '<span class="px-2 sm:px-4 py-1 sm:py-1.5 rounded-full bg-red-500/10 text-red-500/70 text-[7px] sm:text-[10px] font-bold uppercase border border-red-500/20 shadow-inner">Terpakai</span>' : '<span class="px-2 sm:px-4 py-1 sm:py-1.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[7px] sm:text-[10px] font-bold uppercase border border-emerald-500/40">Tersedia</span>'}
+                                <div class="text-[7px] sm:text-[10px] text-gray-500 mt-1 truncate mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
                             </td>
-                            <td class="px-4 py-4 sm:px-6 sm:py-5 text-right whitespace-nowrap">
-                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center gap-1 sm:gap-2"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-3 sm:px-4 py-1.5 sm:py-2 bg-red-500/5 text-red-500/40 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold uppercase ml-auto">Hangus</span>`}
+                            <td class="px-2 py-3 sm:px-4 sm:py-5 text-right align-middle">
+                                ${!c.used ? `<button onclick="copyToClipboard('${c.code}')" class="glass-btn text-white px-2 sm:px-5 py-1.5 sm:py-2 rounded md:rounded-xl text-[8px] sm:text-xs ml-auto font-bold flex items-center gap-1 sm:gap-2 w-fit"><i class="fas fa-copy"></i> Salin</button>` : `<span class="inline-block px-2 sm:px-4 py-1 sm:py-2 bg-red-500/5 text-red-500/40 rounded md:rounded-xl text-[8px] sm:text-xs font-bold uppercase ml-auto">Hangus</span>`}
                             </td>
                         </tr>`).join('');
                 }
@@ -504,25 +504,25 @@
                         const dateObj = new Date(h.timestamp);
                         return `
                         <tr class="hover:bg-white/5 border-b border-white/5 transition-colors group">
-                            <td class="px-4 py-3 sm:px-6 sm:py-5 whitespace-nowrap">
-                                <div class="font-bold text-white text-xs sm:text-sm">${h.userName}</div>
-                                <div class="text-[9px] sm:text-[10px] text-emerald-400 font-mono">${h.userEmail}</div>
-                                <div class="text-[8px] sm:text-[9px] text-gray-500 mt-1 cursor-pointer hover:text-white" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
+                            <td class="px-2 py-3 sm:px-4 sm:py-5 overflow-hidden align-middle">
+                                <div class="font-bold text-white text-[9px] sm:text-sm truncate">${h.userName}</div>
+                                <div class="text-[7px] sm:text-[10px] text-emerald-400 font-mono truncate">${h.userEmail}</div>
+                                <div class="text-[6px] sm:text-[9px] text-gray-500 mt-0.5 cursor-pointer hover:text-white truncate" onclick="copyToClipboard('${h.taskId}')">ID: ${h.taskId.substring(0,10)}...</div>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-5 min-w-[200px]">
-                                <div class="flex flex-wrap items-center gap-1 sm:gap-2 mb-1">
-                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.type}</span>
-                                    <span class="px-1.5 sm:px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[8px] sm:text-[9px] font-bold uppercase">${h.engine}</span>
+                            <td class="px-1 py-3 sm:px-4 sm:py-5 overflow-hidden align-middle">
+                                <div class="flex flex-wrap items-center gap-1 mb-1">
+                                    <span class="px-1 py-0.5 rounded bg-purple-500/20 text-purple-400 text-[6px] sm:text-[9px] font-bold uppercase truncate max-w-[45%]">${h.type}</span>
+                                    <span class="px-1 py-0.5 rounded bg-blue-500/20 text-blue-400 text-[6px] sm:text-[9px] font-bold uppercase truncate max-w-[45%]">${h.engine}</span>
                                 </div>
-                                <p class="text-[10px] sm:text-xs text-gray-300 line-clamp-2 w-full whitespace-normal break-all">${h.prompt}</p>
+                                <p class="text-[8px] sm:text-xs text-gray-300 line-clamp-2 w-full whitespace-normal break-all">${h.prompt}</p>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-center text-gray-400 text-[10px] sm:text-xs whitespace-nowrap">
-                                <div class="font-bold text-white">${dateObj.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
-                                <div class="text-[9px] sm:text-[10px]">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
+                            <td class="px-1 py-3 sm:px-4 sm:py-5 text-center text-gray-400 overflow-hidden align-middle">
+                                <div class="font-bold text-white text-[8px] sm:text-xs truncate">${dateObj.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>
+                                <div class="text-[7px] sm:text-[10px] truncate">${dateObj.toLocaleDateString('id-ID', {day:'numeric',month:'short'})}</div>
                             </td>
-                            <td class="px-4 py-3 sm:px-6 sm:py-5 text-right whitespace-nowrap">
-                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32">
-                                    <i class="fas fa-search"></i> Cek Server
+                            <td class="px-2 py-3 sm:px-4 sm:py-5 text-right align-middle">
+                                <button id="btn-cek-${h.taskId}" onclick="cekHasilKie('${h.taskId}', '${h.engine}')" class="glass-btn text-white px-2 py-1.5 sm:px-4 sm:py-2 rounded md:rounded-xl text-[8px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 w-[55px] sm:w-24">
+                                    <i class="fas fa-search"></i> <span class="hidden sm:inline">Cek</span>
                                 </button>
                             </td>
                         </tr>`}).join('');
@@ -539,20 +539,21 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             try {
-                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                // PENAMBAHAN: Tambahkan parameter appId agar pencarian akurat 100% dan lolos auto-refund
+                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}&appId=${appId}`);
                 const data = await res.json();
                 
                 const status = String(data.data?.successFlag ?? data.successFlag ?? data.data?.status ?? data.status ?? '').toUpperCase();
                 
                 // Cek jika status GAGAL
                 if (status === 'FAIL' || status === 'ERROR' || status === '2' || status === '3' || status === 'FAILED') {
-                    btn.innerHTML = '<i class="fas fa-times text-red-500"></i> Gagal';
-                    btn.className = 'px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-red-900/50 border border-red-500/50 text-red-300';
+                    btn.innerHTML = '<i class="fas fa-times text-red-500"></i>';
+                    btn.className = 'px-2 py-1.5 sm:px-4 sm:py-2 rounded md:rounded-xl text-[8px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 w-[55px] sm:w-24 bg-red-900/50 border border-red-500/50 text-red-300';
                     showToast('Generasi gagal di server Kie.ai', 'error');
                     return;
                 }
 
-                // Ekstraksi URL Cerdas (Anti Salah Ambil Link Gambar Referensi)
+                // Ekstraksi URL Cerdas
                 let mediaUrl = data.data?.resultUrl || 
                                (data.data?.resultUrls && data.data.resultUrls[0]) || 
                                (data.data?.response?.resultUrls && data.data.response.resultUrls[0]) || 
@@ -566,12 +567,9 @@
                     mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg|jpeg)(\?.*)?$/i)) || validUrls[0];
                 }
 
-                // Status sukses termasuk '100' (Kling AI) dan URL berisi tempfile
                 if (mediaUrl && (status === '1' || status === '100' || status === 'SUCCESS' || status === 'COMPLETED' || mediaUrl.includes('tempfile'))) {
-                    
                     let finalUrl = mediaUrl;
                     
-                    // Kalau linknya adalah tempfile (masih diblokir CORS), konversi dulu pakai backend kita
                     if (mediaUrl.includes('tempfile')) {
                         try {
                             const dlRes = await fetch('/api/download', { 
@@ -586,10 +584,9 @@
                         }
                     }
 
-                    // Tampilkan Tombol Sukses dengan efek kaca aslimu
-                    btn.innerHTML = '<i class="fa-solid fa-external-link-alt"></i> Lihat';
-                    btn.className = 'glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-emerald-500 text-white';
-                    btn.onclick = () => window.open(finalUrl, '_blank');
+                    btn.innerHTML = '<i class="fa-solid fa-download"></i>';
+                    btn.className = 'glass-btn text-white px-2 py-1.5 sm:px-4 sm:py-2 rounded md:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 w-[55px] sm:w-24 bg-emerald-500 text-white';
+                    btn.onclick = () => window.downloadAdminFile(finalUrl, btn);
                     btn.disabled = false;
                     showToast('Hasil ditemukan!');
                 } else {
@@ -603,6 +600,44 @@
                 showToast('Gagal terhubung API.', 'error');
             }
         }
+
+        window.downloadAdminFile = async function(url, btnElement) {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btnElement.disabled = true;
+
+            try {
+                // Tentukan ekstensi file berdasarkan URL
+                const isVideo = url.match(/\.(mp4|webm|mov)$/i) || url.includes('video');
+                const ext = isVideo ? 'mp4' : 'png';
+
+                // Fetch data sebagai blob (data mentah)
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("CORS terblokir");
+                
+                const blob = await response.blob(); 
+                const blobUrl = window.URL.createObjectURL(blob);
+                
+                // Buat elemen <a> tersembunyi untuk memaksa proses download browser
+                const a = document.createElement('a'); 
+                a.style.display = 'none'; 
+                a.href = blobUrl; 
+                a.download = `Ailabs_User_History_${Date.now()}.${ext}`;
+                document.body.appendChild(a); 
+                a.click(); 
+                window.URL.revokeObjectURL(blobUrl);
+
+                showToast("Berhasil diunduh!");
+            } catch (error) {
+                console.warn("Direct download gagal karena CORS, fallback ke tab baru", error);
+                // Fallback jika API server memblokir direct download via Fetch (CORS)
+                window.open(url, '_blank');
+                showToast("Membuka di tab baru");
+            } finally {
+                btnElement.innerHTML = '<i class="fa-solid fa-download"></i>';
+                btnElement.disabled = false;
+            }
+        };
 
         function copyToClipboard(text) {
             const el = document.createElement('textarea');
