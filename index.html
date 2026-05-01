@@ -681,8 +681,8 @@
                         </button>
                         
                         <!-- Dropdown Options -->
-                        <div id="engine-options-dropdown" class="hidden absolute top-[105%] left-0 w-full bg-[#121212] border border-emerald-500/40 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.9)] z-[70] flex flex-col overflow-hidden">
-                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group">
+                        <div id="engine-options-dropdown" class="hidden absolute top-[105%] left-0 w-full bg-[#121212] border border-emerald-500/40 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.9)] z-[70] flex flex-col overflow-y-auto custom-scrollbar max-h-[220px]">
+                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
                                         <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
@@ -694,8 +694,8 @@
                                 </div>
                                 <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">18 ⚡</span>
                             </button>
-                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="setGenEngine('veo3.1 lite'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="setGenEngine('veo3.1 lite'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
                                         <svg class="w-4 h-4 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>
@@ -707,8 +707,8 @@
                                 </div>
                                 <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">30 ⚡</span>
                             </button>
-                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
                                         <i class="fa-solid fa-compact-disc text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.8)] text-[14px]"></i>
@@ -720,8 +720,8 @@
                                 </div>
                                 <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
                             </button>
-                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
                                         <i class="fa-solid fa-clapperboard text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)] text-[14px]"></i>
@@ -733,8 +733,8 @@
                                 </div>
                                 <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
                             </button>
-                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
                                         <i class="fa-solid fa-bolt text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-[14px]"></i>
@@ -746,8 +746,8 @@
                                 </div>
                                 <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
                             </button>
-                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
-                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70">
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
                                 <div class="flex items-center gap-3">
                                     <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
                                         <i class="fa-solid fa-video text-purple-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.8)] text-[14px]"></i>
