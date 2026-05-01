@@ -858,12 +858,18 @@
 
     <!-- Modals Editor / Viewer -->
     <div id="video-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur flex items-center justify-center p-2">
-        <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-white bg-white/20 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <button onclick="downloadFromModal('video', this)" class="text-white bg-emerald-500/80 hover:bg-emerald-500 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Download File"><i class="fa-solid fa-download"></i></button>
+            <button onclick="closeVideoModal()" class="text-white bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <video id="modal-video-player" controls playsinline class="max-w-full max-h-[85vh] rounded-xl"></video>
     </div>
 
     <div id="image-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur flex items-center justify-center p-2">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white bg-white/20 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <button onclick="downloadFromModal('image', this)" class="text-white bg-emerald-500/80 hover:bg-emerald-500 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Download File"><i class="fa-solid fa-download"></i></button>
+            <button onclick="closeImageModal()" class="text-white bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <img id="modal-image-viewer" src="" class="max-w-full max-h-[85vh] rounded-xl object-contain">
     </div>
 
@@ -2202,6 +2208,59 @@
             if (modal && modalViewer && resultImage) { modalViewer.src = resultImage.src; modal.classList.remove('hidden'); }
         }
         window.closeImageModal = function() { document.getElementById('image-modal')?.classList.add('hidden'); }
+
+        window.downloadFromModal = async function(type, btnElement) {
+            let urlToDownload = "";
+            let isFileVideo = type === 'video';
+            
+            if (isFileVideo) {
+                const vidEl = document.getElementById('modal-video-player');
+                if (vidEl && vidEl.src) urlToDownload = vidEl.src;
+            } else {
+                const imgEl = document.getElementById('modal-image-viewer');
+                if (imgEl && imgEl.src) urlToDownload = imgEl.src;
+            }
+            
+            if (!urlToDownload) return window.showCustomAlert("Gagal menemukan link file.");
+
+            const icon = btnElement ? btnElement.querySelector('i') : null;
+            if (icon) icon.className = "fa-solid fa-spinner fa-spin";
+
+            try {
+                let finalDlUrl = urlToDownload;
+                // Bersihkan Temp URL agar browser bisa mendownloadnya
+                try {
+                    const dlRes = await fetch('/api/download', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlToDownload })
+                    });
+                    if (dlRes.ok) {
+                        const dlData = await dlRes.json();
+                        finalDlUrl = dlData.data || dlData.url || finalDlUrl;
+                    }
+                } catch(err) {
+                    console.warn("Gagal konversi link di modal, memakai URL asli");
+                }
+
+                const response = await fetch(finalDlUrl);
+                if (!response.ok) throw new Error("CORS terblokir");
+                const blob = await response.blob(); 
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a'); 
+                a.style.display = 'none'; 
+                a.href = blobUrl; 
+                a.download = `Ailabs_History_${Date.now()}.${isFileVideo ? 'mp4' : 'png'}`;
+                document.body.appendChild(a); 
+                a.click(); 
+                window.URL.revokeObjectURL(blobUrl);
+                
+                if (icon) icon.className = "fa-solid fa-download";
+                window.showToast("Berhasil diunduh!");
+            } catch (error) {
+                // Fallback jika API KIE mencegah download langsung (membuka tab baru)
+                window.open(urlToDownload, '_blank');
+                if (icon) icon.className = "fa-solid fa-download";
+            }
+        };
 
         window.resetEditor = function() {
             editorImages['mulai'] = null;
