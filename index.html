@@ -2057,7 +2057,8 @@
                         
                         let checkRes, checkData;
                         try {
-                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                            // DITAMBAH: Mengirim appId ke backend agar auto-refund sukses
+                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}&appId=${window.appId}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
@@ -2258,12 +2259,14 @@
 
                 listEl.innerHTML = myHistory.map(item => {
                     const dateStr = item.timestamp ? new Date(item.timestamp.toMillis()).toLocaleString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '-';
-                    const isFailed = item.status === 'FAILED';
+                    // DITAMBAH: Badge untuk status Refund 
+                    const isFailed = item.status === 'FAILED' || item.status === 'FAILED_REFUNDED';
                     const isSuccess = item.status === 'SUCCESS';
                     
                     let statusBadge = '';
-                    if (isFailed) statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30">Gagal</span>';
-                    if (isSuccess) statusBadge = '<span class="text-[9px] bg-emerald-900/40 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">Selesai</span>';
+                    if (item.status === 'FAILED_REFUNDED') statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30" title="Kredit telah dikembalikan">Gagal (Refund)</span>';
+                    else if (isFailed) statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30">Gagal</span>';
+                    else if (isSuccess) statusBadge = '<span class="text-[9px] bg-emerald-900/40 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">Selesai</span>';
 
                     return `
                         <div class="bg-black/40 border border-white/10 rounded-xl p-3 md:p-4 flex flex-col gap-2 relative group hover:border-emerald-500/30 transition">
@@ -2299,7 +2302,8 @@
             btnElement.disabled = true;
 
             try {
-                const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                // DITAMBAH: Mengirim appId ke backend 
+                const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}&appId=${window.appId}`);
                 const checkData = await checkRes.json();
 
                 let rawStatus = checkData.data?.state ?? checkData.data?.successFlag ?? checkData.data?.status ?? checkData.status ?? checkData.successFlag ?? "";
@@ -2387,7 +2391,6 @@
             try {
                 if (icon) icon.className = "fa-solid fa-spinner fa-spin text-white text-2xl";
                 
-                // BARU: Panggil API convert temp URL HANYA SAAT MENGUNDUH
                 let finalDlUrl = urlToDownload;
                 try {
                     const dlRes = await fetch('/api/download', {
@@ -2970,8 +2973,8 @@
                     if (actionType === 'extend') {
                         let checkData;
                         try {
-                            // FIXED API ROUTE: /api/check
-                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
+                            // FIXED API ROUTE: /api/check (DITAMBAH appId JUGA DI SINI AGAR SINKRON)
+                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo&appId=${window.appId}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             continue;
