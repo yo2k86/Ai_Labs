@@ -314,41 +314,9 @@
         </main>
     </div>
 
-    <!-- Firebase SDK Imports -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyCq_zB0KHCqVKgouKBLUw1obq6KU0HZHvc",
-            authDomain: "ailabs-6f8b1.firebaseapp.com",
-            projectId: "ailabs-6f8b1",
-            storageBucket: "ailabs-6f8b1.firebasestorage.app",
-            messagingSenderId: "290208256362",
-            appId: "1:290208256362:web:b5022be8bd57311f9cd513",
-            measurementId: "G-4QQCLCWJF0"
-        };
-        
-        let app, auth, db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
-        
-        // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API
-        window.appId = appId;
-        
-        const provider = new GoogleAuthProvider();
-        
-        window.currentUserCredits = 0;
-        window.currentUserId = null;
-        let creditUnsubscribe = null;
-    </script>
-
     <script>
         let currentAdminSessionCode = '';
         const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
-        
-        // PERBAIKAN: Ekspos appId ke window
-        window.appId = appId;
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
@@ -571,7 +539,8 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
             try {
-                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                // PENAMBAHAN: Tambahkan parameter appId agar pencarian akurat 100% dan lolos auto-refund
+                const res = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}&appId=${appId}`);
                 const data = await res.json();
                 
                 const status = String(data.data?.successFlag ?? data.successFlag ?? data.data?.status ?? data.status ?? '').toUpperCase();
@@ -584,7 +553,7 @@
                     return;
                 }
 
-                // Ekstraksi URL Cerdas (Anti Salah Ambil Link Gambar Referensi)
+                // Ekstraksi URL Cerdas
                 let mediaUrl = data.data?.resultUrl || 
                                (data.data?.resultUrls && data.data.resultUrls[0]) || 
                                (data.data?.response?.resultUrls && data.data.response.resultUrls[0]) || 
@@ -598,12 +567,9 @@
                     mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg|jpeg)(\?.*)?$/i)) || validUrls[0];
                 }
 
-                // Status sukses termasuk '100' (Kling AI) dan URL berisi tempfile
                 if (mediaUrl && (status === '1' || status === '100' || status === 'SUCCESS' || status === 'COMPLETED' || mediaUrl.includes('tempfile'))) {
-                    
                     let finalUrl = mediaUrl;
                     
-                    // Kalau linknya adalah tempfile (masih diblokir CORS), konversi dulu pakai backend kita
                     if (mediaUrl.includes('tempfile')) {
                         try {
                             const dlRes = await fetch('/api/download', { 
@@ -618,7 +584,6 @@
                         }
                     }
 
-                    // Tampilkan Tombol Sukses dengan efek kaca aslimu
                     btn.innerHTML = '<i class="fa-solid fa-external-link-alt"></i> Lihat';
                     btn.className = 'glass-btn text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs ml-auto font-bold flex items-center justify-center gap-1 sm:gap-2 w-24 sm:w-32 bg-emerald-500 text-white';
                     btn.onclick = () => window.open(finalUrl, '_blank');
