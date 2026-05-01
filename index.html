@@ -481,7 +481,7 @@
             
             <div class="flex items-center gap-3 md:gap-5 text-gray-400 text-sm md:text-lg">
                 <button class="hover:text-white transition hidden md:block"><i class="fa-solid fa-layer-group"></i></button>
-                <button class="hover:text-white transition"><i class="fa-solid fa-film"></i></button>
+                <button onclick="openHistoryModal()" class="hover:text-white transition" title="History Generasi"><i class="fa-solid fa-film"></i></button>
                 <button class="hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-2 pl-2 md:pl-3 border-l border-gray-700">
@@ -559,9 +559,14 @@
                     <!-- VIDEO TAG -->
                     <video id="result-video" autoplay loop muted playsinline class="hidden w-full h-full object-contain cursor-pointer"></video>
                     
-                    <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
-                        <button id="btn-view-result" class="w-12 h-12 md:w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl"></i></button>
-                        <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
+                    <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
+                        <div class="flex gap-4">
+                            <button id="btn-view-result" class="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30 hover:scale-105 transition" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl ml-1"></i></button>
+                            <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center hover:scale-105 transition" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
+                        </div>
+                        <button onclick="resetEditor()" class="bg-black/80 border border-emerald-500/50 text-emerald-400 px-5 py-2 rounded-full text-xs font-bold hover:bg-emerald-900/50 transition flex items-center gap-2 mt-2 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                            <i class="fa-solid fa-rotate-left"></i> Buat Project Baru
+                        </button>
                     </div>
                     
                     <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md">
@@ -862,6 +867,23 @@
         <img id="modal-image-viewer" src="" class="max-w-full max-h-[85vh] rounded-xl object-contain">
     </div>
 
+    <!-- History Modal -->
+    <div id="history-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg p-5 md:p-6 rounded-2xl relative h-[80vh] flex flex-col border-t border-emerald-500/30">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> History Generasi
+                </h3>
+                <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2">
+                <!-- Data history dimasukkan lewat JS -->
+            </div>
+        </div>
+    </div>
+
     <!-- Extend Video Modal -->
     <div id="extend-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-[90%] md:max-w-sm p-4 md:p-6 rounded-xl md:rounded-2xl border-t border-purple-500/30">
@@ -1011,7 +1033,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCq_zB0KHCqVKgouKBLUw1obq6KU0HZHvc",
@@ -1041,6 +1063,11 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            
+            // Ekspor variabel untuk dipakai fungsi UI standar
+            window.db = db;
+            window.fsCollection = collection;
+            window.fsGetDocs = getDocs;
             
             setPersistence(auth, browserLocalPersistence).catch((err) => console.log("Persistence error:", err));
 
@@ -2174,6 +2201,179 @@
             if (modal && modalViewer && resultImage) { modalViewer.src = resultImage.src; modal.classList.remove('hidden'); }
         }
         window.closeImageModal = function() { document.getElementById('image-modal')?.classList.add('hidden'); }
+
+        window.resetEditor = function() {
+            editorImages['mulai'] = null;
+            editorImages['akhir'] = null;
+            imageRefs = [];
+            const promptInput = document.getElementById('main-prompt-input');
+            if (promptInput) promptInput.value = '';
+            
+            ['result-video', 'result-image', 'result-overlay', 'veo-actions-panel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const vid = document.getElementById('result-video');
+            if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
+            const img = document.getElementById('result-image');
+            if (img) img.src = '';
+            
+            const placeholder = document.getElementById('output-placeholder');
+            if (placeholder) placeholder.classList.remove('hidden');
+
+            window.updateCanvasPreview();
+            window.updateImageRefUI();
+            window.showToast("Project kembali bersih!");
+        };
+
+        window.openHistoryModal = async function() {
+            if (!window.currentUserId) return window.showCustomAlert("Silakan login untuk melihat history.");
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.classList.remove('hidden');
+            const listEl = document.getElementById('history-list');
+            if (listEl) listEl.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin text-emerald-500 text-2xl"></i><p class="mt-2 text-gray-400 text-xs">Memuat history...</p></div>';
+
+            try {
+                if (!window.db || !window.fsCollection || !window.fsGetDocs) throw new Error("Database belum siap.");
+                const historyRef = window.fsCollection(window.db, 'artifacts', window.appId, 'history');
+                const snapshot = await window.fsGetDocs(historyRef);
+                let myHistory = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId === window.currentUserId) {
+                        myHistory.push({ id: doc.id, ...data });
+                    }
+                });
+
+                myHistory.sort((a, b) => {
+                    const tA = a.timestamp ? a.timestamp.toMillis() : 0;
+                    const tB = b.timestamp ? b.timestamp.toMillis() : 0;
+                    return tB - tA;
+                });
+
+                if (myHistory.length === 0) {
+                    listEl.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs italic">Belum ada history generasi.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = myHistory.map(item => {
+                    const dateStr = item.timestamp ? new Date(item.timestamp.toMillis()).toLocaleString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '-';
+                    const isFailed = item.status === 'FAILED';
+                    const isSuccess = item.status === 'SUCCESS';
+                    
+                    let statusBadge = '';
+                    if (isFailed) statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30">Gagal</span>';
+                    if (isSuccess) statusBadge = '<span class="text-[9px] bg-emerald-900/40 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">Selesai</span>';
+
+                    return `
+                        <div class="bg-black/40 border border-white/10 rounded-xl p-3 md:p-4 flex flex-col gap-2 relative group hover:border-emerald-500/30 transition">
+                            <div class="flex justify-between items-start mb-1">
+                                <div class="flex items-center">
+                                    <span class="text-[10px] md:text-xs font-bold text-cyan-400 bg-cyan-900/30 px-2 py-0.5 rounded border border-cyan-500/30 uppercase">${item.engine}</span>
+                                    ${statusBadge}
+                                </div>
+                                <span class="text-[9px] md:text-[10px] text-gray-500">${dateStr}</span>
+                            </div>
+                            <p class="text-xs md:text-sm text-gray-300 line-clamp-2" title="${item.prompt}">${item.prompt}</p>
+                            
+                            <button onclick="recheckHistoryTask('${item.taskId}', '${item.engine}', this)" class="mt-2 bg-[#1e1e1e] hover:bg-emerald-900/40 border border-white/10 hover:border-emerald-500/50 text-white text-xs py-2 rounded-lg flex items-center justify-center gap-2 transition group-hover:shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                <i class="fas fa-cloud-download-alt text-emerald-400"></i> Buka Ulang Hasil
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error("History fetch error:", error);
+                if (listEl) listEl.innerHTML = '<div class="text-center py-10 text-red-400 text-xs italic">Gagal memuat history. Pastikan koneksi lancar.</div>';
+            }
+        };
+
+        window.closeHistoryModal = function() {
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.recheckHistoryTask = async function(taskId, engine, btnElement) {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-400"></i> Mengambil data...';
+            btnElement.disabled = true;
+
+            try {
+                const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}`);
+                const checkData = await checkRes.json();
+
+                let rawStatus = checkData.data?.state ?? checkData.data?.successFlag ?? checkData.data?.status ?? checkData.status ?? checkData.successFlag ?? "";
+                let statusStr = String(rawStatus).toLowerCase();
+                const isSuccess = ['success', 'succeeded', 'completed', '1', '100', '99', 'finished', 'done'].includes(statusStr);
+                const isFail = ['fail', 'failed', 'error', '2', '3'].includes(statusStr);
+                
+                if (isFail) {
+                    window.showCustomAlert(checkData.data?.failMsg || checkData.errorMessage || "Tugas ini berstatus GAGAL dari server AI.");
+                } else if (isSuccess) {
+                    let mediaUrl = null;
+                    if (checkData.data?.response) {
+                        let veoResp = checkData.data.response;
+                        mediaUrl = veoResp.fullResultUrls?.[0] || veoResp.resultUrls?.[0];
+                    } else if (checkData.data?.resultJson) {
+                        try {
+                            let parsedResult = JSON.parse(checkData.data.resultJson);
+                            mediaUrl = parsedResult.resultUrls?.[0] || parsedResult.resultUrl || parsedResult.video_url;
+                        } catch(e) {}
+                    }
+                    if (!mediaUrl) mediaUrl = checkData.data?.resultUrl || checkData.data?.resultUrls?.[0] || checkData.resultUrls?.[0] || checkData.url;
+                    
+                    if (!mediaUrl) {
+                        let foundUrls = [];
+                        JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
+                        const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org'));
+                        mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg)(\?.*)?$/i)) || validUrls[0];
+                    }
+
+                    if (mediaUrl) {
+                        try {
+                            const dlRes = await fetch('/api/download', {
+                                method: 'POST', 
+                                headers: { 'Content-Type': 'application/json' }, 
+                                body: JSON.stringify({ url: mediaUrl })
+                            });
+                            const dlData = await dlRes.json();
+                            mediaUrl = dlData.data || dlData.url || mediaUrl; 
+                        } catch(err) {
+                            console.warn("Gagal convert temp url:", err);
+                        }
+
+                        if (mediaUrl.startsWith('http://')) mediaUrl = mediaUrl.replace(/^http:\/\//i, 'https://');
+                        
+                        const isVid = mediaUrl.match(/\.(mp4|webm|mov)$/i) || engine.toLowerCase().includes('veo') || engine.toLowerCase().includes('kling') || engine.toLowerCase().includes('video');
+                        
+                        if (isVid) {
+                            const modal = document.getElementById('video-modal');
+                            const modalPlayer = document.getElementById('modal-video-player');
+                            if (modal && modalPlayer) { 
+                                modalPlayer.src = mediaUrl;
+                                modal.classList.remove('hidden'); 
+                                modalPlayer.play().catch(e=>e); 
+                            }
+                        } else {
+                            const modal = document.getElementById('image-modal');
+                            const modalViewer = document.getElementById('modal-image-viewer');
+                            if (modal && modalViewer) { 
+                                modalViewer.src = mediaUrl; 
+                                modal.classList.remove('hidden'); 
+                            }
+                        }
+                    } else {
+                        window.showCustomAlert("File hasil tidak ditemukan. Kemungkinan sudah expired di server AI.");
+                    }
+                } else {
+                    window.showCustomAlert(`Status saat ini: ${statusStr.toUpperCase()}. Silakan coba lagi nanti.`);
+                }
+            } catch (e) {
+                window.showCustomAlert("Gagal terhubung ke server saat mengecek history.");
+            }
+            btnElement.innerHTML = originalHtml;
+            btnElement.disabled = false;
+        };
 
         window.downloadResult = async function(e) {
             if (e) e.stopPropagation();
