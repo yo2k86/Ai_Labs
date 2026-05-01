@@ -2276,10 +2276,7 @@
                             </div>
                             <p class="text-xs md:text-sm text-gray-300 line-clamp-2" title="${item.prompt}">${item.prompt}</p>
                             
-                            <!-- TEMPAT VIDEO/GAMBAR AKAN MUNCUL -->
-                            <div id="media-container-${item.taskId}" class="hidden w-full flex flex-col gap-2 mt-2"></div>
-                            
-                            <button id="btn-recheck-${item.taskId}" onclick="recheckHistoryTask('${item.taskId}', '${item.engine}', this)" class="mt-2 bg-[#1e1e1e] hover:bg-emerald-900/40 border border-white/10 hover:border-emerald-500/50 text-white text-xs py-2 rounded-lg flex items-center justify-center gap-2 transition group-hover:shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                            <button onclick="recheckHistoryTask('${item.taskId}', '${item.engine}', this)" class="mt-2 bg-[#1e1e1e] hover:bg-emerald-900/40 border border-white/10 hover:border-emerald-500/50 text-white text-xs py-2 rounded-lg flex items-center justify-center gap-2 transition group-hover:shadow-[0_0_10px_rgba(16,185,129,0.1)]">
                                 <i class="fas fa-cloud-download-alt text-emerald-400"></i> Buka Ulang Hasil
                             </button>
                         </div>
@@ -2349,25 +2346,21 @@
                         
                         const isVid = mediaUrl.match(/\.(mp4|webm|mov)$/i) || engine.toLowerCase().includes('veo') || engine.toLowerCase().includes('kling') || engine.toLowerCase().includes('video');
                         
-                        const mediaContainer = document.getElementById(`media-container-${taskId}`);
-                        if (mediaContainer) {
-                            if (isVid) {
-                                mediaContainer.innerHTML = `
-                                    <video src="${mediaUrl}" controls playsinline class="w-full rounded-lg border border-emerald-500/30 bg-black"></video>
-                                    <button onclick="downloadHistoryMedia('${mediaUrl}', 'video')" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 rounded-lg flex items-center justify-center gap-2 font-bold transition shadow-lg">
-                                        <i class="fa-solid fa-download"></i> Unduh Video
-                                    </button>
-                                `;
-                            } else {
-                                mediaContainer.innerHTML = `
-                                    <img src="${mediaUrl}" class="w-full rounded-lg object-contain border border-emerald-500/30 bg-black">
-                                    <button onclick="downloadHistoryMedia('${mediaUrl}', 'image')" class="mt-2 w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 rounded-lg flex items-center justify-center gap-2 font-bold transition shadow-lg">
-                                        <i class="fa-solid fa-download"></i> Unduh Gambar
-                                    </button>
-                                `;
+                        if (isVid) {
+                            const modal = document.getElementById('video-modal');
+                            const modalPlayer = document.getElementById('modal-video-player');
+                            if (modal && modalPlayer) { 
+                                modalPlayer.src = mediaUrl;
+                                modal.classList.remove('hidden'); 
+                                modalPlayer.play().catch(e=>e); 
                             }
-                            mediaContainer.classList.remove('hidden');
-                            btnElement.classList.add('hidden'); // Sembunyikan tombol cek ulang setelah video tampil
+                        } else {
+                            const modal = document.getElementById('image-modal');
+                            const modalViewer = document.getElementById('modal-image-viewer');
+                            if (modal && modalViewer) { 
+                                modalViewer.src = mediaUrl; 
+                                modal.classList.remove('hidden'); 
+                            }
                         }
                     } else {
                         window.showCustomAlert("File hasil tidak ditemukan. Kemungkinan sudah expired di server AI.");
@@ -2378,45 +2371,8 @@
             } catch (e) {
                 window.showCustomAlert("Gagal terhubung ke server saat mengecek history.");
             }
-            
-            // Kembalikan tombol jika gagal/belum tampil
-            if (btnElement && !btnElement.classList.contains('hidden')) {
-                btnElement.innerHTML = originalHtml;
-                btnElement.disabled = false;
-            }
-        };
-
-        window.downloadHistoryMedia = async function(url, type) {
-            try {
-                window.showToast("Mengunduh file...");
-                
-                let finalDlUrl = url;
-                try {
-                    const dlRes = await fetch('/api/download', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: url })
-                    });
-                    if (dlRes.ok) {
-                        const dlData = await dlRes.json();
-                        finalDlUrl = dlData.data || dlData.url || finalDlUrl;
-                    }
-                } catch(err) {}
-
-                const response = await fetch(finalDlUrl);
-                if (!response.ok) throw new Error("CORS terblokir");
-                const blob = await response.blob();
-                const blobUrl = window.URL.createObjectURL(blob);
-                const a = document.createElement('a'); 
-                a.style.display = 'none'; 
-                a.href = blobUrl; 
-                a.download = `Ailabs_History_${Date.now()}.${type === 'video' ? 'mp4' : 'png'}`;
-                document.body.appendChild(a); 
-                a.click(); 
-                window.URL.revokeObjectURL(blobUrl);
-                
-                setTimeout(() => window.showToast("Unduhan selesai!"), 1000);
-            } catch (error) {
-                window.open(url, '_blank');
-            }
+            btnElement.innerHTML = originalHtml;
+            btnElement.disabled = false;
         };
 
         window.downloadResult = async function(e) {
