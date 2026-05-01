@@ -155,22 +155,28 @@ async function handleGenerate(req, res, apiKey, db, admin) {
   // ==========================================
   let cost = 1; 
   const engineName = (engine || '').toLowerCase();
+  let incomingMode = String(mode || "720p").toLowerCase();
+  let safeDuration = parseInt(duration) || 5; // Default Kling adalah 5 detik
   
   if (type === 'Gambar') {
       cost = 1;
   } else if (engineName === 'grok') {
-      const dur = parseInt(duration) || 6;
-      cost = (dur / 6) * 18; 
-  } else if (engineName.includes('veo3.1 lite')) {
+      const grokDur = parseInt(duration) || 6;
+      cost = (grokDur / 6) * 18; 
+  } else if (engineName.includes('veo3.1 lite') || engineName.includes('veo3.1 fast')) {
       cost = 30; 
-  } else if (engineName.includes('veo3.1 fast')) {
-      cost = 30;
   } else if (engineName.includes('veo3.1 quality')) {
       cost = 50; 
   } else if (engineName.includes('kling 3.0')) {
-      cost = 15;
+      // PERHITUNGAN AKURAT KLING 3.0
+      if (incomingMode === "1080p" || incomingMode === "pro") {
+          cost = safeDuration * 27;
+      } else {
+          cost = safeDuration * 20;
+      }
   } else if (engineName.includes('kling')) { 
-      cost = 10;
+      // PERHITUNGAN AKURAT KLING 2.6
+      cost = safeDuration * 11;
   } else if (type === 'Video' || type === 'Motion') {
       cost = 5; 
   }
@@ -211,8 +217,6 @@ async function handleGenerate(req, res, apiKey, db, admin) {
     let endpoint = 'https://api.kie.ai/api/v1/jobs/createTask';
     let payload = {};
 
-    let incomingMode = String(mode || "720p").toLowerCase();
-
     // ---> 1. KLING & MOTION
     if (type === 'Motion' || (engine && engine.includes('Kling'))) {
         const isKling3 = engine === 'Kling 3.0';
@@ -235,7 +239,8 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                 input_urls: image_urls.length > 0 ? [image_urls[0]] : [], 
                 video_urls: video_urls.length > 0 ? [video_urls[0]] : [],
                 character_orientation: character_orientation || "video",
-                mode: klingMode 
+                mode: klingMode,
+                duration: safeDuration // Mengirim Parameter Durasi Ke KIE
             }
         };
         if (isKling3 && background_source) {
@@ -253,8 +258,8 @@ async function handleGenerate(req, res, apiKey, db, admin) {
             if (incomingMode === "fun") safeMode = "fun";
             if (hasImages && safeMode === 'spicy') safeMode = "normal";
 
-            let safeDuration = parseInt(duration) || 6;
-            safeDuration = Math.min(Math.max(safeDuration, 6), 30);
+            let safeGrokDuration = parseInt(duration) || 6;
+            safeGrokDuration = Math.min(Math.max(safeGrokDuration, 6), 30);
 
             payload = {
                 model: modelName,
@@ -262,7 +267,7 @@ async function handleGenerate(req, res, apiKey, db, admin) {
                     prompt: prompt ? prompt.substring(0, 4900) : "Cinematic aesthetic movement",
                     aspect_ratio: ratio || "16:9",
                     mode: safeMode,
-                    duration: String(safeDuration),
+                    duration: String(safeGrokDuration),
                     resolution: "720p",
                     nsfw_checker: false
                 }
