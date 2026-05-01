@@ -99,7 +99,7 @@
             border-top: 1px solid rgba(191, 219, 254, 0.6);
         }
 
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: rgba(59, 130, 246, 0.4); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(59, 130, 246, 0.8); }
@@ -167,14 +167,14 @@
             </div>
 
             <div class="flex flex-row gap-1 md:gap-3 items-center">
-                <button id="tab-users" onclick="switchTab('users')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center justify-center">
-                    <i class="fas fa-users md:mr-2"></i> <span class="hidden md:inline">Pengguna</span>
+                <button id="tab-users" onclick="switchTab('users')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all active-tab shadow-sm flex items-center justify-center whitespace-nowrap">
+                    <i class="fas fa-users mr-1 md:mr-2"></i> <span>Pengguna</span>
                 </button>
-                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
-                    <i class="fas fa-ticket-alt md:mr-2"></i> <span class="hidden md:inline">Stok VIP</span>
+                <button id="tab-referrals" onclick="switchTab('referrals')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center whitespace-nowrap">
+                    <i class="fas fa-ticket-alt mr-1 md:mr-2"></i> <span>Stok VIP</span>
                 </button>
-                <button id="tab-history" onclick="switchTab('history')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center">
-                    <i class="fas fa-history md:mr-2"></i> <span class="hidden md:inline">Riwayat</span>
+                <button id="tab-history" onclick="switchTab('history')" class="px-2 py-1.5 md:px-5 md:py-2.5 rounded-lg md:rounded-xl bg-white/5 text-blue-100 text-[9px] md:text-[13px] font-semibold border border-white/5 hover:bg-white/10 transition-all shadow-sm flex items-center justify-center whitespace-nowrap">
+                    <i class="fas fa-history mr-1 md:mr-2"></i> <span>Riwayat</span>
                 </button>
                 <div class="w-px h-5 bg-white/10 mx-1 md:mx-2"></div>
                 <button onclick="logoutAdmin()" class="px-2 py-1.5 md:px-4 md:py-2 rounded-lg md:rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-[9px] md:text-[13px] font-bold transition-all border border-red-500/20 flex items-center shadow-lg">
@@ -205,10 +205,10 @@
 
                 <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[70vh] border border-blue-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-blue-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-database text-blue-400"></i> <span class="hidden md:inline">Database</span> Klien</h3>
+                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-database text-blue-400"></i> <span>Database Klien</span></h3>
                         <div class="flex flex-row items-center gap-1 md:gap-3">
-                            <button onclick="loadUsers()" class="glass-btn text-[8px] md:text-[13px] px-2 py-1 md:px-4 md:py-2.5 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg font-semibold shrink-0">
-                                <i class="fas fa-sync-alt md:mr-2"></i> <span class="hidden md:inline">Refresh</span>
+                            <button onclick="loadUsers()" class="glass-btn text-[8px] md:text-[13px] px-2 py-1 md:px-4 md:py-2.5 rounded-lg md:rounded-xl flex items-center justify-center shadow-lg font-semibold shrink-0 whitespace-nowrap">
+                                <i class="fas fa-sync-alt mr-1 md:mr-2"></i> <span>Refresh</span>
                             </button>
                             <div class="relative">
                                 <i class="fas fa-search absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 text-blue-300/50 text-[8px] md:text-[13px]"></i>
@@ -217,8 +217,9 @@
                         </div>
                     </div>
                     
-                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar relative z-10 w-full">
-                        <table class="w-full text-left border-collapse table-fixed">
+                    <!-- DIGANTI overflow-x-auto agar bisa discroll horizontal jika tabel butuh ruang lebar -->
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar relative z-10 w-full">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-blue-200/60 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-2 py-2 md:px-4 md:py-3 bg-[#080C16]/95 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[40%]">Profil & ID</th>
@@ -240,21 +241,22 @@
                         <div class="w-8 h-8 md:w-14 md:h-14 shrink-0 rounded-lg md:rounded-2xl bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center text-cyan-400 text-[12px] md:text-2xl shadow-[inset_0_0_10px_rgba(6,182,212,0.2)]"><i class="fas fa-key"></i></div>
                         <div class="truncate"><p class="text-[8px] md:text-[13px] text-cyan-200/70 font-medium md:mb-1 truncate">Total Stok Kode VIP</p><h3 class="text-[12px] md:text-3xl font-extrabold drop-shadow-md text-white" id="stat-total-refs">300</h3></div>
                     </div>
-                    <button onclick="loadReferrals()" class="glass-btn shrink-0 text-[8px] md:text-[13px] px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl flex items-center shadow-lg font-bold">
-                        <i class="fas fa-sync-alt md:mr-2"></i> <span class="hidden md:inline">Refresh Status</span>
+                    <button onclick="loadReferrals()" class="glass-btn shrink-0 text-[8px] md:text-[13px] px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl flex items-center shadow-lg font-bold whitespace-nowrap">
+                        <i class="fas fa-sync-alt mr-1 md:mr-2"></i> <span>Refresh Status</span>
                     </button>
                 </div>
 
                 <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[70vh] border border-cyan-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-cyan-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-shield-alt text-cyan-400"></i> <span class="hidden md:inline">Monitoring</span> Kode</h3>
+                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-shield-alt text-cyan-400"></i> <span>Monitoring Kode</span></h3>
                         <div class="relative">
                             <i class="fas fa-search absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 text-cyan-300/50 text-[8px] md:text-[13px]"></i>
                             <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input w-28 md:w-64 rounded-lg md:rounded-xl pl-6 pr-2 py-1 md:pl-9 md:pr-4 md:py-2 text-[9px] md:text-[13px]" placeholder="Cari kode...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar w-full relative">
-                        <table class="w-full text-left border-collapse table-fixed">
+                    <!-- DIGANTI overflow-x-auto agar bisa discroll horizontal -->
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[450px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-cyan-200/60 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-2 py-2 md:px-4 md:py-3 bg-[#080C16]/95 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[45%]">Kode Referral (200 ⚡)</th>
@@ -275,21 +277,22 @@
                         <div class="w-8 h-8 md:w-14 md:h-14 shrink-0 rounded-lg md:rounded-2xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 text-[12px] md:text-2xl shadow-[inset_0_0_10px_rgba(99,102,241,0.2)]"><i class="fas fa-photo-video"></i></div>
                         <div class="truncate"><p class="text-[8px] md:text-[13px] text-indigo-200/70 font-medium md:mb-1 truncate">Riwayat Server</p><h3 class="text-[11px] md:text-xl font-extrabold drop-shadow-md text-white truncate">Pantau & Unduh Hasil</h3></div>
                     </div>
-                    <button onclick="loadHistory()" class="glass-btn shrink-0 text-[8px] md:text-[13px] px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl flex items-center shadow-lg font-bold">
-                        <i class="fas fa-sync-alt md:mr-2"></i> <span class="hidden md:inline">Refresh Riwayat</span>
+                    <button onclick="loadHistory()" class="glass-btn shrink-0 text-[8px] md:text-[13px] px-2 py-1 md:px-5 md:py-2.5 rounded-lg md:rounded-xl flex items-center shadow-lg font-bold whitespace-nowrap">
+                        <i class="fas fa-sync-alt mr-1 md:mr-2"></i> <span>Refresh Riwayat</span>
                     </button>
                 </div>
 
                 <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[70vh] border border-indigo-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-indigo-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm">
-                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-list-alt text-indigo-400"></i> Log <span class="hidden md:inline">Aktivitas User</span></h3>
+                        <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-list-alt text-indigo-400"></i> <span>Log Aktivitas User</span></h3>
                         <div class="relative">
                             <i class="fas fa-search absolute left-2 md:left-3 top-1/2 transform -translate-y-1/2 text-indigo-300/50 text-[8px] md:text-[13px]"></i>
                             <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input w-28 md:w-64 rounded-lg md:rounded-xl pl-6 pr-2 py-1 md:pl-9 md:pr-4 md:py-2 text-[9px] md:text-[13px]" placeholder="Cari data...">
                         </div>
                     </div>
-                    <div class="overflow-y-auto overflow-x-hidden flex-1 custom-scrollbar w-full relative">
-                        <table class="w-full text-left border-collapse table-fixed">
+                    <!-- DIGANTI overflow-x-auto agar bisa discroll horizontal -->
+                    <div class="overflow-y-auto overflow-x-auto flex-1 custom-scrollbar w-full relative">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-indigo-200/60 sticky top-0 z-30">
                                 <tr>
                                     <th class="px-2 py-2 md:px-4 md:py-3 bg-[#080C16]/95 backdrop-blur-xl border-b border-white/10 font-bold tracking-wider w-[30%]">Info Klien</th>
@@ -411,7 +414,6 @@
                         return;
                     }
 
-                    // GENERASI HTML ROW TERBARU: Proporsional "Mini Desktop"
                     tbody.innerHTML = data.users.map(u => {
                         const isVideoOn = u.videoAccess !== false;
                         return `
@@ -486,7 +488,8 @@
                 if(data.success) {
                     tbody.innerHTML = data.codes.map(c => `
                         <tr class="hover:bg-blue-900/10 border-b border-blue-500/10 transition-colors group">
-                            <td class="px-2 py-2 md:px-4 md:py-5 font-mono font-bold tracking-widest truncate align-middle ${c.used ? 'text-blue-200/30 line-through' : 'text-cyan-300 text-[10px] md:text-[15px] drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]'}">${c.code}</td>
+                            <!-- Truncate dihapus agar kode utuh dan tabel scrollable -->
+                            <td class="px-2 py-2 md:px-4 md:py-5 font-mono font-bold tracking-widest align-middle ${c.used ? 'text-blue-200/30 line-through' : 'text-cyan-300 text-[10px] md:text-[15px] drop-shadow-[0_0_5px_rgba(6,182,212,0.5)]'}">${c.code}</td>
                             <td class="px-1 py-2 md:px-4 md:py-5 text-center align-middle overflow-hidden">
                                 ${c.used ? '<span class="px-2 md:px-4 py-1 md:py-1.5 rounded bg-red-500/10 text-red-400 text-[6px] md:text-[10px] font-bold uppercase border border-red-500/20">Terpakai</span>' : '<span class="px-2 md:px-4 py-1 md:py-1.5 rounded bg-blue-500/20 text-blue-300 text-[6px] md:text-[10px] font-bold uppercase border border-blue-500/40 shadow-[inset_0_0_8px_rgba(59,130,246,0.3)]">Tersedia</span>'}
                                 <div class="text-[6px] md:text-[11px] text-blue-200/50 mt-1 md:mt-2 truncate mx-auto">${c.used ? `User: ${c.usedBy || '?'}` : ''}</div>
