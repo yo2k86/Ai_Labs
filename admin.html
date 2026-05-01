@@ -203,8 +203,8 @@
                     </div>
                 </div>
 
-                <!-- Tinggi kontainer diubah ke h-[65vh] md:h-[70vh] agar pas di layar, min-h-0 ditambahkan ke child -->
-                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[65vh] md:h-[70vh] border border-blue-500/20">
+                <!-- Perbaikan Tinggi: Batas max-height diterapkan langsung ke tabel scroll agar scroll jalan mulus di HP -->
+                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col border border-blue-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-blue-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm shrink-0">
                         <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-database text-blue-400"></i> <span>Database Klien</span></h3>
                         <div class="flex flex-row items-center gap-1 md:gap-3">
@@ -218,8 +218,8 @@
                         </div>
                     </div>
                     
-                    <!-- DITAMBAHKAN min-h-0 agar flexbox scroll berfungsi dengan benar di HP -->
-                    <div class="overflow-y-auto overflow-x-auto flex-1 min-h-0 custom-scrollbar relative z-10 w-full">
+                    <!-- DITAMBAHKAN max-h agar flexbox scroll berfungsi tanpa masalah di layar HP -->
+                    <div class="overflow-y-auto overflow-x-auto w-full custom-scrollbar relative z-10 max-h-[60vh] md:max-h-[70vh]">
                         <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-blue-200/60 sticky top-0 z-30">
                                 <tr>
@@ -247,7 +247,7 @@
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[65vh] md:h-[70vh] border border-cyan-500/20">
+                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col border border-cyan-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-cyan-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm shrink-0">
                         <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-shield-alt text-cyan-400"></i> <span>Monitoring Kode</span></h3>
                         <div class="relative">
@@ -255,8 +255,8 @@
                             <input type="text" id="search-ref" onkeyup="filterTable('ref-tbody', 'search-ref')" class="glass-input w-28 md:w-64 rounded-lg md:rounded-xl pl-6 pr-2 py-1 md:pl-9 md:pr-4 md:py-2 text-[9px] md:text-[13px]" placeholder="Cari kode...">
                         </div>
                     </div>
-                    <!-- DITAMBAHKAN min-h-0 agar flexbox scroll berfungsi dengan benar di HP -->
-                    <div class="overflow-y-auto overflow-x-auto flex-1 min-h-0 custom-scrollbar w-full relative">
+                    <!-- DITAMBAHKAN max-h agar flexbox scroll berfungsi tanpa masalah di layar HP -->
+                    <div class="overflow-y-auto overflow-x-auto w-full custom-scrollbar relative max-h-[60vh] md:max-h-[70vh]">
                         <table class="w-full text-left border-collapse min-w-[450px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-cyan-200/60 sticky top-0 z-30">
                                 <tr>
@@ -283,7 +283,7 @@
                     </button>
                 </div>
 
-                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col h-[65vh] md:h-[70vh] border border-indigo-500/20">
+                <div class="glass-panel rounded-xl md:rounded-3xl flex flex-col border border-indigo-500/20">
                     <div class="p-2 md:p-5 border-b border-white/10 flex flex-row justify-between items-center gap-2 bg-indigo-900/10 backdrop-blur-md z-20 rounded-t-xl md:rounded-t-3xl shadow-sm shrink-0">
                         <h3 class="font-bold text-[10px] md:text-lg tracking-wide truncate flex items-center gap-1"><i class="fas fa-list-alt text-indigo-400"></i> <span>Log Aktivitas User</span></h3>
                         <div class="relative">
@@ -291,8 +291,8 @@
                             <input type="text" id="search-history" onkeyup="filterTable('history-tbody', 'search-history')" class="glass-input w-28 md:w-64 rounded-lg md:rounded-xl pl-6 pr-2 py-1 md:pl-9 md:pr-4 md:py-2 text-[9px] md:text-[13px]" placeholder="Cari data...">
                         </div>
                     </div>
-                    <!-- DITAMBAHKAN min-h-0 agar flexbox scroll berfungsi dengan benar di HP -->
-                    <div class="overflow-y-auto overflow-x-auto flex-1 min-h-0 custom-scrollbar w-full relative">
+                    <!-- DITAMBAHKAN max-h agar flexbox scroll berfungsi tanpa masalah di layar HP -->
+                    <div class="overflow-y-auto overflow-x-auto w-full custom-scrollbar relative max-h-[60vh] md:max-h-[70vh]">
                         <table class="w-full text-left border-collapse min-w-[600px]">
                             <thead class="text-[7px] md:text-[11px] uppercase text-indigo-200/60 sticky top-0 z-30">
                                 <tr>
