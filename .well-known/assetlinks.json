@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "com.bangpro.ailabs",
-        "sha256_cert_fingerprints": ["2F:EA:2E:75:CC:DC:6D:D7:A4:A2:00:D7:84:28:3D:CD:CF:80:FE:87:8B:31:8D:52:59:0A:94:84:8D:83:15:CC"]
+        "sha256_cert_fingerprints": ["76:C1:51:EE:05:77:DA:3A:1A:66:65:09:0D:D7:B3:09:97:32:D4:01:B1:E8:6A:19:14:49:89:03:55:EB:8D:81"]
       }
     }]
