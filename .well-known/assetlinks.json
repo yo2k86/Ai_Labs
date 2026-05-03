@@ -1,1 +1,9 @@
 
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.bangpro.ailabs",
+        "sha256_cert_fingerprints": ["13:7E:23:57:AC:96:C6:44:2B:E4:8E:10:76:70:E7:E2:2D:AC:24:B8:10:3C:0D:68:97:A0:F2:DB:BE:F1:C5:6A"]
+      }
+    }]
