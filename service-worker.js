@@ -3,8 +3,9 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/icon-192.png',
+  '/icon-512.png',
   '/manifest.json',
-  '/logo.png' // Tambahkan aset penting lainnya di sini
+  '/logo.png'
 ];
 
 self.addEventListener('install', event => {
