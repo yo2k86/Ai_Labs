@@ -109,15 +109,62 @@
                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
-            <!-- Teks terminal: HP 11px -> PC 14px -->
-            <div class="font-mono text-[11px] md:text-[13px] lg:text-sm text-cyan-500/80 mt-3 space-y-1">
-                <p>> System.Lock(maintenance=true);</p>
-                <p>> Initializing UI upgrades...</p>
-                <p class="animate-pulse">> Estimated completion: Segera hadir_</p>
+            <!-- Teks terminal: Container dibuat fixed height agar layout tidak lompat -->
+            <div id="terminal-container" class="font-mono text-[11px] md:text-[13px] lg:text-sm text-cyan-500/80 mt-3 space-y-1 h-[72px] md:h-[84px] w-full">
+                <!-- Konten akan diketik secara otomatis oleh JavaScript -->
             </div>
         </div>
 
     </main>
 
+    <!-- Script Animasi Ngetik Terminal -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const terminalContainer = document.getElementById('terminal-container');
+            const lines = [
+                "> System.Lock(maintenance=true);",
+                "> Initializing UI upgrades...",
+                "> Estimated completion: Segera hadir"
+            ];
+            
+            let currentLine = 0;
+            let currentChar = 0;
+            
+            function typeText() {
+                if (currentLine < lines.length) {
+                    // Buat elemen p baru di setiap baris baru
+                    if (currentChar === 0) {
+                        const p = document.createElement('p');
+                        p.id = `line-${currentLine}`;
+                        terminalContainer.appendChild(p);
+                    }
+                    
+                    const pElement = document.getElementById(`line-${currentLine}`);
+                    
+                    // Ketik karakter satu per satu dengan kursor "_"
+                    if (currentChar < lines[currentLine].length) {
+                        pElement.innerHTML = lines[currentLine].substring(0, currentChar + 1) + '<span class="animate-pulse">_</span>';
+                        currentChar++;
+                        
+                        // Kecepatan mengetik acak agar terlihat natural seperti diketik orang/mesin
+                        setTimeout(typeText, Math.random() * 40 + 20); 
+                    } else {
+                        // Jika baris selesai, hapus kursor jika bukan baris terakhir
+                        if (currentLine < lines.length - 1) {
+                            pElement.innerHTML = lines[currentLine];
+                        }
+                        currentLine++;
+                        currentChar = 0;
+                        
+                        // Jeda waktu antar baris
+                        setTimeout(typeText, 600); 
+                    }
+                }
+            }
+            
+            // Mulai animasi 1 detik setelah halaman termuat
+            setTimeout(typeText, 1000);
+        });
+    </script>
 </body>
 </html>
