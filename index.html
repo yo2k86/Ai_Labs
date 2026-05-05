@@ -20,6 +20,15 @@
                     animation: {
                         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
                         'spin-slow': 'spin 8s linear infinite',
+                        'blink-1': 'blink 1.5s infinite',
+                        'blink-2': 'blink 1.5s infinite 0.5s',
+                        'blink-3': 'blink 1.5s infinite 1s',
+                    },
+                    keyframes: {
+                        blink: {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '0.2' },
+                        }
                     }
                 }
             }
@@ -105,19 +114,28 @@
         <!-- Informasi Tambahan (Terminal Style) -->
         <div class="mt-8 lg:mt-12 w-full max-w-md bg-[#040810] border border-slate-800 rounded-lg p-4 text-left shadow-inner">
             <div class="flex items-center gap-2 mb-2">
-                <div class="w-3 h-3 rounded-full bg-red-500"></div>
-                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                <!-- Tambahan animasi kedip berurutan untuk lingkaran -->
+                <div class="w-3 h-3 rounded-full bg-red-500 animate-blink-1"></div>
+                <div class="w-3 h-3 rounded-full bg-yellow-500 animate-blink-2"></div>
+                <div class="w-3 h-3 rounded-full bg-green-500 animate-blink-3"></div>
             </div>
-            <!-- Container dibuat flex-col justify-end dan overflow-hidden agar scroll dari bawah seperti terminal asli -->
-            <div id="terminal-container" class="font-mono text-[11px] md:text-[13px] lg:text-sm mt-3 space-y-1 h-[80px] md:h-[100px] w-full overflow-hidden flex flex-col justify-end">
-                <!-- Konten akan diketik otomatis oleh JavaScript -->
+            
+            <!-- Perintah Utama yang Statis -->
+            <div class="font-mono text-[11px] md:text-[13px] lg:text-sm text-cyan-400 font-semibold mt-3 mb-2 border-b border-slate-800/60 pb-2 drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">
+                <p>> System.Lock(maintenance=true);</p>
+                <p>> Initializing UI upgrades...</p>
+                <p>> Estimated completion: Segera hadir<span class='animate-pulse text-white'>_</span></p>
+            </div>
+
+            <!-- Container Hacker Logs dibuat terpisah dan jalan terus -->
+            <div id="terminal-container" class="font-mono text-[11px] md:text-[13px] lg:text-sm space-y-1 h-[60px] md:h-[80px] w-full overflow-hidden flex flex-col justify-end">
+                <!-- Konten log berjalan otomatis oleh JavaScript -->
             </div>
         </div>
 
     </main>
 
-    <!-- Script Animasi Hacker Terminal -->
+    <!-- Script Animasi Hacker Terminal (Infinite Loop) -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const terminalContainer = document.getElementById('terminal-container');
@@ -135,55 +153,29 @@
                 "10110010 01101001 00101101...",
                 "Extracting mainframe data...",
                 "Loading ui_core_v2.dll...",
-                "Establishing secure socket..."
+                "Establishing secure socket...",
+                "Rerouting DNS traffic...",
+                "Verifying hash signatures..."
             ];
 
-            let hackCount = 0;
-            const maxHackLines = 45; // Berapa kali teks acak muncul sebelum selesai
-
             function runHackerCode() {
-                if (hackCount < maxHackLines) {
-                    const p = document.createElement('p');
-                    const randomLog = hackerLogs[Math.floor(Math.random() * hackerLogs.length)];
-                    // Generate Hex code acak
-                    const randomHex = "0x" + Math.floor(Math.random()*16777215).toString(16).toUpperCase().padStart(6, '0');
-                    
-                    p.textContent = `[${randomHex}] ${randomLog}`;
-                    p.className = "text-emerald-500/40"; // Teks hijau redup saat berjalan cepat
-                    
-                    terminalContainer.appendChild(p);
+                const p = document.createElement('p');
+                const randomLog = hackerLogs[Math.floor(Math.random() * hackerLogs.length)];
+                // Generate Hex code acak
+                const randomHex = "0x" + Math.floor(Math.random()*16777215).toString(16).toUpperCase().padStart(6, '0');
+                
+                p.textContent = `[${randomHex}] ${randomLog}`;
+                p.className = "text-emerald-500/40"; // Teks hijau redup saat berjalan cepat
+                
+                terminalContainer.appendChild(p);
 
-                    // Hapus elemen paling atas agar tidak penuh (maksimal 5 baris di dalam container)
-                    if (terminalContainer.children.length > 5) {
-                        terminalContainer.removeChild(terminalContainer.firstChild);
-                    }
-
-                    hackCount++;
-                    // Jeda yang sangat cepat agar seperti mesin berjalan (10ms - 50ms)
-                    setTimeout(runHackerCode, Math.random() * 40 + 10); 
-                } else {
-                    // Setelah selesai animasi "hacker", bersihkan log lalu tampilkan hasil akhirnya
-                    setTimeout(() => {
-                        terminalContainer.innerHTML = ''; // Bersihkan container
-
-                        const finalLines = [
-                            "> System.Lock(maintenance=true);",
-                            "> Initializing UI upgrades...",
-                            "> Estimated completion: Segera hadir<span class='animate-pulse text-white'>_</span>"
-                        ];
-
-                        finalLines.forEach((line, i) => {
-                            setTimeout(() => {
-                                const p = document.createElement('p');
-                                p.innerHTML = line;
-                                // Kembalikan ke warna cyan agar cocok dengan tema website
-                                p.className = "text-cyan-400 font-semibold drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]";
-                                terminalContainer.appendChild(p);
-                            }, i * 300); // Tampilkan hasil akhir perlahan
-                        });
-
-                    }, 200);
+                // Batasi jumlah maksimal log di layar (misal 4 baris) agar efek scroll bagus
+                if (terminalContainer.children.length > 4) {
+                    terminalContainer.removeChild(terminalContainer.firstChild);
                 }
+
+                // Jeda sangat cepat yang dieksekusi TERUS MENERUS tanpa batas
+                setTimeout(runHackerCode, Math.random() * 40 + 10); 
             }
 
             // Mulai animasi setengah detik setelah halaman dirender
