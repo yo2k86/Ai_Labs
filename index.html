@@ -109,61 +109,85 @@
                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
             </div>
-            <!-- Teks terminal: Container dibuat fixed height agar layout tidak lompat -->
-            <div id="terminal-container" class="font-mono text-[11px] md:text-[13px] lg:text-sm text-cyan-500/80 mt-3 space-y-1 h-[72px] md:h-[84px] w-full">
-                <!-- Konten akan diketik secara otomatis oleh JavaScript -->
+            <!-- Container dibuat flex-col justify-end dan overflow-hidden agar scroll dari bawah seperti terminal asli -->
+            <div id="terminal-container" class="font-mono text-[11px] md:text-[13px] lg:text-sm mt-3 space-y-1 h-[80px] md:h-[100px] w-full overflow-hidden flex flex-col justify-end">
+                <!-- Konten akan diketik otomatis oleh JavaScript -->
             </div>
         </div>
 
     </main>
 
-    <!-- Script Animasi Ngetik Terminal -->
+    <!-- Script Animasi Hacker Terminal -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const terminalContainer = document.getElementById('terminal-container');
-            const lines = [
-                "> System.Lock(maintenance=true);",
-                "> Initializing UI upgrades...",
-                "> Estimated completion: Segera hadir"
+            
+            // Kumpulan log acak bergaya hacker
+            const hackerLogs = [
+                "Bypassing proxy server...",
+                "Decrypting root access 0x8A9F...",
+                "Compiling neural network nodes...",
+                "[WARN] Firewall interference detected...",
+                "Injecting packet payloads...",
+                "Mounting virtual directories...",
+                "Overriding manual security...",
+                "Scanning ports 0 - 65535...",
+                "10110010 01101001 00101101...",
+                "Extracting mainframe data...",
+                "Loading ui_core_v2.dll...",
+                "Establishing secure socket..."
             ];
-            
-            let currentLine = 0;
-            let currentChar = 0;
-            
-            function typeText() {
-                if (currentLine < lines.length) {
-                    // Buat elemen p baru di setiap baris baru
-                    if (currentChar === 0) {
-                        const p = document.createElement('p');
-                        p.id = `line-${currentLine}`;
-                        terminalContainer.appendChild(p);
-                    }
+
+            let hackCount = 0;
+            const maxHackLines = 45; // Berapa kali teks acak muncul sebelum selesai
+
+            function runHackerCode() {
+                if (hackCount < maxHackLines) {
+                    const p = document.createElement('p');
+                    const randomLog = hackerLogs[Math.floor(Math.random() * hackerLogs.length)];
+                    // Generate Hex code acak
+                    const randomHex = "0x" + Math.floor(Math.random()*16777215).toString(16).toUpperCase().padStart(6, '0');
                     
-                    const pElement = document.getElementById(`line-${currentLine}`);
+                    p.textContent = `[${randomHex}] ${randomLog}`;
+                    p.className = "text-emerald-500/40"; // Teks hijau redup saat berjalan cepat
                     
-                    // Ketik karakter satu per satu dengan kursor "_"
-                    if (currentChar < lines[currentLine].length) {
-                        pElement.innerHTML = lines[currentLine].substring(0, currentChar + 1) + '<span class="animate-pulse">_</span>';
-                        currentChar++;
-                        
-                        // Kecepatan mengetik acak agar terlihat natural seperti diketik orang/mesin
-                        setTimeout(typeText, Math.random() * 40 + 20); 
-                    } else {
-                        // Jika baris selesai, hapus kursor jika bukan baris terakhir
-                        if (currentLine < lines.length - 1) {
-                            pElement.innerHTML = lines[currentLine];
-                        }
-                        currentLine++;
-                        currentChar = 0;
-                        
-                        // Jeda waktu antar baris
-                        setTimeout(typeText, 600); 
+                    terminalContainer.appendChild(p);
+
+                    // Hapus elemen paling atas agar tidak penuh (maksimal 5 baris di dalam container)
+                    if (terminalContainer.children.length > 5) {
+                        terminalContainer.removeChild(terminalContainer.firstChild);
                     }
+
+                    hackCount++;
+                    // Jeda yang sangat cepat agar seperti mesin berjalan (10ms - 50ms)
+                    setTimeout(runHackerCode, Math.random() * 40 + 10); 
+                } else {
+                    // Setelah selesai animasi "hacker", bersihkan log lalu tampilkan hasil akhirnya
+                    setTimeout(() => {
+                        terminalContainer.innerHTML = ''; // Bersihkan container
+
+                        const finalLines = [
+                            "> System.Lock(maintenance=true);",
+                            "> Initializing UI upgrades...",
+                            "> Estimated completion: Segera hadir<span class='animate-pulse text-white'>_</span>"
+                        ];
+
+                        finalLines.forEach((line, i) => {
+                            setTimeout(() => {
+                                const p = document.createElement('p');
+                                p.innerHTML = line;
+                                // Kembalikan ke warna cyan agar cocok dengan tema website
+                                p.className = "text-cyan-400 font-semibold drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]";
+                                terminalContainer.appendChild(p);
+                            }, i * 300); // Tampilkan hasil akhir perlahan
+                        });
+
+                    }, 200);
                 }
             }
-            
-            // Mulai animasi 1 detik setelah halaman termuat
-            setTimeout(typeText, 1000);
+
+            // Mulai animasi setengah detik setelah halaman dirender
+            setTimeout(runHackerCode, 500);
         });
     </script>
 </body>
