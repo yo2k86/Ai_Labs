@@ -9,6 +9,11 @@
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon-192.png">
     
+    <!-- Anti-Cache Meta Tags: Memaksa browser mengecek versi terbaru ke server -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
     <title>Ailabs - Dashboard</title>
     
     <!-- Import Tailwind CSS -->
@@ -476,7 +481,7 @@
             
             <div class="flex items-center gap-3 md:gap-5 text-gray-400 text-sm md:text-lg">
                 <button class="hover:text-white transition hidden md:block"><i class="fa-solid fa-layer-group"></i></button>
-                <button class="hover:text-white transition"><i class="fa-solid fa-film"></i></button>
+                <button onclick="openHistoryModal()" class="hover:text-white transition" title="History Generasi"><i class="fa-solid fa-film"></i></button>
                 <button class="hover:text-white transition"><i class="fa-solid fa-gear"></i></button>
                 
                 <div id="auth-section-editor" class="flex items-center gap-2 pl-2 md:pl-3 border-l border-gray-700">
@@ -554,9 +559,14 @@
                     <!-- VIDEO TAG -->
                     <video id="result-video" autoplay loop muted playsinline class="hidden w-full h-full object-contain cursor-pointer"></video>
                     
-                    <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
-                        <button id="btn-view-result" class="w-12 h-12 md:w-16 h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl"></i></button>
-                        <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
+                    <div id="result-overlay" class="hidden absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 backdrop-blur-sm">
+                        <div class="flex gap-4">
+                            <button id="btn-view-result" class="w-12 h-12 md:w-16 md:h-16 bg-white/20 rounded-full flex items-center justify-center border border-white/30 hover:scale-105 transition" title="Putar"><i id="icon-view-result" class="fa-solid fa-play text-white text-xl ml-1"></i></button>
+                            <button onclick="downloadResult(event)" class="w-12 h-12 md:w-16 md:h-16 bg-emerald-500/80 rounded-full flex items-center justify-center hover:scale-105 transition" title="Unduh"><i class="fa-solid fa-download text-white text-xl"></i></button>
+                        </div>
+                        <button onclick="resetEditor()" class="bg-black/80 border border-emerald-500/50 text-emerald-400 px-5 py-2 rounded-full text-xs font-bold hover:bg-emerald-900/50 transition flex items-center gap-2 mt-2 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                            <i class="fa-solid fa-rotate-left"></i> Buat Project Baru
+                        </button>
                     </div>
                     
                     <div id="output-loading" class="hidden absolute inset-0 z-40 bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md">
@@ -598,42 +608,191 @@
 
             <div class="flex flex-wrap sm:flex-nowrap justify-between sm:justify-end items-center gap-2 w-full border-t border-emerald-500/20 pt-2 relative">
                 
-                <div id="motion-control-menu" class="hidden absolute bottom-[120%] right-0 sm:right-auto md:right-28 w-[90vw] sm:w-[280px] max-w-[320px] bg-[#1a1a1a]/95 backdrop-blur-xl border border-gray-600 rounded-xl p-3 shadow-2xl z-[60] flex flex-col gap-2">
-                    <div class="flex flex-col gap-1 text-white">
-                        <label class="text-[9px] text-gray-400 uppercase">Engine Motion</label>
-                        <button onclick="setMotionControlMode('Kling 2.6')" id="btn-motion-kling2" class="text-left px-2 py-1.5 text-xs bg-black/40 rounded border border-white/10 flex justify-between">Kling 2.6 <span class="text-emerald-400 text-[8px]">Ready</span></button>
-                        <button onclick="setMotionControlMode('Kling 3.0')" id="btn-motion-kling3" class="text-left px-2 py-1.5 text-xs bg-black/40 rounded border border-white/10 flex justify-between">Kling 3.0 <span class="text-emerald-400 text-[8px]">Baru!</span></button>
+                <div id="motion-control-menu" class="hidden absolute bottom-[120%] right-0 sm:right-auto md:right-28 w-[90vw] sm:w-[320px] bg-[#0d0d0d]/95 backdrop-blur-2xl border border-emerald-500/30 rounded-2xl p-4 shadow-[0_10px_50px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.2)] z-[60] flex flex-col gap-3 text-white">
+                    <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+                        <i class="fa-solid fa-person-running text-emerald-400"></i>
+                        <span class="text-sm font-bold tracking-wide">Engine Motion</span>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <button onclick="setMotionControlMode('Kling 2.6')" id="btn-motion-kling2" class="flex justify-between items-center text-left p-3 bg-black/60 hover:bg-emerald-900/20 border border-emerald-500/50 rounded-xl transition-colors group shadow-inner">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
+                                    <i class="fa-solid fa-clapperboard text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]"></i>
+                                </span>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">Kling 2.6</span>
+                                    <span class="text-[9px] text-emerald-400 mt-0.5">11 ⚡ / Detik</span>
+                                </div>
+                            </div>
+                            <span class="text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-1 rounded border border-emerald-500/30 font-bold shrink-0 shadow-[0_0_10px_rgba(16,185,129,0.2)]">Ready</span>
+                        </button>
+                        <button onclick="setMotionControlMode('Kling 3.0')" id="btn-motion-kling3" class="flex justify-between items-center text-left p-3 bg-black/60 hover:bg-emerald-900/20 border border-white/10 rounded-xl transition-colors group shadow-inner">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-purple-500/30 transition-colors">
+                                    <i class="fa-solid fa-wand-magic-sparkles text-purple-400 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]"></i>
+                                </span>
+                                <div class="flex flex-col">
+                                    <span class="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">Kling 3.0</span>
+                                    <span class="text-[9px] text-purple-400 mt-0.5">720p: 20⚡ | 1080p: 27⚡ / dtk</span>
+                                </div>
+                            </div>
+                            <span class="text-[9px] bg-purple-900/40 text-purple-300 px-2 py-1 rounded border border-purple-500/30 font-bold shrink-0 shadow-[0_0_10px_rgba(168,85,247,0.2)]">Baru!</span>
+                        </button>
+                    </div>
+
+                    <!-- Options Resolusi & Durasi -->
+                    <div class="flex flex-col gap-3 mt-1 pt-3 border-t border-white/10">
+                        <div id="motion-resolution-options" class="hidden">
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Resolusi (Kling 3.0)</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setMotionParam('mode', '720p')" id="btn-motion-720p" class="flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1">720p</button>
+                                <button onclick="setMotionParam('mode', '1080p')" id="btn-motion-1080p" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1">1080p</button>
+                            </div>
+                        </div>
+                        <div id="motion-duration-options">
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Durasi Motion</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setMotionParam('duration', '5')" id="btn-motion-5s" class="flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center">5 Detik</button>
+                                <button onclick="setMotionParam('duration', '10')" id="btn-motion-10s" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center">10 Detik</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div id="gen-settings-menu" class="hidden absolute bottom-[120%] right-0 md:right-8 w-[90vw] sm:w-[280px] max-w-[320px] bg-[#1a1a1a]/95 backdrop-blur-xl border border-gray-600 rounded-xl p-3 shadow-2xl z-[60] flex flex-col gap-3 text-white">
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="text-[9px] text-gray-400 uppercase mb-1 block">Tipe</label>
-                            <div class="flex bg-black rounded p-0.5"><button onclick="setGenType('Gambar')" id="btn-type-Gambar" class="flex-1 text-[10px] py-1 rounded text-gray-400">Img</button><button onclick="setGenType('Video')" id="btn-type-Video" class="flex-1 text-[10px] py-1 rounded bg-[#2a2a2a] text-white">Vid</button></div>
+                <div id="gen-settings-menu" class="hidden absolute bottom-[120%] right-0 md:right-8 w-[90vw] sm:w-[320px] bg-[#0d0d0d]/95 backdrop-blur-2xl border border-emerald-500/30 rounded-2xl p-4 shadow-[0_10px_50px_rgba(0,0,0,0.8),0_0_20px_rgba(16,185,129,0.2)] z-[60] flex flex-col gap-4 text-white">
+                    <div class="flex items-center gap-2 border-b border-white/10 pb-2">
+                        <i class="fa-solid fa-sliders text-emerald-400"></i>
+                        <span class="text-sm font-bold tracking-wide">Pengaturan AI</span>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 relative">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider">AI Engine</label>
+                            <span id="engine-info-text" class="text-[9px] bg-emerald-900/40 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold tracking-wide shadow-[0_0_10px_rgba(16,185,129,0.2)]">6 dtk • 18 ⚡</span>
                         </div>
-                        <div>
-                            <label class="text-[9px] text-gray-400 uppercase mb-1 block">Rasio</label>
-                            <div class="flex bg-black rounded p-0.5"><button onclick="setGenRatio('9:16')" id="btn-ratio-9-16" class="flex-1 text-[10px] py-1 rounded bg-[#2a2a2a] text-white">9:16</button><button onclick="setGenRatio('16:9')" id="btn-ratio-16-9" class="flex-1 text-[10px] py-1 rounded text-gray-400">16:9</button></div>
+                        <button id="engine-select-btn" onclick="toggleDropdown('engine-options-dropdown', event)" class="w-full bg-black/80 hover:bg-black border border-white/20 hover:border-emerald-500/50 rounded-xl px-3 py-2.5 text-sm flex justify-between items-center transition-all group shadow-inner">
+                            <div class="flex items-center gap-2">
+                                <span id="engine-select-icon" class="flex items-center justify-center w-6 h-6 rounded-md bg-white/5 border border-white/10 group-hover:border-emerald-500/30 transition-colors">
+                                    <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
+                                </span>
+                                <span id="engine-select-text" class="font-bold tracking-wide">grok</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-gray-400 group-hover:text-emerald-400 transition-colors"></i>
+                        </button>
+                        
+                        <!-- Dropdown Options -->
+                        <div id="engine-options-dropdown" class="hidden absolute top-[105%] left-0 w-full bg-[#121212] border border-emerald-500/40 rounded-xl shadow-[0_15px_40px_rgba(0,0,0,0.9)] z-[70] flex flex-col overflow-y-auto custom-scrollbar max-h-[220px]">
+                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
+                                        <svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">grok</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Fast Generation AI</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">18 ⚡</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="setGenEngine('veo3.1 lite'); toggleDropdown('engine-options-dropdown', event)" class="flex justify-between items-center text-left px-3 py-3 hover:bg-emerald-900/20 transition-colors group shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10 group-hover:border-emerald-500/30">
+                                        <svg class="w-4 h-4 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-white group-hover:text-emerald-300 transition-colors">veo3.1 lite</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Video Cinematic Pro</span>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] bg-black text-gray-300 px-2 py-1 rounded border border-white/10 font-mono font-bold shrink-0 shadow-inner">30 ⚡</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-compact-disc text-pink-400 drop-shadow-[0_0_5px_rgba(244,114,182,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Seedance</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">AI Dance Video</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-clapperboard text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Kling</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Kuaishou AI Video</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-bolt text-yellow-400 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Wan</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">Alibaba Wan 2.1</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
+                            <div class="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent shrink-0"></div>
+                            <button onclick="event.stopPropagation()" class="flex justify-between items-center text-left px-3 py-3 hover:bg-white/5 transition-colors group cursor-not-allowed opacity-70 shrink-0">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-white/5 border border-white/10">
+                                        <i class="fa-solid fa-video text-purple-400 drop-shadow-[0_0_5px_rgba(192,132,252,0.8)] text-[14px]"></i>
+                                    </span>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-bold text-gray-300">Sora</span>
+                                        <span class="text-[9px] text-gray-500 mt-0.5">OpenAI Sora</span>
+                                    </div>
+                                </div>
+                                <span class="text-[8px] bg-pink-900/40 text-pink-300 px-2 py-1 rounded border border-pink-500/30 font-bold shrink-0 shadow-inner uppercase tracking-wider">Coming Soon</span>
+                            </button>
                         </div>
                     </div>
-                    <div>
-                        <label class="text-[9px] text-gray-400 uppercase mb-1 block">Engine</label>
-                        <button id="engine-select-btn" onclick="toggleDropdown('engine-options-dropdown', event)" class="w-full bg-black border border-white/10 rounded px-2 py-1.5 text-xs flex justify-between items-center"><span id="engine-select-text">veo3.1 lite</span><i class="fa-solid fa-chevron-down text-[8px]"></i></button>
-                        <div id="engine-options-dropdown" class="hidden absolute bottom-full left-0 w-full bg-[#1a1a1a] border border-white/10 rounded shadow-xl z-[70] flex flex-col">
-                            <button onclick="setGenEngine('veo3.1 lite'); toggleDropdown('engine-options-dropdown', event)" class="text-left px-2 py-1.5 text-[10px] hover:bg-white/10">veo3.1 lite</button>
-                            <button onclick="setGenEngine('grok'); toggleDropdown('engine-options-dropdown', event)" class="text-left px-2 py-1.5 text-[10px] hover:bg-white/10">grok</button>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Tipe Media</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setGenType('Gambar')" id="btn-type-Gambar" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5"><i class="fa-regular fa-image"></i> Img</button>
+                                <button onclick="setGenType('Video')" id="btn-type-Video" class="flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5"><i class="fa-solid fa-film"></i> Vid</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-gray-400 uppercase font-semibold tracking-wider block mb-1.5">Rasio</label>
+                            <div class="flex bg-black/60 border border-white/10 rounded-lg p-1 relative">
+                                <button onclick="setGenRatio('9:16')" id="btn-ratio-9-16" class="flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5"><i class="fa-solid fa-mobile-screen"></i> 9:16</button>
+                                <button onclick="setGenRatio('16:9')" id="btn-ratio-16-9" class="flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5"><i class="fa-solid fa-desktop"></i> 16:9</button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="flex gap-1.5 sm:gap-2">
-                    <div id="btn-motion-control" onclick="toggleMotionControlMenu(event)" class="flex items-center gap-1.5 border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer">
-                        <span class="hidden sm:inline">Motion</span><i class="fa-solid fa-person-running"></i>
+                    <div id="btn-motion-control" onclick="toggleMotionControlMenu(event)" class="flex flex-col items-center justify-center border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer transition-all duration-300">
+                        <span id="motion-btn-engine" class="text-[6px] sm:text-[7px] text-emerald-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-emerald-900/40 px-1 py-0.5 rounded border border-emerald-500/30">Kling 2.6</span>
+                        <div class="flex items-center gap-1.5">
+                            <span>Motion</span><i class="fa-solid fa-person-running"></i>
+                        </div>
                     </div>
 
-                    <div id="btn-open-settings" onclick="toggleSettingsMenu(event)" class="flex items-center gap-1.5 border border-gray-600 bg-black/60 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer">
-                        <span id="setting-type-label">Video</span> <i id="setting-icon" class="fa-solid fa-mobile-screen"></i>
+                    <div id="btn-open-settings" onclick="toggleSettingsMenu(event)" class="flex flex-col items-center justify-center border border-cyan-500 bg-cyan-900/20 px-2 sm:px-3 py-1 rounded-lg text-[9px] sm:text-xs text-gray-300 font-medium cursor-pointer transition-all duration-300">
+                        <span id="ai-btn-engine" class="text-[6px] sm:text-[7px] text-cyan-400 font-black uppercase tracking-wider mb-0.5 leading-none bg-cyan-900/40 px-1 py-0.5 rounded border border-cyan-500/30">grok</span>
+                        <div class="flex items-center gap-1.5">
+                            <span id="setting-type-label">Video</span> <i id="setting-icon" class="fa-solid fa-mobile-screen"></i>
+                        </div>
                     </div>
                 </div>
                 
@@ -715,7 +874,7 @@
                 <button onclick="closeNewProjectMenu()" class="text-gray-400 hover:text-white bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3 overflow-y-auto max-h-[55vh] md:max-h-[65vh] custom-scrollbar pr-2 pb-2">
                 <button onclick="goToEditor(); closeNewProjectMenu()" class="flex items-center gap-4 bg-emerald-900/20 hover:bg-emerald-800/40 border border-emerald-500/30 p-4 rounded-xl transition text-left group">
                     <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                         <i class="fa-solid fa-plus text-emerald-400 text-xl"></i>
@@ -745,19 +904,52 @@
                         <p class="text-[10px] md:text-xs text-gray-400">Cari inspirasi dari prompt komunitas</p>
                     </div>
                 </button>
+
+                <button onclick="openAilabsBotGuideModal(); closeNewProjectMenu()" class="flex items-center gap-4 bg-sky-900/20 hover:bg-sky-800/40 border border-sky-500/30 p-4 rounded-xl transition text-left group">
+                    <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(14,165,233,0.5)]">
+                        <i class="fa-brands fa-telegram text-sky-400 text-xl"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-white font-bold text-sm md:text-base">Ailabs Bot</h4>
+                        <p class="text-[10px] md:text-xs text-gray-400">Generate Video Motion Control Free</p>
+                    </div>
+                </button>
             </div>
         </div>
     </div>
 
     <!-- Modals Editor / Viewer -->
     <div id="video-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur flex items-center justify-center p-2">
-        <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-white bg-white/20 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <button onclick="downloadFromModal('video', this)" class="text-white bg-emerald-500/80 hover:bg-emerald-500 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Download File"><i class="fa-solid fa-download"></i></button>
+            <button onclick="closeVideoModal()" class="text-white bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <video id="modal-video-player" controls playsinline class="max-w-full max-h-[85vh] rounded-xl"></video>
     </div>
 
     <div id="image-modal" class="hidden fixed inset-0 z-[150] bg-black/95 backdrop-blur flex items-center justify-center p-2">
-        <button onclick="closeImageModal()" class="absolute top-4 right-4 text-white bg-white/20 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+        <div class="absolute top-4 right-4 flex gap-3 z-50">
+            <button onclick="downloadFromModal('image', this)" class="text-white bg-emerald-500/80 hover:bg-emerald-500 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Download File"><i class="fa-solid fa-download"></i></button>
+            <button onclick="closeImageModal()" class="text-white bg-white/20 hover:bg-white/30 rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center shadow-lg transition" title="Tutup"><i class="fa-solid fa-xmark"></i></button>
+        </div>
         <img id="modal-image-viewer" src="" class="max-w-full max-h-[85vh] rounded-xl object-contain">
+    </div>
+
+    <!-- History Modal -->
+    <div id="history-modal" class="hidden fixed inset-0 z-[200] bg-black/80 backdrop-blur flex items-center justify-center p-4">
+        <div class="glass-card w-full max-w-lg p-5 md:p-6 rounded-2xl relative h-[80vh] flex flex-col border-t border-emerald-500/30">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base md:text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-emerald-400"></i> History Generasi
+                </h3>
+                <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-3 pr-2">
+                <!-- Data history dimasukkan lewat JS -->
+            </div>
+        </div>
     </div>
 
     <!-- Extend Video Modal -->
@@ -800,6 +992,61 @@
             
             <div id="admin-grid-container" class="flex flex-col gap-4">
                 <!-- Diisi oleh JS loadAdminsFromSheets() -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ailabs Bot Guide -->
+    <div id="ailabs-bot-guide-modal" class="hidden fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeAilabsBotGuideModal(event)">
+        <div class="glass-card w-full max-w-md p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(14,165,233,0.15)] border-t border-sky-500/30" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-center mb-6 sticky top-0 bg-[#1e1e1e]/95 backdrop-blur-md z-10 py-3 border-b border-white/10 -mt-6 -mx-6 px-6 md:-mx-8 md:px-8">
+                <h3 class="text-xl font-bold text-white flex items-center gap-3">
+                    <i class="fa-brands fa-telegram text-sky-400 text-3xl"></i> Panduan Bot
+                </h3>
+                <button onclick="closeAilabsBotGuideModal()" class="text-gray-400 hover:text-white transition w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-4 text-xs sm:text-sm text-gray-300 mt-4">
+                <p class="text-center text-gray-400 mb-4 font-medium">Ikuti panduan berikut untuk menggunakan Ailabs Bot:</p>
+                
+                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
+                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">1</div>
+                    <p>Daftarkan alamat Gmail Anda ke admin untuk mendapatkan aksesnya.</p>
+                </div>
+                
+                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
+                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">2</div>
+                    <p>Buat API Key dengan cara mendaftar di situs <a href="https://www.magnific.com/" target="_blank" class="text-sky-400 hover:text-white underline transition-colors font-medium">www.magnific.com</a>.</p>
+                </div>
+                
+                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
+                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">3</div>
+                    <div class="space-y-2 w-full">
+                        <p>Masuk ke Ailabs Bot, ketik <span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded">/start</span>.</p>
+                        <p>Selanjutnya Anda harus memasukkan alamat Gmail yang sudah didaftarkan: <br><span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded inline-block mt-1 break-all">/login (gmail anda)</span></p>
+                        <p>Lalu masukkan API Key yang sudah diambil dari Magnific dengan cara: <br><span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded inline-block mt-1 break-all">/setkey (apikey anda)</span></p>
+                        <p class="text-sky-300 font-medium mt-2">Enjoy, silahkan dipakai secara bijak!</p>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-900/20 border border-yellow-500/30 p-4 rounded-xl mt-6 relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
+                    <p class="text-yellow-400 font-bold mb-2 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> NOTE:</p>
+                    <p class="text-[10px] sm:text-xs text-yellow-100/90 leading-relaxed text-justify">
+                        Kalau jatah apikey habis, clear browser, buat apikey baru lagi dengan alamat gmail yang baru.. dan jangan lupa hapus apikey yang sudah disave di telegram untuk mengganti dengan yang baru.
+                    </p>
+                    <div class="mt-4 pt-3 border-t border-yellow-500/20 text-right">
+                        <p class="text-[10px] sm:text-xs font-bold italic text-yellow-500/80">~ Salam dari saya Bang Pro</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8">
+                <button onclick="window.open('https://t.me/Ailabs_Gen_bot', '_blank'); closeAilabsBotGuideModal()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.3)] transition transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 border border-sky-400">
+                    <i class="fa-brands fa-telegram text-xl"></i> Buka Telegram Sekarang
+                </button>
             </div>
         </div>
     </div>
@@ -909,7 +1156,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDoc, deleteDoc, onSnapshot, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyCq_zB0KHCqVKgouKBLUw1obq6KU0HZHvc",
@@ -939,6 +1186,11 @@
             app = initializeApp(firebaseConfig);
             auth = getAuth(app);
             db = getFirestore(app);
+            
+            // Ekspor variabel untuk dipakai fungsi UI standar
+            window.db = db;
+            window.fsCollection = collection;
+            window.fsGetDocs = getDocs;
             
             setPersistence(auth, browserLocalPersistence).catch((err) => console.log("Persistence error:", err));
 
@@ -1327,22 +1579,34 @@
             }
         }
 
-        let genConfig = { type: 'Video', ratio: '9:16', engine: 'veo3.1 lite', duration: '6', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
+        let genConfig = { type: 'Video', ratio: '9:16', engine: 'grok', duration: '5', motionMode: '720p', characterOrientation: 'video', backgroundSource: 'input_video' };
         window.lastGenData = { taskId: null, engine: null };
 
         window.setMotionParam = function(param, value) {
             if (param === 'mode') {
                 genConfig.motionMode = value;
-                document.getElementById('btn-motion-720p').className = value === '720p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-motion-1080p').className = value === '1080p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btn720p = document.getElementById('btn-motion-720p');
+                const btn1080p = document.getElementById('btn-motion-1080p');
+                if (btn720p) btn720p.className = value === '720p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1";
+                if (btn1080p) btn1080p.className = value === '1080p' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center gap-1" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center gap-1";
+            } else if (param === 'duration') {
+                genConfig.duration = value;
+                const btn5s = document.getElementById('btn-motion-5s');
+                const btn10s = document.getElementById('btn-motion-10s');
+                if (btn5s) btn5s.className = value === '5' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center";
+                if (btn10s) btn10s.className = value === '10' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10 transition-all flex items-center justify-center" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white bg-transparent border-transparent transition-all font-medium flex items-center justify-center";
             } else if (param === 'orientation') {
                 genConfig.characterOrientation = value;
-                document.getElementById('btn-ori-video').className = value === 'video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-ori-image').className = value === 'image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btnVid = document.getElementById('btn-ori-video');
+                const btnImg = document.getElementById('btn-ori-image');
+                if (btnVid) btnVid.className = value === 'video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                if (btnImg) btnImg.className = value === 'image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
             } else if (param === 'bg') {
                 genConfig.backgroundSource = value;
-                document.getElementById('btn-bg-video').className = value === 'input_video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                document.getElementById('btn-bg-image').className = value === 'input_image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const btnBgVid = document.getElementById('btn-bg-video');
+                const btnBgImg = document.getElementById('btn-bg-image');
+                if (btnBgVid) btnBgVid.className = value === 'input_video' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                if (btnBgImg) btnBgImg.className = value === 'input_image' ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
             }
         };
 
@@ -1350,21 +1614,71 @@
             genConfig.type = 'Motion'; genConfig.engine = engine;
             ['Gambar', 'Video'].forEach(t => {
                 const btn = document.getElementById(`btn-type-${t}`);
-                if (btn) btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                if (btn) {
+                    const icon = t === 'Gambar' ? 'fa-image' : 'fa-film';
+                    const styleIcon = t === 'Gambar' ? 'fa-regular' : 'fa-solid';
+                    const shortText = t === 'Gambar' ? 'Img' : 'Vid';
+                    btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5";
+                    btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                }
             });
             const btnK2 = document.getElementById('btn-motion-kling2'); const btnK3 = document.getElementById('btn-motion-kling3');
             if(btnK2) btnK2.classList.toggle('border-emerald-500/50', engine === 'Kling 2.6');
             if(btnK3) btnK3.classList.toggle('border-emerald-500/50', engine === 'Kling 3.0');
-            const bgOption = document.getElementById('kling3-bg-option');
-            if (bgOption) { if (engine === 'Kling 3.0') bgOption.classList.remove('hidden'); else bgOption.classList.add('hidden'); }
+            
+            const resOptions = document.getElementById('motion-resolution-options');
+            if (resOptions) {
+                if (engine === 'Kling 3.0') {
+                    resOptions.classList.remove('hidden');
+                } else {
+                    resOptions.classList.add('hidden');
+                    window.setMotionParam('mode', '720p'); // default Kling 2.6
+                }
+            }
+            
+            const motBtnEngine = document.getElementById('motion-btn-engine');
+            if (motBtnEngine) motBtnEngine.innerText = engine;
+
             window.updateMainSettingButton(); window.updateCanvasPreview();
         };
 
         window.setGenType = function(type) {
             genConfig.type = type;
+            
+            // Auto reset engine jika berasal dari mode Motion
+            if (genConfig.engine.includes('Kling')) {
+                genConfig.engine = 'grok';
+                const selectText = document.getElementById('engine-select-text');
+                if (selectText) selectText.innerText = 'grok';
+                const selectIcon = document.getElementById('engine-select-icon');
+                if (selectIcon) selectIcon.innerHTML = `<svg class="w-4 h-4 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>`;
+                const infoText = document.getElementById('engine-info-text');
+                if (infoText) infoText.innerText = '6 dtk • 18 ⚡';
+                
+                const btnK2 = document.getElementById('btn-motion-kling2');
+                const btnK3 = document.getElementById('btn-motion-kling3');
+                if(btnK2) btnK2.classList.remove('border-emerald-500/50');
+                if(btnK3) btnK3.classList.remove('border-emerald-500/50');
+                
+                const aiBtnEngine = document.getElementById('ai-btn-engine');
+                if (aiBtnEngine) aiBtnEngine.innerText = 'grok';
+            }
+
             ['Gambar', 'Video'].forEach(t => {
                 const btn = document.getElementById(`btn-type-${t}`);
-                if (btn) btn.className = (t === type) ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
+                const icon = t === 'Gambar' ? 'fa-image' : 'fa-film';
+                const styleIcon = t === 'Gambar' ? 'fa-regular' : 'fa-solid';
+                const shortText = t === 'Gambar' ? 'Img' : 'Vid';
+                
+                if (btn) {
+                    if (t === type) {
+                        btn.className = "flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                    } else {
+                        btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                    }
+                }
             });
             window.updateMainSettingButton(); if (type !== 'Gambar') window.updateCanvasPreview();
         };
@@ -1375,9 +1689,15 @@
                 const btn = document.getElementById(`btn-ratio-${r}`);
                 const icon = r === '9-16' ? 'fa-mobile-screen' : 'fa-desktop';
                 const originalText = r.replace('-', ':');
+                
                 if (btn) {
-                    btn.className = (r === safeRatio) ? "flex-1 text-xs py-1.5 rounded-md bg-[#2a2a2a] text-white shadow font-medium border border-white/10" : "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition bg-transparent border-transparent";
-                    btn.innerHTML = `<i class="fa-solid ${icon} mr-1"></i> ${originalText}`;
+                    if (r === safeRatio) {
+                        btn.className = "flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${originalText}`;
+                    } else {
+                        btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5";
+                        btn.innerHTML = `<i class="fa-solid ${icon}"></i> ${originalText}`;
+                    }
                 }
             });
             window.updateMainSettingButton();
@@ -1385,8 +1705,58 @@
 
         window.setGenEngine = function(engine) {
             genConfig.engine = engine;
+            
+            // Otomatis kembalikan mode ke Video jika memilih Engine AI saat sedang berada di Motion
+            if (genConfig.type === 'Motion') {
+                genConfig.type = 'Video';
+                ['Gambar', 'Video'].forEach(t => {
+                    const btn = document.getElementById(`btn-type-${t}`);
+                    const icon = t === 'Gambar' ? 'fa-image' : 'fa-film';
+                    const styleIcon = t === 'Gambar' ? 'fa-regular' : 'fa-solid';
+                    const shortText = t === 'Gambar' ? 'Img' : 'Vid';
+                    
+                    if (btn) {
+                        if (t === 'Video') {
+                            btn.className = "flex-1 text-xs py-1.5 rounded-md bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-md font-bold transition-all z-10 flex items-center justify-center gap-1.5";
+                            btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                        } else {
+                            btn.className = "flex-1 text-xs py-1.5 rounded-md text-gray-400 hover:text-white transition-all font-medium z-10 flex items-center justify-center gap-1.5";
+                            btn.innerHTML = `<i class="${styleIcon} ${icon}"></i> ${shortText}`;
+                        }
+                    }
+                });
+                
+                const btnK2 = document.getElementById('btn-motion-kling2');
+                const btnK3 = document.getElementById('btn-motion-kling3');
+                if(btnK2) btnK2.classList.remove('border-emerald-500/50');
+                if(btnK3) btnK3.classList.remove('border-emerald-500/50');
+
+                window.updateMainSettingButton(); 
+                window.updateCanvasPreview();
+            }
+
             const selectText = document.getElementById('engine-select-text');
+            const selectIcon = document.getElementById('engine-select-icon');
+            
+            const veoIcon = `<svg class="w-3 h-3 text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/></svg>`;
+            const grokIcon = `<svg class="w-3 h-3 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 22.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.008 3.54H5.078z"/></svg>`;
+            
             if (selectText) selectText.innerText = engine;
+            if (selectIcon) {
+                if (engine.includes('veo')) selectIcon.innerHTML = veoIcon;
+                else if (engine === 'grok') selectIcon.innerHTML = grokIcon;
+                else selectIcon.innerHTML = '';
+            }
+
+            const infoText = document.getElementById('engine-info-text');
+            if (infoText) {
+                if (engine.includes('veo3.1')) infoText.innerText = '8 dtk • 30 ⚡';
+                else if (engine === 'grok') infoText.innerText = '6 dtk • 18 ⚡';
+                else infoText.innerText = '';
+            }
+            
+            const aiBtnEngine = document.getElementById('ai-btn-engine');
+            if (aiBtnEngine) aiBtnEngine.innerText = engine;
         };
 
         window.updateMainSettingButton = function() {
@@ -1394,6 +1764,25 @@
             const icn = document.getElementById('setting-icon');
             if (lbl) lbl.innerText = genConfig.type === 'Motion' ? 'Motion' : genConfig.type;
             if (icn) icn.className = genConfig.type === 'Motion' ? "fa-solid fa-person-running" : (genConfig.ratio === '9:16' ? "fa-solid fa-mobile-screen" : "fa-solid fa-desktop");
+
+            const btnMot = document.getElementById('btn-motion-control');
+            const btnAi = document.getElementById('btn-open-settings');
+            
+            if (btnMot && btnAi) {
+                if (genConfig.type === 'Motion') {
+                    btnMot.classList.replace('border-gray-600', 'border-emerald-500');
+                    btnMot.classList.replace('bg-black/60', 'bg-emerald-900/20');
+                    
+                    btnAi.classList.replace('border-cyan-500', 'border-gray-600');
+                    btnAi.classList.replace('bg-cyan-900/20', 'bg-black/60');
+                } else {
+                    btnAi.classList.replace('border-gray-600', 'border-cyan-500');
+                    btnAi.classList.replace('bg-black/60', 'bg-cyan-900/20');
+                    
+                    btnMot.classList.replace('border-emerald-500', 'border-gray-600');
+                    btnMot.classList.replace('bg-emerald-900/20', 'bg-black/60');
+                }
+            }
 
             const outputLabel = document.getElementById('output-label');
             const outputPlaceholderIcon = document.getElementById('output-placeholder-icon');
@@ -1661,14 +2050,23 @@
             }
 
             let cost = 1; const engineName = genConfig.engine.toLowerCase();
-            if (genConfig.type === 'Gambar') cost = 1;
-            else if (engineName === 'grok') cost = (parseInt(genConfig.duration) || 6) / 6 * 18;
-            else if (engineName.includes('veo3.1 lite')) cost = 30;
-            else if (engineName.includes('veo3.1 fast')) cost = 30;
-            else if (engineName.includes('veo3.1 quality')) cost = 50;
-            else if (engineName.includes('kling 3.0')) cost = 15;
-            else if (engineName.includes('kling')) cost = 10;
-            else cost = 5;
+            let durationVal = parseInt(genConfig.duration) || 5;
+
+            if (genConfig.type === 'Gambar') {
+                cost = 1;
+            } else if (genConfig.type === 'Motion') {
+                if (engineName.includes('kling 3.0')) {
+                    cost = genConfig.motionMode === '1080p' ? durationVal * 27 : durationVal * 20;
+                } else {
+                    cost = durationVal * 11;
+                }
+            } else {
+                if (engineName === 'grok') cost = (durationVal || 6) / 6 * 18;
+                else if (engineName.includes('veo3.1 lite')) cost = 30;
+                else if (engineName.includes('veo3.1 fast')) cost = 30;
+                else if (engineName.includes('veo3.1 quality')) cost = 50;
+                else cost = 5;
+            }
             
             if (window.currentUserCredits < cost) {
                 window.showCustomAlert(`Kredit tidak cukup! Butuh ${cost} ⚡, sisa kredit ${window.currentUserCredits} ⚡.`); return;
@@ -1782,7 +2180,8 @@
                         
                         let checkRes, checkData;
                         try {
-                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}`);
+                            // DITAMBAH: Mengirim appId ke backend agar auto-refund sukses
+                            checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(genConfig.engine)}&appId=${window.appId}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             console.warn("Jaringan APK nge-drop sementara, mencoba auto-reconnect...", err);
@@ -1793,10 +2192,8 @@
                         // PERBAIKAN BUG UTAMA: EKSTRAKSI STATUS & URL YANG BENAR
                         // =========================================================
 
-                        // 1. Ambil status yang benar (Kling/Grok pakai 'state', Veo pakai 'successFlag')
-                        let stateStr = checkData.data?.state; 
-                        let successFlagStr = checkData.data?.successFlag;
-                        let rawStatus = stateStr || successFlagStr || checkData.status || "";
+                        // 1. Ambil status yang benar (Kling/Grok pakai 'state', Veo pakai 'successFlag' atau 'status')
+                        let rawStatus = checkData.data?.state ?? checkData.data?.successFlag ?? checkData.data?.status ?? checkData.status ?? checkData.successFlag ?? "";
                         let statusStr = String(rawStatus).toLowerCase();
                         
                         // Menambahkan status '99' (sukses khusus Kling) dan 'succeeded'
@@ -1826,9 +2223,9 @@
                                     console.warn("Gagal ekstrak JSON dari resultJson", e);
                                 }
                             }
-                            // 2C. Fallback metode lama
+                            // 2C. Fallback metode lama (Diperbarui untuk Veo)
                             if (!mediaUrl) {
-                                mediaUrl = checkData.data?.resultUrl || checkData.resultUrls?.[0] || checkData.url;
+                                mediaUrl = checkData.data?.resultUrl || checkData.data?.resultUrls?.[0] || checkData.resultUrls?.[0] || checkData.url;
                             }
 
                             // 2D. Fallback sapu bersih semua link dari payload
@@ -1929,6 +2326,235 @@
         }
         window.closeImageModal = function() { document.getElementById('image-modal')?.classList.add('hidden'); }
 
+        window.downloadFromModal = async function(type, btnElement) {
+            let urlToDownload = "";
+            let isFileVideo = type === 'video';
+            
+            if (isFileVideo) {
+                const vidEl = document.getElementById('modal-video-player');
+                if (vidEl && vidEl.src) urlToDownload = vidEl.src;
+            } else {
+                const imgEl = document.getElementById('modal-image-viewer');
+                if (imgEl && imgEl.src) urlToDownload = imgEl.src;
+            }
+            
+            if (!urlToDownload) return window.showCustomAlert("Gagal menemukan link file.");
+
+            const icon = btnElement ? btnElement.querySelector('i') : null;
+            if (icon) icon.className = "fa-solid fa-spinner fa-spin";
+
+            try {
+                let finalDlUrl = urlToDownload;
+                // Bersihkan Temp URL agar browser bisa mendownloadnya
+                try {
+                    const dlRes = await fetch('/api/download', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: urlToDownload })
+                    });
+                    if (dlRes.ok) {
+                        const dlData = await dlRes.json();
+                        finalDlUrl = dlData.data || dlData.url || finalDlUrl;
+                    }
+                } catch(err) {
+                    console.warn("Gagal konversi link di modal, memakai URL asli");
+                }
+
+                const response = await fetch(finalDlUrl);
+                if (!response.ok) throw new Error("CORS terblokir");
+                const blob = await response.blob(); 
+                const blobUrl = window.URL.createObjectURL(blob);
+                const a = document.createElement('a'); 
+                a.style.display = 'none'; 
+                a.href = blobUrl; 
+                a.download = `Ailabs_History_${Date.now()}.${isFileVideo ? 'mp4' : 'png'}`;
+                document.body.appendChild(a); 
+                a.click(); 
+                window.URL.revokeObjectURL(blobUrl);
+                
+                if (icon) icon.className = "fa-solid fa-download";
+                window.showToast("Berhasil diunduh!");
+            } catch (error) {
+                // Fallback jika API KIE mencegah download langsung (membuka tab baru)
+                window.open(urlToDownload, '_blank');
+                if (icon) icon.className = "fa-solid fa-download";
+            }
+        };
+
+        window.resetEditor = function() {
+            editorImages['mulai'] = null;
+            editorImages['akhir'] = null;
+            imageRefs = [];
+            const promptInput = document.getElementById('main-prompt-input');
+            if (promptInput) promptInput.value = '';
+            
+            ['result-video', 'result-image', 'result-overlay', 'veo-actions-panel'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.add('hidden');
+            });
+            const vid = document.getElementById('result-video');
+            if (vid) { vid.pause(); vid.removeAttribute('src'); vid.load(); }
+            const img = document.getElementById('result-image');
+            if (img) img.src = '';
+            
+            const placeholder = document.getElementById('output-placeholder');
+            if (placeholder) placeholder.classList.remove('hidden');
+
+            window.updateCanvasPreview();
+            window.updateImageRefUI();
+            window.showToast("Project kembali bersih!");
+        };
+
+        window.openHistoryModal = async function() {
+            if (!window.currentUserId) return window.showCustomAlert("Silakan login untuk melihat history.");
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.classList.remove('hidden');
+            const listEl = document.getElementById('history-list');
+            if (listEl) listEl.innerHTML = '<div class="text-center py-10"><i class="fas fa-spinner fa-spin text-emerald-500 text-2xl"></i><p class="mt-2 text-gray-400 text-xs">Memuat history...</p></div>';
+
+            try {
+                if (!window.db || !window.fsCollection || !window.fsGetDocs) throw new Error("Database belum siap.");
+                const historyRef = window.fsCollection(window.db, 'artifacts', window.appId, 'history');
+                const snapshot = await window.fsGetDocs(historyRef);
+                let myHistory = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.userId === window.currentUserId) {
+                        myHistory.push({ id: doc.id, ...data });
+                    }
+                });
+
+                myHistory.sort((a, b) => {
+                    const tA = a.timestamp ? a.timestamp.toMillis() : 0;
+                    const tB = b.timestamp ? b.timestamp.toMillis() : 0;
+                    return tB - tA;
+                });
+
+                if (myHistory.length === 0) {
+                    listEl.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs italic">Belum ada history generasi.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = myHistory.map(item => {
+                    const dateStr = item.timestamp ? new Date(item.timestamp.toMillis()).toLocaleString('id-ID', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}) : '-';
+                    // DITAMBAH: Badge untuk status Refund 
+                    const isFailed = item.status === 'FAILED' || item.status === 'FAILED_REFUNDED';
+                    const isSuccess = item.status === 'SUCCESS';
+                    
+                    let statusBadge = '';
+                    if (item.status === 'FAILED_REFUNDED') statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30" title="Kredit telah dikembalikan">Gagal (Refund)</span>';
+                    else if (isFailed) statusBadge = '<span class="text-[9px] bg-red-900/40 text-red-400 px-1.5 py-0.5 rounded ml-2 border border-red-500/30">Gagal</span>';
+                    else if (isSuccess) statusBadge = '<span class="text-[9px] bg-emerald-900/40 text-emerald-400 px-1.5 py-0.5 rounded ml-2 border border-emerald-500/30">Selesai</span>';
+
+                    return `
+                        <div class="bg-black/40 border border-white/10 rounded-xl p-3 md:p-4 flex flex-col gap-2 relative group hover:border-emerald-500/30 transition">
+                            <div class="flex justify-between items-start mb-1">
+                                <div class="flex items-center">
+                                    <span class="text-[10px] md:text-xs font-bold text-cyan-400 bg-cyan-900/30 px-2 py-0.5 rounded border border-cyan-500/30 uppercase">${item.engine}</span>
+                                    ${statusBadge}
+                                </div>
+                                <span class="text-[9px] md:text-[10px] text-gray-500">${dateStr}</span>
+                            </div>
+                            <p class="text-xs md:text-sm text-gray-300 line-clamp-2" title="${item.prompt}">${item.prompt}</p>
+                            
+                            <button onclick="recheckHistoryTask('${item.taskId}', '${item.engine}', this)" class="mt-2 bg-[#1e1e1e] hover:bg-emerald-900/40 border border-white/10 hover:border-emerald-500/50 text-white text-xs py-2 rounded-lg flex items-center justify-center gap-2 transition group-hover:shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+                                <i class="fas fa-cloud-download-alt text-emerald-400"></i> Buka Ulang Hasil
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error("History fetch error:", error);
+                if (listEl) listEl.innerHTML = '<div class="text-center py-10 text-red-400 text-xs italic">Gagal memuat history. Pastikan koneksi lancar.</div>';
+            }
+        };
+
+        window.closeHistoryModal = function() {
+            const modal = document.getElementById('history-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.recheckHistoryTask = async function(taskId, engine, btnElement) {
+            const originalHtml = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fas fa-spinner fa-spin text-emerald-400"></i> Mengambil data...';
+            btnElement.disabled = true;
+
+            try {
+                // DITAMBAH: Mengirim appId ke backend 
+                const checkRes = await fetch(`/api/check?taskId=${taskId}&engine=${encodeURIComponent(engine)}&appId=${window.appId}`);
+                const checkData = await checkRes.json();
+
+                let rawStatus = checkData.data?.state ?? checkData.data?.successFlag ?? checkData.data?.status ?? checkData.status ?? checkData.successFlag ?? "";
+                let statusStr = String(rawStatus).toLowerCase();
+                const isSuccess = ['success', 'succeeded', 'completed', '1', '100', '99', 'finished', 'done'].includes(statusStr);
+                const isFail = ['fail', 'failed', 'error', '2', '3'].includes(statusStr);
+                
+                if (isFail) {
+                    window.showCustomAlert(checkData.data?.failMsg || checkData.errorMessage || "Tugas ini berstatus GAGAL dari server AI.");
+                } else if (isSuccess) {
+                    let mediaUrl = null;
+                    if (checkData.data?.response) {
+                        let veoResp = checkData.data.response;
+                        mediaUrl = veoResp.fullResultUrls?.[0] || veoResp.resultUrls?.[0];
+                    } else if (checkData.data?.resultJson) {
+                        try {
+                            let parsedResult = JSON.parse(checkData.data.resultJson);
+                            mediaUrl = parsedResult.resultUrls?.[0] || parsedResult.resultUrl || parsedResult.video_url;
+                        } catch(e) {}
+                    }
+                    if (!mediaUrl) mediaUrl = checkData.data?.resultUrl || checkData.data?.resultUrls?.[0] || checkData.resultUrls?.[0] || checkData.url;
+                    
+                    if (!mediaUrl) {
+                        let foundUrls = [];
+                        JSON.stringify(checkData, (k, v) => { if(typeof v === 'string' && v.startsWith('http')) foundUrls.push(v); return v; });
+                        const validUrls = foundUrls.filter(u => !u.includes('localhost') && !u.includes('w3.org'));
+                        mediaUrl = validUrls.find(u => u.includes('tempfile')) || validUrls.find(u => u.match(/\.(mp4|webm|mov|png|jpg)(\?.*)?$/i)) || validUrls[0];
+                    }
+
+                    if (mediaUrl) {
+                        try {
+                            const dlRes = await fetch('/api/download', {
+                                method: 'POST', 
+                                headers: { 'Content-Type': 'application/json' }, 
+                                body: JSON.stringify({ url: mediaUrl })
+                            });
+                            const dlData = await dlRes.json();
+                            mediaUrl = dlData.data || dlData.url || mediaUrl; 
+                        } catch(err) {
+                            console.warn("Gagal convert temp url:", err);
+                        }
+
+                        if (mediaUrl.startsWith('http://')) mediaUrl = mediaUrl.replace(/^http:\/\//i, 'https://');
+                        
+                        const isVid = mediaUrl.match(/\.(mp4|webm|mov)$/i) || engine.toLowerCase().includes('veo') || engine.toLowerCase().includes('kling') || engine.toLowerCase().includes('video');
+                        
+                        if (isVid) {
+                            const modal = document.getElementById('video-modal');
+                            const modalPlayer = document.getElementById('modal-video-player');
+                            if (modal && modalPlayer) { 
+                                modalPlayer.src = mediaUrl;
+                                modal.classList.remove('hidden'); 
+                                modalPlayer.play().catch(e=>e); 
+                            }
+                        } else {
+                            const modal = document.getElementById('image-modal');
+                            const modalViewer = document.getElementById('modal-image-viewer');
+                            if (modal && modalViewer) { 
+                                modalViewer.src = mediaUrl; 
+                                modal.classList.remove('hidden'); 
+                            }
+                        }
+                    } else {
+                        window.showCustomAlert("File hasil tidak ditemukan. Kemungkinan sudah expired di server AI.");
+                    }
+                } else {
+                    window.showCustomAlert(`Status saat ini: ${statusStr.toUpperCase()}. Silakan coba lagi nanti.`);
+                }
+            } catch (e) {
+                window.showCustomAlert("Gagal terhubung ke server saat mengecek history.");
+            }
+            btnElement.innerHTML = originalHtml;
+            btnElement.disabled = false;
+        };
+
         window.downloadResult = async function(e) {
             if (e) e.stopPropagation();
             let urlToDownload = ""; const vidEl = document.getElementById('result-video'); const imgEl = document.getElementById('result-image');
@@ -1941,7 +2567,6 @@
             try {
                 if (icon) icon.className = "fa-solid fa-spinner fa-spin text-white text-2xl";
                 
-                // BARU: Panggil API convert temp URL HANYA SAAT MENGUNDUH
                 let finalDlUrl = urlToDownload;
                 try {
                     const dlRes = await fetch('/api/download', {
@@ -2194,6 +2819,22 @@
         window.closeAdminHelpModal = function() {
             const modal = document.getElementById('admin-help-modal');
             if (modal) { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); }
+        };
+
+        window.openAilabsBotGuideModal = function() {
+            const modal = document.getElementById('ailabs-bot-guide-modal');
+            if (modal) { 
+                modal.classList.remove('hidden'); 
+                setTimeout(() => modal.classList.remove('opacity-0'), 10); 
+            }
+        };
+
+        window.closeAilabsBotGuideModal = function(e) {
+            const modal = document.getElementById('ailabs-bot-guide-modal');
+            if (modal) { 
+                modal.classList.add('opacity-0'); 
+                setTimeout(() => modal.classList.add('hidden'), 300); 
+            }
         };
 
         document.addEventListener('click', function(e) {
@@ -2524,8 +3165,8 @@
                     if (actionType === 'extend') {
                         let checkData;
                         try {
-                            // FIXED API ROUTE: /api/check
-                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo`);
+                            // FIXED API ROUTE: /api/check (DITAMBAH appId JUGA DI SINI AGAR SINKRON)
+                            const checkRes = await fetch(`/api/check?taskId=${activeTaskId}&engine=veo&appId=${window.appId}`);
                             checkData = await checkRes.json();
                         } catch (err) {
                             continue;
@@ -2594,11 +3235,63 @@
             }
         };
 
+        // ==========================================
+        // SISTEM AUTO-UPDATE PWA / SERVICE WORKER
+        // ==========================================
         if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.protocol === 'http:')) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('service-worker.js')
-                    .then(reg => console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope))
+                    .then(reg => {
+                        console.log('PWA: Service Worker berhasil didaftarkan.', reg.scope);
+                        
+                        // 1. Cek update secara berkala setiap 1 jam di background
+                        setInterval(() => {
+                            reg.update();
+                        }, 1000 * 60 * 60);
+
+                        // 2. Deteksi jika ada versi baru yang masuk
+                        reg.onupdatefound = () => {
+                            const installingWorker = reg.installing;
+                            if (installingWorker == null) return;
+
+                            installingWorker.onstatechange = () => {
+                                if (installingWorker.state === 'installed') {
+                                    if (navigator.serviceWorker.controller) {
+                                        // Versi baru ditemukan dan sudah siap diunduh!
+                                        console.log('PWA: Versi baru tersedia!');
+                                        
+                                        // Munculkan notifikasi ke pengguna lalu auto-reload
+                                        if (window.showToast) {
+                                            window.showToast("Menerapkan pembaruan aplikasi...");
+                                        }
+                                        
+                                        // Paksa update ke versi baru
+                                        if (installingWorker.postMessage) {
+                                            installingWorker.postMessage({ type: 'SKIP_WAITING' });
+                                        }
+
+                                        // Reload halaman setelah 1.5 detik
+                                        setTimeout(() => {
+                                            window.location.reload(true);
+                                        }, 1500);
+                                        
+                                    } else {
+                                        console.log('PWA: Aplikasi siap digunakan offline.');
+                                    }
+                                }
+                            };
+                        };
+                    })
                     .catch(err => console.warn('PWA: Service Worker gagal didaftarkan (Abaikan jika di preview).', err.message));
+
+                // Pastikan halaman di-reload saat Service Worker baru mengambil alih
+                let refreshing = false;
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    if (!refreshing) {
+                        window.location.reload(true);
+                        refreshing = true;
+                    }
+                });
             });
         } else {
             console.log('PWA: Pendaftaran Service Worker dilewati di environment preview/lokal ini.');
