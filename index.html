@@ -1169,7 +1169,8 @@
         };
         
         let app, auth, db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
+        // PERBAIKAN: Gunakan ID statis agar selalu terhubung ke jalur database yang sama dengan Backend & Admin
+        const appId = '1:290208256362:web:b5022be8bd57311f9cd513'; 
         
         // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API Generate & Redeem
         window.appId = appId;
