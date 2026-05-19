@@ -1213,13 +1213,21 @@
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
+                            window.currentUserCredits = 0;
                         } else {
+                            // PERBAIKAN: Langsung ambil data kredit dari server jika user sudah pernah login sebelumnya
+                            window.currentUserCredits = docSnap.data().credits || 0;
+                            
                             await setDoc(userRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
                                 name: user.displayName || docSnap.data().name || 'Google User',
                                 isAnon: false
                             }, { merge: true });
                         }
+                        
+                        // PERBAIKAN: Paksa render ulang UI seketika dengan jumlah kredit dari server
+                        window.updateCreditUI(window.currentUserCredits);
+                        console.log(`✅ [Ailabs] Auth Sukses. UID: ${user.uid} | AppID: ${appId} | Kredit Asli: ${window.currentUserCredits}`);
                     } catch (err) { console.error("Gagal init db:", err); }
 
                     if (creditUnsubscribe) creditUnsubscribe();
