@@ -312,7 +312,10 @@
 
     <script>
         let currentAdminSessionCode = '';
-        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513';
+        
+        // --- PERBAIKAN DI SINI ---
+        // Kita KUNCI appId secara statis agar 100% sama dengan aplikasi utama!
+        const appId = '1:290208256362:web:b5022be8bd57311f9cd513';
 
         // Fungsi Animasi Loading Khusus dengan Custom Logo
         function getLoadingHTML(colSpan) {
