@@ -1169,8 +1169,8 @@
         };
         
         let app, auth, db;
-        // PERBAIKAN: Kunci appId dengan ID Firebase langsung agar selalu sinkron dengan Admin di Github!
-        const appId = '1:290208256362:web:b5022be8bd57311f9cd513'; 
+        // Paksa aplikasi utama memakai appId yang sama dengan Admin
+        const appId = "1:290208256362:web:b5022be8bd57311f9cd513"; 
         
         // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API Generate & Redeem
         window.appId = appId;
