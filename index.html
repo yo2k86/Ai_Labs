@@ -1181,7 +1181,9 @@
         };
         
         let app, auth, db;
-        const appId = typeof __app_id !== 'undefined' ? __app_id : '1:290208256362:web:b5022be8bd57311f9cd513'; 
+        
+        // PERBAIKAN PENTING: Kunci (Hardcode) AppId ke ID aslimu agar tidak terjadi "Split Database" antara Canvas, Github, dan Backend Vercel
+        const appId = '1:290208256362:web:b5022be8bd57311f9cd513'; 
         
         // PERBAIKAN: Ekspos appId ke window agar bisa dibaca saat pemanggilan API Generate & Redeem
         window.appId = appId;
