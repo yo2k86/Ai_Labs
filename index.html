@@ -1203,81 +1203,36 @@
                     
                     if (window.updateAuthUI) window.updateAuthUI(true, photo, false, user.displayName, user.email);
 
-                    const userProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-                    const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
-                    const rootUserRef = doc(db, 'users', user.uid);
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    const mainUserRef = doc(db, 'artifacts', appId, 'users', user.uid);
                     
-                    // Frontend HANYA inisialisasi profile/data agar tidak menimpa saldo dari backend (mencegah overwrite ke 0)
                     try {
-                        const docSnap = await getDoc(userProfileRef);
+                        const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
-                            await setDoc(userProfileRef, {
+                            await setDoc(userRef, {
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
+                            await setDoc(mainUserRef, { credits: 0 }, { merge: true });
                         } else {
-                            await setDoc(userProfileRef, {
+                            await setDoc(userRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
-                                name: user.displayName || docSnap.data().name || 'Google User'
+                                name: user.displayName || docSnap.data().name || 'Google User',
+                                isAnon: false
                             }, { merge: true });
                         }
                     } catch (err) { console.error("Gagal init db:", err); }
 
                     if (creditUnsubscribe) creditUnsubscribe();
-                    
-                    let valProfile = 0, valDoc = 0, valRoot = 0;
-                    let activeWallet = null;
-
-                    const syncAllCredits = () => {
-                        // Kunci wallet yang benar dari 3 jalur yang mungkin digunakan API Vercel
-                        if (!activeWallet) {
-                            if (valRoot > 0) activeWallet = 'root';
-                            else if (valDoc > 0) activeWallet = 'doc';
-                            else if (valProfile > 0) activeWallet = 'profile';
-                        }
-                        
-                        let total = 0;
-                        if (activeWallet === 'root') total = valRoot;
-                        else if (activeWallet === 'doc') total = valDoc;
-                        else if (activeWallet === 'profile') total = valProfile;
-                        else total = Math.max(valProfile, valDoc, valRoot); // Jika semua 0, cari yang terbesar
-
-                        window.currentUserCredits = total;
-                        window.updateCreditUI(total);
-                    };
-
-                    const extractCredit = (snap) => {
-                        if (!snap.exists()) return 0;
-                        const d = snap.data();
-                        const c = d.credits !== undefined ? d.credits : d.credit;
-                        return parseInt(c) || 0;
-                    };
-
-                    let unsubProfile = null, unsubDoc = null, unsubRoot = null;
-
                     try {
-                        unsubProfile = onSnapshot(userProfileRef, (snap) => {
-                            valProfile = extractCredit(snap); syncAllCredits();
-                        });
+                        // SINKRONISASI KREDIT OTOMATIS: Angka ini akan otomatis berkurang saat backend Vercel memotong kredit
+                        creditUnsubscribe = onSnapshot(mainUserRef, (snapshot) => {
+                            if (snapshot.exists() && snapshot.data().credits !== undefined) {
+                                window.currentUserCredits = snapshot.data().credits;
+                                window.updateCreditUI(window.currentUserCredits);
+                            }
+                        }, (error) => { console.error("Error Snapshot:", error.message); });
                     } catch(e) {}
-
-                    try {
-                        unsubDoc = onSnapshot(userDocRef, (snap) => {
-                            valDoc = extractCredit(snap); syncAllCredits();
-                        });
-                    } catch(e) {}
-
-                    try {
-                        unsubRoot = onSnapshot(rootUserRef, (snap) => {
-                            valRoot = extractCredit(snap); syncAllCredits();
-                        });
-                    } catch(e) {}
-
-                    creditUnsubscribe = () => {
-                        if (unsubProfile) unsubProfile();
-                        if (unsubDoc) unsubDoc();
-                        if (unsubRoot) unsubRoot();
-                    };
                     
                     if (isInitialAuthCheck) {
                         showView('view-landing');
