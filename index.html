@@ -1178,7 +1178,10 @@
         
         window.currentUserCredits = 0;
         window.currentUserId = null;
-        let creditUnsubscribe = null;
+        let creditUnsubscribeProfile = null;
+        let creditUnsubscribeMain = null;
+        window.profileCredits = 0;
+        window.mainCredits = 0;
 
         window.updateAuthUI(false); 
 
@@ -1212,8 +1215,7 @@
                             await setDoc(userRef, {
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
-                            });
-                            await setDoc(mainUserRef, { credits: 0 }, { merge: true });
+                            }, { merge: true });
                         } else {
                             await setDoc(userRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
@@ -1223,16 +1225,28 @@
                         }
                     } catch (err) { console.error("Gagal init db:", err); }
 
-                    if (creditUnsubscribe) creditUnsubscribe();
+                    if (creditUnsubscribeProfile) creditUnsubscribeProfile();
+                    if (creditUnsubscribeMain) creditUnsubscribeMain();
+                    
                     try {
-                        // SINKRONISASI KREDIT OTOMATIS: Angka ini akan otomatis berkurang saat backend Vercel memotong kredit
-                        creditUnsubscribe = onSnapshot(mainUserRef, (snapshot) => {
-                            if (snapshot.exists() && snapshot.data().credits !== undefined) {
-                                window.currentUserCredits = snapshot.data().credits;
+                        // SINKRONISASI KREDIT GANDA: Melacak 2 jalur sekaligus (Profil & Utama).
+                        // Mengamankan saldo tidak peduli jalur mana yang ditembak oleh Vercel Backend.
+                        creditUnsubscribeProfile = onSnapshot(userRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                window.profileCredits = snapshot.data().credits || 0;
+                                window.currentUserCredits = Math.max(window.profileCredits, window.mainCredits);
                                 window.updateCreditUI(window.currentUserCredits);
                             }
-                        }, (error) => { console.error("Error Snapshot:", error.message); });
-                    } catch(e) {}
+                        });
+
+                        creditUnsubscribeMain = onSnapshot(mainUserRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                window.mainCredits = snapshot.data().credits || 0;
+                                window.currentUserCredits = Math.max(window.profileCredits, window.mainCredits);
+                                window.updateCreditUI(window.currentUserCredits);
+                            }
+                        });
+                    } catch(e) { console.error("Error Snapshot:", e); }
                     
                     if (isInitialAuthCheck) {
                         showView('view-landing');
@@ -1240,7 +1254,9 @@
                     isInitialAuthCheck = false;
                 } else {
                     window.currentUserId = null; window.currentUserCredits = 0;
-                    if (creditUnsubscribe) { creditUnsubscribe(); creditUnsubscribe = null; }
+                    window.profileCredits = 0; window.mainCredits = 0;
+                    if (creditUnsubscribeProfile) { creditUnsubscribeProfile(); creditUnsubscribeProfile = null; }
+                    if (creditUnsubscribeMain) { creditUnsubscribeMain(); creditUnsubscribeMain = null; }
                     if (window.updateAuthUI) window.updateAuthUI(false);
                     
                     if (isInitialAuthCheck) {
