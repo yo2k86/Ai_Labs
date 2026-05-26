@@ -1180,8 +1180,10 @@
         window.currentUserId = null;
         let creditUnsubscribeProfile = null;
         let creditUnsubscribeMain = null;
+        let creditUnsubscribeRoot = null;
         window.profileCredits = 0;
         window.mainCredits = 0;
+        window.rootCredits = 0;
 
         window.updateAuthUI(false); 
 
@@ -1208,6 +1210,7 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     const mainUserRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                    const rootUserRef = doc(db, 'users', user.uid);
                     
                     try {
                         const docSnap = await getDoc(userRef);
@@ -1227,23 +1230,40 @@
 
                     if (creditUnsubscribeProfile) creditUnsubscribeProfile();
                     if (creditUnsubscribeMain) creditUnsubscribeMain();
+                    if (creditUnsubscribeRoot) creditUnsubscribeRoot();
                     
+                    const updateCreditsCalc = () => {
+                        window.currentUserCredits = Math.max(
+                            Number(window.profileCredits) || 0, 
+                            Number(window.mainCredits) || 0,
+                            Number(window.rootCredits) || 0
+                        );
+                        window.updateCreditUI(window.currentUserCredits);
+                    };
+
                     try {
-                        // SINKRONISASI KREDIT GANDA: Melacak 2 jalur sekaligus (Profil & Utama).
-                        // Mengamankan saldo tidak peduli jalur mana yang ditembak oleh Vercel Backend.
+                        // SINKRONISASI KREDIT: Melacak multi-jalur untuk memastikan sinkron dengan admin panel.
                         creditUnsubscribeProfile = onSnapshot(userRef, (snapshot) => {
                             if (snapshot.exists()) {
-                                window.profileCredits = snapshot.data().credits || 0;
-                                window.currentUserCredits = Math.max(window.profileCredits, window.mainCredits);
-                                window.updateCreditUI(window.currentUserCredits);
+                                const data = snapshot.data();
+                                window.profileCredits = data.credits !== undefined ? data.credits : (data.credit || 0);
+                                updateCreditsCalc();
                             }
                         });
 
                         creditUnsubscribeMain = onSnapshot(mainUserRef, (snapshot) => {
                             if (snapshot.exists()) {
-                                window.mainCredits = snapshot.data().credits || 0;
-                                window.currentUserCredits = Math.max(window.profileCredits, window.mainCredits);
-                                window.updateCreditUI(window.currentUserCredits);
+                                const data = snapshot.data();
+                                window.mainCredits = data.credits !== undefined ? data.credits : (data.credit || 0);
+                                updateCreditsCalc();
+                            }
+                        });
+
+                        creditUnsubscribeRoot = onSnapshot(rootUserRef, (snapshot) => {
+                            if (snapshot.exists()) {
+                                const data = snapshot.data();
+                                window.rootCredits = data.credits !== undefined ? data.credits : (data.credit || 0);
+                                updateCreditsCalc();
                             }
                         });
                     } catch(e) { console.error("Error Snapshot:", e); }
@@ -1254,9 +1274,10 @@
                     isInitialAuthCheck = false;
                 } else {
                     window.currentUserId = null; window.currentUserCredits = 0;
-                    window.profileCredits = 0; window.mainCredits = 0;
+                    window.profileCredits = 0; window.mainCredits = 0; window.rootCredits = 0;
                     if (creditUnsubscribeProfile) { creditUnsubscribeProfile(); creditUnsubscribeProfile = null; }
                     if (creditUnsubscribeMain) { creditUnsubscribeMain(); creditUnsubscribeMain = null; }
+                    if (creditUnsubscribeRoot) { creditUnsubscribeRoot(); creditUnsubscribeRoot = null; }
                     if (window.updateAuthUI) window.updateAuthUI(false);
                     
                     if (isInitialAuthCheck) {
