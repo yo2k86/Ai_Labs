@@ -1203,23 +1203,15 @@
                     
                     if (window.updateAuthUI) window.updateAuthUI(true, photo, false, user.displayName, user.email);
 
-                    // PERBAIKAN: Arahkan ke document user langsung agar sinkron dengan Super Admin / Backend
-                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    const rootUserRef = doc(db, 'users', user.uid); // Tambahan untuk kompatibilitas backend eksternal (Vercel)
                     
                     try {
                         const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
-                            // Cek old path untuk migrasi kredit jika sebelumnya tersimpan di profile/data
-                            let oldCredits = 0;
-                            try {
-                                const oldRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-                                const oldSnap = await getDoc(oldRef);
-                                if (oldSnap.exists()) oldCredits = oldSnap.data().credits || 0;
-                            } catch(e) {}
-
                             await setDoc(userRef, {
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
-                                isAnon: false, credits: oldCredits, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
+                                isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
                         } else {
                             await setDoc(userRef, {
@@ -1230,16 +1222,55 @@
                         }
                     } catch (err) { console.error("Gagal init db:", err); }
 
-                    if (creditUnsubscribe) creditUnsubscribe();
                     try {
-                        // SINKRONISASI KREDIT OTOMATIS: Angka ini akan otomatis berkurang saat backend Vercel memotong kredit
-                        creditUnsubscribe = onSnapshot(userRef, (snapshot) => {
-                            if (snapshot.exists()) {
-                                window.currentUserCredits = snapshot.data().credits || 0;
-                                window.updateCreditUI(window.currentUserCredits);
-                            }
-                        }, (error) => { console.error("Error Snapshot:", error.message); });
+                        const rootSnap = await getDoc(rootUserRef);
+                        if (!rootSnap.exists()) {
+                            await setDoc(rootUserRef, {
+                                uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
+                                isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
+                            });
+                        } else {
+                            await setDoc(rootUserRef, {
+                                email: user.email || rootSnap.data().email || 'Tidak ada email',
+                                name: user.displayName || rootSnap.data().name || 'Google User',
+                                isAnon: false
+                            }, { merge: true });
+                        }
+                    } catch (err) { console.error("Gagal init db root:", err); }
+
+                    if (creditUnsubscribe) creditUnsubscribe();
+                    
+                    let canvasUnsub = null;
+                    let rootUnsub = null;
+                    let activeCollection = null;
+
+                    const handleCreditUpdate = (source, credits) => {
+                        // Abaikan update 0 jika source lain memiliki nilai (mencegah saling timpa 0)
+                        if (activeCollection && activeCollection !== source && credits === 0) return;
+                        if (credits > 0) activeCollection = source; 
+                        
+                        window.currentUserCredits = credits;
+                        window.updateCreditUI(credits);
+                    };
+
+                    try {
+                        // SINKRONISASI KREDIT OTOMATIS DARI CANVAS
+                        canvasUnsub = onSnapshot(userRef, (snapshot) => {
+                            if (snapshot.exists()) handleCreditUpdate('canvas', snapshot.data().credits || 0);
+                        }, (error) => { console.error("Error Snapshot Canvas:", error.message); });
                     } catch(e) {}
+
+                    try {
+                        // SINKRONISASI KREDIT DARI ROOT USERS (Vercel Backend)
+                        rootUnsub = onSnapshot(rootUserRef, (snapshot) => {
+                            if (snapshot.exists()) handleCreditUpdate('root', snapshot.data().credits || 0);
+                        }, (error) => { console.error("Error Snapshot Root:", error.message); });
+                    } catch(e) {}
+
+                    creditUnsubscribe = () => {
+                        if (canvasUnsub) canvasUnsub();
+                        if (rootUnsub) rootUnsub();
+                    };
                     
                     if (isInitialAuthCheck) {
                         showView('view-landing');
