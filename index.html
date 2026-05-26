@@ -1203,73 +1203,77 @@
                     
                     if (window.updateAuthUI) window.updateAuthUI(true, photo, false, user.displayName, user.email);
 
-                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
-                    const rootUserRef = doc(db, 'users', user.uid); // Tambahan untuk kompatibilitas backend eksternal (Vercel)
+                    const userProfileRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    const userDocRef = doc(db, 'artifacts', appId, 'users', user.uid);
+                    const rootUserRef = doc(db, 'users', user.uid);
                     
+                    // Frontend HANYA inisialisasi profile/data agar tidak menimpa saldo dari backend (mencegah overwrite ke 0)
                     try {
-                        const docSnap = await getDoc(userRef);
+                        const docSnap = await getDoc(userProfileRef);
                         if (!docSnap.exists()) {
-                            await setDoc(userRef, {
+                            await setDoc(userProfileRef, {
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
                         } else {
-                            await setDoc(userRef, {
+                            await setDoc(userProfileRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
-                                name: user.displayName || docSnap.data().name || 'Google User',
-                                isAnon: false
+                                name: user.displayName || docSnap.data().name || 'Google User'
                             }, { merge: true });
                         }
                     } catch (err) { console.error("Gagal init db:", err); }
 
-                    try {
-                        const rootSnap = await getDoc(rootUserRef);
-                        if (!rootSnap.exists()) {
-                            await setDoc(rootUserRef, {
-                                uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
-                                isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
-                            });
-                        } else {
-                            await setDoc(rootUserRef, {
-                                email: user.email || rootSnap.data().email || 'Tidak ada email',
-                                name: user.displayName || rootSnap.data().name || 'Google User',
-                                isAnon: false
-                            }, { merge: true });
-                        }
-                    } catch (err) { console.error("Gagal init db root:", err); }
-
                     if (creditUnsubscribe) creditUnsubscribe();
                     
-                    let canvasUnsub = null;
-                    let rootUnsub = null;
-                    let activeCollection = null;
+                    let valProfile = 0, valDoc = 0, valRoot = 0;
+                    let activeWallet = null;
 
-                    const handleCreditUpdate = (source, credits) => {
-                        // Abaikan update 0 jika source lain memiliki nilai (mencegah saling timpa 0)
-                        if (activeCollection && activeCollection !== source && credits === 0) return;
-                        if (credits > 0) activeCollection = source; 
+                    const syncAllCredits = () => {
+                        let total = 0;
+                        if (valProfile > 0) activeWallet = 'profile';
+                        else if (valDoc > 0) activeWallet = 'doc';
+                        else if (valRoot > 0) activeWallet = 'root';
+
+                        if (activeWallet === 'profile') total = valProfile;
+                        else if (activeWallet === 'doc') total = valDoc;
+                        else if (activeWallet === 'root') total = valRoot;
                         
-                        window.currentUserCredits = credits;
-                        window.updateCreditUI(credits);
+                        if (valProfile === 0 && valDoc === 0 && valRoot === 0) total = 0;
+
+                        window.currentUserCredits = total;
+                        window.updateCreditUI(total);
                     };
 
+                    let unsubProfile = null, unsubDoc = null, unsubRoot = null;
+
                     try {
-                        // SINKRONISASI KREDIT OTOMATIS DARI CANVAS
-                        canvasUnsub = onSnapshot(userRef, (snapshot) => {
-                            if (snapshot.exists()) handleCreditUpdate('canvas', snapshot.data().credits || 0);
-                        }, (error) => { console.error("Error Snapshot Canvas:", error.message); });
+                        unsubProfile = onSnapshot(userProfileRef, (snap) => {
+                            if (snap.exists() && snap.data().credits !== undefined) {
+                                valProfile = parseInt(snap.data().credits) || 0; syncAllCredits();
+                            }
+                        });
                     } catch(e) {}
 
                     try {
-                        // SINKRONISASI KREDIT DARI ROOT USERS (Vercel Backend)
-                        rootUnsub = onSnapshot(rootUserRef, (snapshot) => {
-                            if (snapshot.exists()) handleCreditUpdate('root', snapshot.data().credits || 0);
-                        }, (error) => { console.error("Error Snapshot Root:", error.message); });
+                        unsubDoc = onSnapshot(userDocRef, (snap) => {
+                            if (snap.exists() && snap.data().credits !== undefined) {
+                                valDoc = parseInt(snap.data().credits) || 0; syncAllCredits();
+                            }
+                        });
+                    } catch(e) {}
+
+                    try {
+                        unsubRoot = onSnapshot(rootUserRef, (snap) => {
+                            if (snap.exists() && snap.data().credits !== undefined) {
+                                valRoot = parseInt(snap.data().credits) || 0; syncAllCredits();
+                            }
+                        });
                     } catch(e) {}
 
                     creditUnsubscribe = () => {
-                        if (canvasUnsub) canvasUnsub();
-                        if (rootUnsub) rootUnsub();
+                        if (unsubProfile) unsubProfile();
+                        if (unsubDoc) unsubDoc();
+                        if (unsubRoot) unsubRoot();
                     };
                     
                     if (isInitialAuthCheck) {
