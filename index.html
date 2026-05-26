@@ -874,7 +874,7 @@
                 <button onclick="closeNewProjectMenu()" class="text-gray-400 hover:text-white bg-white/10 w-8 h-8 rounded-full flex items-center justify-center transition"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="flex flex-col gap-3 overflow-y-auto max-h-[55vh] md:max-h-[65vh] custom-scrollbar pr-2 pb-2">
+            <div class="flex flex-col gap-3">
                 <button onclick="goToEditor(); closeNewProjectMenu()" class="flex items-center gap-4 bg-emerald-900/20 hover:bg-emerald-800/40 border border-emerald-500/30 p-4 rounded-xl transition text-left group">
                     <div class="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(16,185,129,0.5)]">
                         <i class="fa-solid fa-plus text-emerald-400 text-xl"></i>
@@ -902,16 +902,6 @@
                     <div>
                         <h4 class="text-white font-bold text-sm md:text-base">Galeri Prompt</h4>
                         <p class="text-[10px] md:text-xs text-gray-400">Cari inspirasi dari prompt komunitas</p>
-                    </div>
-                </button>
-
-                <button onclick="openAilabsBotGuideModal(); closeNewProjectMenu()" class="flex items-center gap-4 bg-sky-900/20 hover:bg-sky-800/40 border border-sky-500/30 p-4 rounded-xl transition text-left group">
-                    <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition group-hover:shadow-[0_0_15px_rgba(14,165,233,0.5)]">
-                        <i class="fa-brands fa-telegram text-sky-400 text-xl"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-white font-bold text-sm md:text-base">Ailabs Bot</h4>
-                        <p class="text-[10px] md:text-xs text-gray-400">Generate Video Motion Control Free</p>
                     </div>
                 </button>
             </div>
@@ -996,61 +986,6 @@
         </div>
     </div>
 
-    <!-- Modal Ailabs Bot Guide -->
-    <div id="ailabs-bot-guide-modal" class="hidden fixed inset-0 z-[250] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 transition-opacity duration-300" onclick="closeAilabsBotGuideModal(event)">
-        <div class="glass-card w-full max-w-md p-6 md:p-8 rounded-2xl relative max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(14,165,233,0.15)] border-t border-sky-500/30" onclick="event.stopPropagation()">
-            <div class="flex justify-between items-center mb-6 sticky top-0 bg-[#1e1e1e]/95 backdrop-blur-md z-10 py-3 border-b border-white/10 -mt-6 -mx-6 px-6 md:-mx-8 md:px-8">
-                <h3 class="text-xl font-bold text-white flex items-center gap-3">
-                    <i class="fa-brands fa-telegram text-sky-400 text-3xl"></i> Panduan Bot
-                </h3>
-                <button onclick="closeAilabsBotGuideModal()" class="text-gray-400 hover:text-white transition w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center">
-                    <i class="fas fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <div class="space-y-4 text-xs sm:text-sm text-gray-300 mt-4">
-                <p class="text-center text-gray-400 mb-4 font-medium">Ikuti panduan berikut untuk menggunakan Ailabs Bot:</p>
-                
-                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
-                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">1</div>
-                    <p>Daftarkan alamat Gmail Anda ke admin untuk mendapatkan aksesnya.</p>
-                </div>
-                
-                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
-                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">2</div>
-                    <p>Buat API Key dengan cara mendaftar di situs <a href="https://www.magnific.com/" target="_blank" class="text-sky-400 hover:text-white underline transition-colors font-medium">www.magnific.com</a>.</p>
-                </div>
-                
-                <div class="flex items-start gap-3 bg-black/40 p-3 rounded-xl border border-white/5 hover:border-sky-500/30 transition">
-                    <div class="bg-sky-900/30 text-sky-400 w-6 h-6 rounded-full flex items-center justify-center font-bold shrink-0 mt-0.5">3</div>
-                    <div class="space-y-2 w-full">
-                        <p>Masuk ke Ailabs Bot, ketik <span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded">/start</span>.</p>
-                        <p>Selanjutnya Anda harus memasukkan alamat Gmail yang sudah didaftarkan: <br><span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded inline-block mt-1 break-all">/login (gmail anda)</span></p>
-                        <p>Lalu masukkan API Key yang sudah diambil dari Magnific dengan cara: <br><span class="text-emerald-400 font-mono bg-black/60 px-1.5 py-0.5 rounded inline-block mt-1 break-all">/setkey (apikey anda)</span></p>
-                        <p class="text-sky-300 font-medium mt-2">Enjoy, silahkan dipakai secara bijak!</p>
-                    </div>
-                </div>
-
-                <div class="bg-yellow-900/20 border border-yellow-500/30 p-4 rounded-xl mt-6 relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-1 h-full bg-yellow-500"></div>
-                    <p class="text-yellow-400 font-bold mb-2 flex items-center gap-2"><i class="fas fa-exclamation-triangle"></i> NOTE:</p>
-                    <p class="text-[10px] sm:text-xs text-yellow-100/90 leading-relaxed text-justify">
-                        Kalau jatah apikey habis, clear browser, buat apikey baru lagi dengan alamat gmail yang baru.. dan jangan lupa hapus apikey yang sudah disave di telegram untuk mengganti dengan yang baru.
-                    </p>
-                    <div class="mt-4 pt-3 border-t border-yellow-500/20 text-right">
-                        <p class="text-[10px] sm:text-xs font-bold italic text-yellow-500/80">~ Salam dari saya Bang Pro</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-8">
-                <button onclick="window.open('https://t.me/Ailabs_Gen_bot', '_blank'); closeAilabsBotGuideModal()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-3.5 rounded-xl shadow-[0_0_20px_rgba(14,165,233,0.3)] transition transform hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 border border-sky-400">
-                    <i class="fa-brands fa-telegram text-xl"></i> Buka Telegram Sekarang
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Modals Prompts Admin -->
     <div id="admin-login-modal" class="hidden fixed inset-0 z-[105] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="glass-card w-full max-w-sm p-6 rounded-2xl text-center">
@@ -1127,7 +1062,7 @@
             <button onclick="closeManageAdminModal()" class="absolute top-4 right-4 text-white text-xl z-10"><i class="fas fa-times"></i></button>
             <div class="p-4 border-b border-white/10 flex gap-2">
                 <button id="tab-btn-profiles" onclick="switchManageTab('profiles')" class="px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition">Profil Admin</button>
-                <!-- Tab Kelola User / Topup di Super Admin DIHAPUS DEMI KEAMANAN -->
+                <button id="tab-btn-tokens" onclick="switchManageTab('tokens')" class="px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white transition">Kelola User (Token)</button>
             </div>
             
             <div id="tab-content-profiles" class="flex-1 overflow-y-auto p-4 hidden">
@@ -1142,7 +1077,9 @@
                  <button id="admin-save-btn" onclick="saveAdmin()" class="bg-blue-600 text-white px-4 py-2 rounded mb-6">Simpan Baru</button>
                  <div id="manage-admin-list" class="w-full space-y-2"></div>
             </div>
-            <!-- Dihapus tab-content-tokens karena fitur topup dipindah ke Spreadsheet -->
+            <div id="tab-content-tokens" class="flex-1 overflow-y-auto p-4 flex flex-col hidden">
+                 <div id="admin-users-list" class="w-full space-y-2"></div>
+            </div>
         </div>
     </div>
 
@@ -1178,9 +1115,6 @@
         window.currentUserId = null;
         let creditUnsubscribe = null;
 
-        // URL GOOGLE SPREADSHEET UNTUK SINKRONISASI KREDIT
-        const USER_SHEET_URL = "https://script.google.com/macros/s/AKfycbybZI95NQVebjz2xm_ddjulAOX4yEvn6tASoH_cO19Qk_E3ht574NImSYV5cR6aKvG8qg/exec";
-
         window.updateAuthUI(false); 
 
         if (firebaseConfig.apiKey !== "GANTI_DENGAN_API_KEY_KAMU" && firebaseConfig.apiKey !== "") {
@@ -1206,7 +1140,6 @@
 
                     const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
                     
-                    let currentCreditInDb = 0;
                     try {
                         const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
@@ -1214,48 +1147,13 @@
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
-                            currentCreditInDb = 0;
                         } else {
-                            currentCreditInDb = docSnap.data().credits || 0;
                             await setDoc(userRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
                                 name: user.displayName || docSnap.data().name || 'Google User',
                                 isAnon: false
                             }, { merge: true });
                         }
-
-                        // === PROSES SINKRONISASI KREDIT KE GOOGLE SHEETS ===
-                        try {
-                            const syncRes = await fetch(USER_SHEET_URL, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                body: JSON.stringify({
-                                    action: 'syncUser',
-                                    uid: user.uid,
-                                    email: user.email || 'Tidak ada email',
-                                    name: user.displayName || 'Google User',
-                                    currentCredits: currentCreditInDb
-                                })
-                            });
-                            
-                            const syncData = await syncRes.json();
-                            if (syncData.success && syncData.pendingCredit > 0) {
-                                currentCreditInDb += syncData.pendingCredit;
-                                await setDoc(userRef, { credits: currentCreditInDb }, { merge: true });
-                                window.showToast(`Topup Berhasil! Ditambahkan ${syncData.pendingCredit} ⚡`);
-                                
-                                // Laporkan kembali ke Spreadsheet bahwa Topup sudah berhasil masuk Firebase
-                                await fetch(USER_SHEET_URL, {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                    body: JSON.stringify({ action: 'confirmTopup', uid: user.uid })
-                                });
-                            }
-                        } catch (err) {
-                            console.error("Gagal sinkronisasi dengan Spreadsheet Topup:", err);
-                        }
-                        // === END SINKRONISASI ===
-
                     } catch (err) { console.error("Gagal init db:", err); }
 
                     if (creditUnsubscribe) creditUnsubscribe();
@@ -1263,29 +1161,8 @@
                         // SINKRONISASI KREDIT OTOMATIS: Angka ini akan otomatis berkurang saat backend Vercel memotong kredit
                         creditUnsubscribe = onSnapshot(userRef, (snapshot) => {
                             if (snapshot.exists()) {
-                                const newCredits = snapshot.data().credits || 0;
-                                
-                                // Deteksi jika ada perubahan sisa kredit
-                                if (window.currentUserCredits !== newCredits && window.currentUserCredits !== undefined) {
-                                    window.currentUserCredits = newCredits;
-                                    window.updateCreditUI(window.currentUserCredits);
-                                    
-                                    // Update sisa kredit ke Spreadsheet (Real-time updateBalance)
-                                    if (window.currentUserId) {
-                                        fetch(USER_SHEET_URL, {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                                            body: JSON.stringify({ 
-                                                action: 'updateBalance', 
-                                                uid: window.currentUserId, 
-                                                currentCredits: newCredits 
-                                            })
-                                        }).catch(e => console.log(e));
-                                    }
-                                } else {
-                                    window.currentUserCredits = newCredits;
-                                    window.updateCreditUI(window.currentUserCredits);
-                                }
+                                window.currentUserCredits = snapshot.data().credits || 0;
+                                window.updateCreditUI(window.currentUserCredits);
                             }
                         }, (error) => { console.error("Error Snapshot:", error.message); });
                     } catch(e) {}
@@ -2787,14 +2664,61 @@
         let currentAdminSessionCode = ''; 
         
         window.switchManageTab = function(tabName) {
-            const tabP = document.getElementById('tab-content-profiles');
-            const btnP = document.getElementById('tab-btn-profiles');
+            const tabP = document.getElementById('tab-content-profiles'); const tabT = document.getElementById('tab-content-tokens');
+            const btnP = document.getElementById('tab-btn-profiles'); const btnT = document.getElementById('tab-btn-tokens');
 
             if (tabName === 'profiles') {
-                tabP.classList.remove('hidden'); tabP.classList.add('flex');
+                tabP.classList.remove('hidden'); tabP.classList.add('flex'); tabT.classList.add('hidden'); tabT.classList.remove('flex');
                 btnP.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition";
+                btnT.className = "px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white hover:bg-white/10 transition border border-transparent";
+            } else {
+                tabP.classList.add('hidden'); tabP.classList.remove('flex'); tabT.classList.remove('hidden'); tabT.classList.add('flex');
+                btnT.className = "px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm font-bold shadow-md transition border border-emerald-500/30";
+                btnP.className = "px-4 py-2 rounded-lg bg-white/5 text-gray-400 text-sm font-bold hover:text-white hover:bg-white/10 transition border border-transparent";
+                loadAllUsersForAdmin();
             }
-            // Tab token dan daftar seluruh user dihapus dari Super Admin untuk keamanan
+        }
+
+        window.loadAllUsersForAdmin = async function() {
+            const container = document.getElementById('admin-users-list'); if(!container) return;
+            container.innerHTML = '<div class="text-center py-10 text-gray-400 text-xs italic"><i class="fas fa-spinner fa-spin text-emerald-500 mb-2 text-lg block"></i> Mengambil data...</div>';
+            try {
+                // FIXED API ROUTE: /api/get_users
+                const res = await fetch('/api/get_users', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId }) });
+                if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+                const data = await res.json();
+                if(data.users && data.users.length > 0) {
+                    container.innerHTML = data.users.map(u => `
+                        <div class="flex justify-between items-center bg-white/5 hover:bg-white/10 p-3 rounded-lg border border-white/10 transition-colors group">
+                            <div class="flex flex-col overflow-hidden w-[45%]">
+                                <span class="text-xs font-bold ${u.isAnon ? 'text-gray-400' : 'text-white'} truncate">${u.name} ${u.isAnon ? '(Anon)' : ''}</span>
+                                <span class="text-[10px] text-emerald-500/80 font-mono truncate">${u.email}</span>
+                            </div>
+                            <div class="flex items-center gap-2 w-[55%] justify-end">
+                                <div class="bg-black/60 px-2 py-1 rounded text-center border border-white/5 min-w-[3.5rem]">
+                                    <span class="text-xs font-black ${u.credits > 0 ? 'text-yellow-400' : 'text-red-400'}">${u.credits}</span>
+                                </div>
+                                <input type="number" id="topup-val-${u.uid}" class="w-14 bg-black/80 border border-emerald-500/30 rounded px-2 py-1 text-xs text-white" placeholder="+Jml">
+                                <button onclick="topUpUser('${u.uid}')" class="bg-emerald-600/80 hover:bg-emerald-500 text-white text-xs px-2.5 py-1 rounded font-bold">SET</button>
+                            </div>
+                        </div>
+                    `).join('');
+                } else { container.innerHTML = '<div class="text-center py-10 text-gray-500 text-xs italic">Kosong.</div>'; }
+            } catch(e) { container.innerHTML = '<div class="text-center py-10 text-red-400 text-xs italic">Gagal load.</div>'; }
+        }
+
+        window.topUpUser = async function(uid) {
+            const input = document.getElementById(`topup-val-${uid}`); const amount = parseInt(input.value);
+            if (isNaN(amount)) return window.showCustomAlert("Masukkan angka yang benar.");
+            const btn = event.currentTarget; const originalText = btn.innerText; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+            try {
+                // FIXED API ROUTE: /api/topup
+                const res = await fetch('/api/topup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ adminCode: currentAdminSessionCode, appId: window.appId, targetUid: uid, amount: amount }) });
+                const data = await res.json();
+                if (data.success) { window.showToast("Sukses!"); input.value = ''; loadAllUsersForAdmin(); } 
+                else window.showCustomAlert(data.error);
+            } catch(e) { window.showCustomAlert("Error sistem."); }
+            btn.innerText = originalText; btn.disabled = false;
         }
 
         window.closeManageAdminAuth = function() {
@@ -2830,22 +2754,6 @@
         window.closeAdminHelpModal = function() {
             const modal = document.getElementById('admin-help-modal');
             if (modal) { modal.classList.add('opacity-0'); setTimeout(() => modal.classList.add('hidden'), 300); }
-        };
-
-        window.openAilabsBotGuideModal = function() {
-            const modal = document.getElementById('ailabs-bot-guide-modal');
-            if (modal) { 
-                modal.classList.remove('hidden'); 
-                setTimeout(() => modal.classList.remove('opacity-0'), 10); 
-            }
-        };
-
-        window.closeAilabsBotGuideModal = function(e) {
-            const modal = document.getElementById('ailabs-bot-guide-modal');
-            if (modal) { 
-                modal.classList.add('opacity-0'); 
-                setTimeout(() => modal.classList.add('hidden'), 300); 
-            }
         };
 
         document.addEventListener('click', function(e) {
