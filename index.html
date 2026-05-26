@@ -349,7 +349,7 @@
                     <div id="user-profile-dashboard" class="hidden items-center gap-1.5 cursor-pointer relative" onclick="toggleDropdown('dropdown-dashboard', event)">
                         <div id="credit-display-dashboard" class="hidden items-center gap-1 bg-yellow-500/10 border border-yellow-500/30 px-1.5 sm:px-2.5 py-0.5 rounded-full">
                             <i class="fas fa-bolt text-yellow-400 text-[8px] sm:text-[10px]"></i>
-                            <span id="credit-amount-dashboard" class="text-[10px] sm:text-xs font-bold text-yellow-100">0</span>
+                            <span id="credit-amount-dashboard" class="text-[10px] sm:text-xs font-bold text-yellow-100">--</span>
                         </div>
                         <img id="user-avatar-dashboard" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-gray-600">
                         
@@ -492,7 +492,7 @@
                     <div id="user-profile-editor" class="hidden items-center gap-1.5 cursor-pointer relative" onclick="toggleDropdown('dropdown-editor', event)">
                         <div id="credit-display-editor" class="hidden items-center gap-1 bg-yellow-500/10 border border-yellow-500/30 px-1.5 md:px-2.5 py-0.5 rounded-full">
                             <i class="fas fa-bolt text-yellow-400 text-[8px] md:text-[10px]"></i>
-                            <span id="credit-amount-editor" class="text-[10px] md:text-xs font-bold text-yellow-100">0</span>
+                            <span id="credit-amount-editor" class="text-[10px] md:text-xs font-bold text-yellow-100">--</span>
                         </div>
                         <img id="user-avatar-editor" referrerpolicy="no-referrer" src="https://ui-avatars.com/api/?name=User&background=333&color=fff" alt="Profile" class="w-6 h-6 md:w-9 md:h-9 rounded-full border border-gray-600">
 
@@ -1217,16 +1217,13 @@
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
                                 isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
-                            window.currentUserCredits = 0;
                         } else {
                             await setDoc(userRef, {
                                 email: user.email || docSnap.data().email || 'Tidak ada email',
                                 name: user.displayName || docSnap.data().name || 'Google User',
                                 isAnon: false
                             }, { merge: true });
-                            window.currentUserCredits = docSnap.data().credits || 0;
                         }
-                        window.updateCreditUI(window.currentUserCredits);
                     } catch (err) { console.error("Gagal init db:", err); }
 
                     if (creditUnsubscribe) creditUnsubscribe();
@@ -1237,7 +1234,10 @@
                                 window.currentUserCredits = snapshot.data().credits || 0;
                                 window.updateCreditUI(window.currentUserCredits);
                             }
-                        }, (error) => { console.error("Error Snapshot:", error.message); });
+                        }, (error) => { 
+                            console.error("Error Snapshot:", error.message); 
+                            window.updateCreditUI('Err');
+                        });
                     } catch(e) {}
                     
                     if (isInitialAuthCheck) {
