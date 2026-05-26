@@ -1229,44 +1229,47 @@
                     let activeWallet = null;
 
                     const syncAllCredits = () => {
-                        let total = 0;
-                        if (valProfile > 0) activeWallet = 'profile';
-                        else if (valDoc > 0) activeWallet = 'doc';
-                        else if (valRoot > 0) activeWallet = 'root';
-
-                        if (activeWallet === 'profile') total = valProfile;
-                        else if (activeWallet === 'doc') total = valDoc;
-                        else if (activeWallet === 'root') total = valRoot;
+                        // Kunci wallet yang benar dari 3 jalur yang mungkin digunakan API Vercel
+                        if (!activeWallet) {
+                            if (valRoot > 0) activeWallet = 'root';
+                            else if (valDoc > 0) activeWallet = 'doc';
+                            else if (valProfile > 0) activeWallet = 'profile';
+                        }
                         
-                        if (valProfile === 0 && valDoc === 0 && valRoot === 0) total = 0;
+                        let total = 0;
+                        if (activeWallet === 'root') total = valRoot;
+                        else if (activeWallet === 'doc') total = valDoc;
+                        else if (activeWallet === 'profile') total = valProfile;
+                        else total = Math.max(valProfile, valDoc, valRoot); // Jika semua 0, cari yang terbesar
 
                         window.currentUserCredits = total;
                         window.updateCreditUI(total);
+                    };
+
+                    const extractCredit = (snap) => {
+                        if (!snap.exists()) return 0;
+                        const d = snap.data();
+                        const c = d.credits !== undefined ? d.credits : d.credit;
+                        return parseInt(c) || 0;
                     };
 
                     let unsubProfile = null, unsubDoc = null, unsubRoot = null;
 
                     try {
                         unsubProfile = onSnapshot(userProfileRef, (snap) => {
-                            if (snap.exists() && snap.data().credits !== undefined) {
-                                valProfile = parseInt(snap.data().credits) || 0; syncAllCredits();
-                            }
+                            valProfile = extractCredit(snap); syncAllCredits();
                         });
                     } catch(e) {}
 
                     try {
                         unsubDoc = onSnapshot(userDocRef, (snap) => {
-                            if (snap.exists() && snap.data().credits !== undefined) {
-                                valDoc = parseInt(snap.data().credits) || 0; syncAllCredits();
-                            }
+                            valDoc = extractCredit(snap); syncAllCredits();
                         });
                     } catch(e) {}
 
                     try {
                         unsubRoot = onSnapshot(rootUserRef, (snap) => {
-                            if (snap.exists() && snap.data().credits !== undefined) {
-                                valRoot = parseInt(snap.data().credits) || 0; syncAllCredits();
-                            }
+                            valRoot = extractCredit(snap); syncAllCredits();
                         });
                     } catch(e) {}
 
