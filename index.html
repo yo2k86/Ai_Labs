@@ -1203,14 +1203,23 @@
                     
                     if (window.updateAuthUI) window.updateAuthUI(true, photo, false, user.displayName, user.email);
 
-                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                    // PERBAIKAN: Arahkan ke document user langsung agar sinkron dengan Super Admin / Backend
+                    const userRef = doc(db, 'artifacts', appId, 'users', user.uid);
                     
                     try {
                         const docSnap = await getDoc(userRef);
                         if (!docSnap.exists()) {
+                            // Cek old path untuk migrasi kredit jika sebelumnya tersimpan di profile/data
+                            let oldCredits = 0;
+                            try {
+                                const oldRef = doc(db, 'artifacts', appId, 'users', user.uid, 'profile', 'data');
+                                const oldSnap = await getDoc(oldRef);
+                                if (oldSnap.exists()) oldCredits = oldSnap.data().credits || 0;
+                            } catch(e) {}
+
                             await setDoc(userRef, {
                                 uid: user.uid, email: user.email || 'Tidak ada email', name: user.displayName || 'Google User',
-                                isAnon: false, credits: 0, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
+                                isAnon: false, credits: oldCredits, isPro: false, hasRedeemed: false, lastResetDate: new Date().toISOString()
                             });
                         } else {
                             await setDoc(userRef, {
