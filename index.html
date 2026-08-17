@@ -1,1405 +1,428 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ailabs - Advanced AI Solutions</title>
-    
-    <!-- PWA / Native App Meta Tags -->
-    <meta name="theme-color" content="#020202">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://i.ibb.co.com/FLfrC2X8/logo.jpg">
-    <link rel="manifest" href="manifest.json">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    
-    <!-- FontAwesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    
-    <!-- Tailwind CSS MUST be loaded before its config -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        display: ['Space Grotesk', 'sans-serif'],
-                        mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-                    },
-                    colors: {
-                        bg: '#020202', // Sedikit lebih gelap agar cahaya lebih menonjol
-                        surface: '#0a0a0a',
-                        brand: {
-                            light: '#ff4d4d',
-                            DEFAULT: '#ff1a1a', 
-                            dark: '#cc0000',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Halaman Tidak Ditemukan</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
         body {
-            background-color: #020202;
-            color: #ffffff;
-            overflow-x: hidden;
-            
-            /* Optimasi Native App */
-            -webkit-tap-highlight-color: transparent; /* Hilangkan kedip biru saat tombol ditekan */
-            -webkit-touch-callout: none; /* Hilangkan menu popup saat tahan lama di gambar */
-            user-select: none; /* Teks tidak bisa diblok sembarangan seperti aplikasi asli */
-            padding-top: env(safe-area-inset-top); /* Proteksi Poni/Notch HP */
-            padding-bottom: env(safe-area-inset-bottom);
-        }
-
-        /* Izinkan blok/copy teks HANYA untuk elemen input dan teks prompt */
-        .select-all, input, textarea {
-            user-select: text !important;
-            -webkit-user-select: text !important;
-        }
-
-        /* Ambient Glow & 3D Container */
-        #bot-3d-container {
-            position: absolute;
-            top: 50%;
-            left: 55%;
-            transform: translate(-50%, -50%);
-            width: 500px;
-            height: 600px;
-            z-index: 0; 
-            pointer-events: none; 
-        }
-        
-        #bot-3d-container::before {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 450px; height: 450px;
-            background: radial-gradient(circle, rgba(255, 26, 26, 0.3) 0%, transparent 60%);
-            filter: blur(50px);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        @media (max-width: 1024px) {
-            #bot-3d-container {
-                left: 50%;
-                transform: translate(-50%, -50%) scale(0.7);
-            }
-        }
-
-        @media (max-width: 768px) {
-            #bot-3d-container {
-                top: 40%;
-                transform: translate(-50%, -50%) scale(0.5);
-                opacity: 0.4; /* Sedikit transparan agar teks Home di HP tetap sangat jelas dibaca */
-            }
-        }
-
-        /* Sembunyikan scrollbar bawaan pada area scroll horizontal di HP */
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* PREMIUM GLASSMORPHISM & GLOSSY EFFECTS */
-        .glass-pill {
-            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.01) 100%);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Refleksi Atas */
-            border-left: 1px solid rgba(255, 255, 255, 0.1); /* Refleksi Kiri */
-            border-radius: 999px;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .bento-card {
-            background: linear-gradient(145deg, rgba(30,30,30,0.3) 0%, rgba(5,5,5,0.7) 100%);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-top: 1px solid rgba(255, 255, 255, 0.15); /* Refleksi kaca atas */
-            border-left: 1px solid rgba(255, 255, 255, 0.08); /* Refleksi kaca kiri */
-            border-radius: 1.5rem;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
+            margin: 0;
+            padding: 0;
+            background-color: #f78c3b; /* Warna latar belakang oranye seperti di gambar */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
             overflow: hidden;
-            box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255,255,255,0.08);
         }
 
-        /* Glossy Shine Hover Effect (Berkilau) */
-        .bento-card::after {
-            content: '';
+        .container {
+            position: relative;
+            width: 600px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .text-404 {
             position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            animation: none;
-            z-index: 10;
-            pointer-events: none;
-            transition: 0.5s;
-        }
-
-        .bento-card:hover {
-            border-color: rgba(255, 26, 26, 0.4);
-            border-top-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 45px rgba(255, 26, 26, 0.15), inset 0 1px 2px rgba(255,255,255,0.15);
-        }
-
-        .bento-card:hover::after {
-            animation: shine 1.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        @keyframes shine {
-            100% { left: 200%; }
-        }
-
-        /* Radial Glow di dalam card */
-        .bento-card::before {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: radial-gradient(circle, rgba(255, 26, 26, 0.15) 0%, transparent 40%);
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            pointer-events: none;
+            font-size: 300px;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.1); /* Warna transparan untuk teks di latar belakang */
             z-index: 0;
-        }
-        .bento-card:hover::before { opacity: 1; }
-        .bento-card > * { position: relative; z-index: 1; }
-
-        .text-glow {
-            text-shadow: 0 0 25px rgba(255, 26, 26, 0.8), 0 0 10px rgba(255, 255, 255, 0.3);
+            letter-spacing: -20px;
+            user-select: none;
         }
 
-        /* Glossy Button */
-        .btn-brand {
-            background: linear-gradient(135deg, #ff1a1a, #990000);
-            box-shadow: 0 4px 15px rgba(255, 26, 26, 0.4), inset 0 2px 2px rgba(255, 255, 255, 0.4), inset 0 -2px 5px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255, 150, 150, 0.3);
+        .characters {
             position: relative;
-            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            gap: 40px; /* Jarak antara dua karakter */
         }
-        .btn-brand::after {
-            content: '';
+
+        .character {
+            position: relative;
+        }
+
+        .body {
+            width: 100px;
+            height: 120px;
+            background-color: #c93a40; /* Merah */
+            border-radius: 50% 50% 40% 40%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .mask {
+            width: 70px;
+            height: 90px;
+            background-color: #1a2930; /* Hitam kebiruan */
+            border-radius: 35px;
             position: absolute;
-            top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg);
-            transition: 0.5s;
-        }
-        .btn-brand:hover {
-            box-shadow: 0 8px 30px rgba(255, 26, 26, 0.8), inset 0 2px 2px rgba(255, 255, 255, 0.5);
-            transform: scale(1.03);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-        .btn-brand:hover::after {
-            animation: shine 0.8s ease forwards;
+            top: -30px;
+            left: 15px;
+            z-index: 3;
         }
 
-        .badge-outline {
-            border: 1px solid rgba(255, 26, 26, 0.3);
-            background: linear-gradient(90deg, rgba(255, 26, 26, 0.1), rgba(255,255,255,0.02));
-            color: #ffb3b3;
-            backdrop-filter: blur(10px);
-            box-shadow: inset 0 1px 1px rgba(255,255,255,0.1);
+        .eye {
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 30px;
         }
 
-        /* Animations */
-        .animate-fade-in-up {
-            animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-            opacity: 0;
-            transform: translateY(30px);
+        .eye.left { left: 15px; }
+        .eye.right { right: 15px; }
+
+        .nose {
+            width: 15px;
+            height: 8px;
+            background-color: #eab08c; /* Warna kulit */
+            border-radius: 10px;
+            position: absolute;
+            top: 40px;
+            left: 27.5px;
+        }
+
+        .arm {
+            position: absolute;
+            background-color: #eab08c; /* Warna kulit */
+            width: 35px;
+            border-radius: 20px;
+            z-index: 1;
+            transform-origin: top center;
+        }
+
+        .char-left .arm-left {
+            height: 100px;
+            top: 30px;
+            left: -15px;
+            transform: rotate(30deg);
+            animation: swingLeft 2s ease-in-out infinite alternate;
+        }
+
+        .char-left .arm-right {
+            height: 100px;
+            top: 30px;
+            right: -15px;
+            transform: rotate(-10deg);
+        }
+
+        .char-right .arm-left {
+            height: 100px;
+            top: 30px;
+            left: -15px;
+            transform: rotate(10deg);
+        }
+
+        .char-right .arm-right {
+            height: 100px;
+            top: 30px;
+            right: -15px;
+            transform: rotate(-80deg);
+            animation: swingRight 2s ease-in-out infinite alternate;
+        }
+
+        .bat {
+            position: absolute;
+            width: 15px;
+            height: 80px;
+            background-color: #5d1b1b; /* Coklat tua */
+            border-radius: 10px;
+        }
+
+        .char-left .bat {
+            bottom: -60px;
+            left: 5px;
+            transform: rotate(-30deg);
+        }
+
+        .char-right .bat {
+            bottom: -60px;
+            left: 10px;
+            transform: rotate(10deg);
+        }
+
+        .leg {
+            position: absolute;
+            background-color: #eab08c; /* Warna kulit */
+            width: 20px;
+            height: 40px;
+            bottom: -30px;
+            z-index: 1;
+        }
+
+        .leg.left { left: 20px; border-radius: 10px 10px 0 0; }
+        .leg.right { right: 20px; border-radius: 10px 10px 0 0; }
+
+        .shoe {
+            position: absolute;
+            background-color: #c93a40; /* Merah sama dengan tubuh */
+            width: 30px;
+            height: 15px;
+            border-radius: 15px 15px 5px 5px;
+            bottom: -10px;
+            left: -5px;
         }
         
-        .delay-100 { animation-delay: 100ms; }
-        .delay-200 { animation-delay: 200ms; }
-        .delay-300 { animation-delay: 300ms; }
-
-        @keyframes fadeInUp {
-            to { opacity: 1; transform: translateY(0); }
+        .shadow {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 15px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 50%;
+            z-index: 0;
+            animation: shadowScale 2s ease-in-out infinite alternate;
         }
 
-        @keyframes slideWords {
-            0%, 22% { transform: translateY(0); }
-            33%, 55% { transform: translateY(-25%); }
-            66%, 88% { transform: translateY(-50%); }
-            100% { transform: translateY(-75%); }
+        /* Lengan yang Diam (Lengan Luar) */
+        .char-left .arm-left {
+            height: 90px;
+            top: 40px;
+            left: -10px;
+            transform: rotate(10deg);
+            z-index: 1;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #020202; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 26, 26, 0.4); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 26, 26, 0.8); }
+        .char-right .arm-right {
+            height: 90px;
+            top: 40px;
+            right: -10px;
+            transform: rotate(-10deg);
+            z-index: 1;
+        }
+
+        /* Lengan yang Memukul (Lengan Dalam yang berhadapan) */
+        .char-left .arm-right {
+            height: 80px;
+            top: 40px;
+            right: -10px;
+            transform-origin: 17.5px 15px; /* Titik putar di bahu */
+            z-index: 10; /* Lengan di depan tubuh lawan */
+            animation: leftSwing 3s infinite;
+        }
+
+        .char-right .arm-left {
+            height: 80px;
+            top: 40px;
+            left: -10px;
+            transform-origin: 17.5px 15px; /* Titik putar di bahu */
+            z-index: 10; /* Lengan di depan tubuh lawan */
+            animation: rightSwing 3s infinite;
+        }
+
+        .bat {
+            position: absolute;
+            width: 15px;
+            height: 90px;
+            background-color: #5d1b1b;
+            border-radius: 10px;
+            bottom: -70px;
+        }
+
+        .char-left .arm-right .bat {
+            left: 10px;
+            transform: rotate(-20deg);
+        }
+
+        .char-right .arm-left .bat {
+            right: 10px;
+            transform: rotate(20deg);
+        }
+
+        .char-left {
+            animation: leftBodyFlinch 3s infinite;
+        }
         
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .char-right {
+             animation: rightBodyFlinch 3s infinite;
+        }
+
+        .char-left .mask {
+            animation: leftHeadOuch 3s infinite;
+        }
+
+        .char-right .mask {
+            animation: rightHeadOuch 3s infinite;
+        }
+
+        /* Giliran Kanan Memukul Kiri (Putaran 360 Derajat Penuh) */
+        @keyframes rightSwing {
+            0%, 10% { transform: rotate(0deg); }
+            15% { transform: rotate(-45deg); } /* Tarik ancang-ancang ke belakang */
+            20% { transform: rotate(110deg); } /* BAAAM! Kena kepala (Laju sangat cepat) */
+            35% { transform: rotate(360deg); } /* Lanjutkan putaran hingga 360 derajat */
+            35.1%, 100% { transform: rotate(0deg); } /* Transisi instan untuk reset */
+        }
+
+        /* Giliran Kiri Memukul Kanan (Putaran 360 Derajat Penuh) */
+        @keyframes leftSwing {
+            0%, 60% { transform: rotate(0deg); }
+            65% { transform: rotate(45deg); } /* Tarik ancang-ancang ke belakang */
+            70% { transform: rotate(-110deg); } /* BAAAM! Kena kepala (Laju sangat cepat) */
+            85% { transform: rotate(-360deg); } /* Lanjutkan putaran hingga 360 derajat */
+            85.1%, 100% { transform: rotate(0deg); } /* Transisi instan untuk reset */
+        }
+
+        /* Reaksi Karakter Kiri saat dipukul */
+        @keyframes leftHeadOuch {
+            0%, 18%, 35%, 100% { transform: rotate(0deg) translate(0, 0); }
+            20% { transform: rotate(-35deg) translate(-15px, 15px); } /* Kepala tertunduk kesakitan */
+        }
+
+        @keyframes leftBodyFlinch {
+            0%, 18%, 35%, 100% { transform: translateX(0) rotate(0deg); }
+            20% { transform: translateX(-15px) rotate(-5deg); } /* Tubuh terdorong */
+        }
+
+        /* Reaksi Karakter Kanan saat dipukul */
+        @keyframes rightHeadOuch {
+            0%, 68%, 85%, 100% { transform: rotate(0deg) translate(0, 0); }
+            70% { transform: rotate(35deg) translate(15px, 15px); } /* Kepala tertunduk kesakitan */
+        }
+
+        @keyframes rightBodyFlinch {
+            0%, 68%, 85%, 100% { transform: translateX(0) rotate(0deg); }
+            70% { transform: translateX(15px) rotate(5deg); } /* Tubuh terdorong */
+        }
+
+        @keyframes shadowScale {
+            0% { transform: translateX(-50%) scale(0.9); }
+            100% { transform: translateX(-50%) scale(1.1); }
+        }
+
+        #audio-toggle {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            padding: 12px 24px;
+            background-color: #1a2930;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        #audio-toggle:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
-<body class="antialiased font-sans bg-bg text-gray-200 overflow-x-hidden flex flex-col min-h-screen">
+<body>
+    <button id="audio-toggle">🔇 Aktifkan Suara</button>
 
-    <!-- Ambient Background / Cahaya Elegan -->
-    <div class="fixed inset-0 z-[-2] pointer-events-none overflow-hidden">
-        <div class="absolute w-[600px] h-[600px] bg-brand/20 top-[-10%] left-[-10%] rounded-full blur-[120px]"></div>
-        <div class="absolute w-[500px] h-[500px] bg-blue-600/10 bottom-[-10%] right-[-5%] rounded-full blur-[120px] animation-delay-2000"></div>
-        <div class="absolute w-[400px] h-[400px] bg-purple-600/10 top-[40%] left-[40%] rounded-full blur-[120px] animation-delay-4000"></div>
+    <div class="container">
+        <!-- Teks 404 di latar belakang -->
+        <div class="text-404">404</div>
+
+        <div class="characters">
+            <!-- Karakter Kiri -->
+            <div class="character char-left">
+                <div class="shadow"></div>
+                <div class="mask">
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="nose"></div>
+                </div>
+                <div class="arm arm-left"></div>
+                <div class="arm arm-right">
+                    <div class="bat"></div>
+                </div>
+                <div class="body"></div>
+                <div class="leg left"><div class="shoe"></div></div>
+                <div class="leg right"><div class="shoe"></div></div>
+            </div>
+
+            <!-- Karakter Kanan -->
+            <div class="character char-right">
+                <div class="shadow"></div>
+                <div class="mask">
+                    <div class="eye left"></div>
+                    <div class="eye right"></div>
+                    <div class="nose"></div>
+                </div>
+                <div class="arm arm-left">
+                    <div class="bat"></div>
+                </div>
+                <div class="arm arm-right"></div>
+                <div class="body"></div>
+                <div class="leg left"><div class="shoe"></div></div>
+                <div class="leg right"><div class="shoe"></div></div>
+            </div>
+        </div>
     </div>
-    
-    <!-- Grid pattern halus (Opsional untuk kesan profesional teknis) -->
-    <div class="fixed inset-0 z-[-1] pointer-events-none opacity-[0.03]" 
-         style="background-image: linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px); background-size: 40px 40px;">
-    </div>
 
-    <!-- NAVBAR -->
-    <nav class="fixed w-full z-50 top-4 px-4 md:px-8">
-        <div class="max-w-screen-2xl mx-auto flex justify-between items-center glass-pill px-5 py-3 shadow-lg shadow-black/50">
-            
-            <div class="flex items-center gap-3 cursor-pointer tab-btn group" data-target="home">
-                <img src="https://i.ibb.co.com/FLfrC2X8/logo.jpg" alt="Ailabs Logo" class="h-9 w-9 rounded-full border border-brand/50 shadow-[0_0_15px_rgba(255,26,26,0.8)] object-cover group-hover:scale-110 transition-transform duration-300">
-                <span class="font-display font-bold text-lg tracking-wide text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Ailabs</span>
-            </div>
-
-            <!-- Tab Menu -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium" id="nav-menu">
-                <button class="tab-btn text-white hover:text-white transition-all text-glow scale-105" data-target="home">Home</button>
-                <button class="tab-btn text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all" data-target="services">BANGpro labs</button>
-                <button class="tab-btn text-brand font-semibold hover:text-brand-light hover:drop-shadow-[0_0_10px_rgba(255,26,26,0.8)] transition-all" data-target="studio">Studio</button>
-                <button class="tab-btn text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all" data-target="gallery">Galery Prompt</button>
-                <button class="tab-btn text-gray-400 hover:text-white hover:drop-shadow-[0_0_8px_rgba(255,255,255,0.5)] transition-all" data-target="about">About</button>
-            </div>
-
-            <!-- Right CTA -->
-            <div class="flex items-center">
-                <button class="tab-btn hidden md:flex items-center gap-2 btn-brand px-6 py-2.5 rounded-full text-sm font-semibold text-white transition-all" data-target="contact">
-                    Contact <i class="fa-solid fa-arrow-right-arrow-left text-[10px] rotate-45"></i>
-                </button>
-                <button class="md:hidden text-white p-2 hover:text-brand transition-colors" id="mobile-menu-btn">
-                    <i class="fa-solid fa-bars text-xl"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="md:hidden mt-3 glass-pill px-4 py-4 max-h-0 opacity-0 overflow-hidden transition-all duration-300">
-            <div class="flex flex-col gap-5 text-center text-sm font-medium">
-                <button class="tab-btn text-white text-glow" data-target="home">Home</button>
-                <button class="tab-btn text-gray-300 hover:text-white" data-target="services">BANGpro labs</button>
-                <button class="tab-btn text-brand font-bold drop-shadow-[0_0_8px_rgba(255,26,26,0.5)]" data-target="studio">Studio</button>
-                <button class="tab-btn text-gray-300 hover:text-white" data-target="gallery">Galery Prompt</button>
-                <button class="tab-btn text-gray-300 hover:text-white" data-target="about">About</button>
-                <button class="tab-btn text-white btn-brand px-4 py-2 rounded-full w-2/3 mx-auto" data-target="contact">Contact</button>
-            </div>
-        </div>
-    </nav>
-
-    <main class="flex-grow pt-32 pb-12 relative z-10 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        
-        <!-- ==================== TAB 1: HOME ==================== -->
-        <section id="home" class="tab-content active min-h-[85vh] flex items-center relative">
-            
-            <!-- 3D Bot Container -->
-            <div id="bot-3d-container"></div>
-
-            <div class="w-full relative z-10 flex flex-col lg:flex-row justify-between gap-12 items-center">
-                <!-- Left: Typography -->
-                <div class="w-full lg:w-3/5 flex flex-col justify-center">
-                    <div class="animate-fade-in-up">
-                        <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-outline text-xs mb-6 font-mono shadow-[0_0_15px_rgba(255,26,26,0.2)]">
-                            <i class="fa-solid fa-circle text-[8px] animate-pulse text-brand shadow-[0_0_8px_rgba(255,26,26,1)]"></i> Developed by Bangpro
-                        </span>
-                    </div>
-
-                    <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] font-display font-bold leading-[1.1] tracking-tight mb-8 animate-fade-in-up delay-100 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
-                        Your AI <br>
-                        <span class="inline-block h-[1.05em] overflow-hidden align-top text-white relative">
-                            <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] animate-[shine_3s_infinite]"></span>
-                            <span class="block animate-[slideWords_8s_cubic-bezier(0.65,0,0.35,1)_infinite]">
-                                <span class="block h-[1.05em]">Sprint Team</span>
-                                <span class="block h-[1.05em]">Co-Pilot</span>
-                                <span class="block h-[1.05em]">Dev Engine</span>
-                                <span class="block h-[1.05em]">Sprint Team</span>
-                            </span>
-                        </span> <br>
-                        <span class="text-brand text-glow">On Demand</span>
-                    </h1>
-                    
-                    <div class="flex items-start gap-4 mb-10 max-w-md animate-fade-in-up delay-200 pointer-events-auto">
-                        <p class="text-gray-300 text-sm md:text-base font-light leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                            Eksplorasi mahakarya AI bersama Bangpro. Akses perpustakaan prompt harian, edukasi pengembangan AI, hingga pesanan sistem kustom dengan sentuhan profesional.
-                        </p>
-                    </div>
-
-                    <div class="flex flex-wrap gap-4 mb-16 animate-fade-in-up delay-300 pointer-events-auto w-full">
-                        <button class="tab-btn glass-pill px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition-all border border-white/20 shadow-lg w-full sm:w-auto" data-target="services">
-                            BANGpro labs
-                        </button>
-                        <button class="tab-btn btn-brand px-7 py-3.5 rounded-full text-sm font-semibold text-white w-full sm:w-auto" data-target="gallery">
-                            Lihat Galery Prompt
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Right: Bento Cards -->
-                <div class="hidden lg:flex w-full lg:w-1/3 justify-end items-center animate-fade-in-up delay-200 pointer-events-auto">
-                    <div class="flex flex-col gap-4 w-full max-w-sm">
-                        <div class="bento-card p-8 group">
-                            <div class="flex justify-between items-center mb-10 text-[10px] text-gray-300 font-mono">
-                                <span class="flex items-center gap-2"><i class="fa-solid fa-microchip text-white/50"></i> Ailabs Engine</span>
-                                <span class="text-brand flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span> Online</span>
-                            </div>
-                            <div class="mb-8 relative z-10">
-                                <h2 class="text-6xl font-display font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">230+</h2>
-                                <p class="text-xs text-gray-400 font-light">Prompt di Database.</p>
-                            </div>
-                            <div class="mb-10 border-t border-white/10 pt-6 relative z-10">
-                                <h2 class="text-5xl font-display font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-br from-white to-gray-400 drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)]">100%</h2>
-                                <p class="text-xs text-gray-400 font-light">Tingkat Keberhasilan Generasi</p>
-                            </div>
-                            <button class="tab-btn block w-full py-4 rounded-full text-center text-sm font-bold btn-brand relative z-10 uppercase tracking-wider" data-target="contact">
-                                Minta Akses API
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== TAB 2: SOLUSI AI ==================== -->
-        <section id="services" class="tab-content hidden animate-fade-in-up">
-            <div class="text-center mb-16 relative">
-                <!-- Cahaya di balik judul -->
-                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-32 bg-brand/30 blur-[80px] -z-10 rounded-full"></div>
-                
-                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-outline text-[10px] mb-6 font-mono shadow-[0_0_10px_rgba(255,26,26,0.1)]">
-                    <i class="fa-solid fa-graduation-cap text-[8px] text-white"></i> Exclusive Modules
-                </span>
-                <h2 class="text-4xl md:text-6xl font-display font-bold text-white mb-6 drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">BANGpro labs</h2>
-                <p class="text-gray-300 max-w-2xl mx-auto text-sm md:text-base font-light leading-relaxed">Eksplorasi materi premium, tutorial video, dan resource prompt eksklusif yang diperbarui langsung dari sistem kami.</p>
-            </div>
-
-            <!-- Container untuk List Video & Materi -->
-            <div id="labs-container" class="flex flex-col gap-8 max-w-5xl mx-auto min-h-[300px]">
-                <!-- Loading State -->
-                <div class="w-full flex flex-col items-center justify-center gap-4 bento-card p-16">
-                    <div class="relative w-12 h-12">
-                        <div class="absolute inset-0 border-4 border-brand/30 border-t-brand rounded-full animate-spin"></div>
-                    </div>
-                    <p class="text-xs font-mono tracking-widest uppercase text-gray-400 shadow-[0_0_10px_rgba(255,255,255,0.1)]">Sinkronisasi Modul Labs...</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== TAB 3: GALERY PROMPT ==================== -->
-        <section id="gallery" class="tab-content hidden animate-fade-in-up">
-            <div class="mb-12 flex flex-col md:flex-row justify-between items-end gap-6 relative z-10">
-                <div>
-                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-outline text-[10px] mb-4 font-mono shadow-[0_0_10px_rgba(255,26,26,0.1)]">
-                        <i class="fa-solid fa-database text-[8px] text-white"></i> Real-time Sync
-                    </span>
-                    <h2 class="text-4xl md:text-5xl font-display font-bold text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">Galery Prompt</h2>
-                    <p class="text-gray-300 text-sm md:text-base mt-3 font-light">Koleksi prompt harian Bangpro dari Spreadsheet terenkripsi.</p>
-                </div>
-                
-                <div class="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-                    <div class="relative w-full md:w-72">
-                        <i class="fa-solid fa-magnifying-glass absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                        <input type="text" id="prompt-search" placeholder="Cari karya agung..." oninput="filterPrompts()" class="w-full pl-12 pr-5 py-3 glass-pill text-white text-sm focus:outline-none focus:border-brand/60 focus:shadow-[0_0_15px_rgba(255,26,26,0.3)] transition-all placeholder:text-gray-500">
-                    </div>
-
-                    <div class="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 hide-scrollbar" id="category-filters">
-                        <button onclick="setCategory('all')" class="cat-btn px-5 py-3 rounded-full text-xs font-bold transition-all btn-brand text-white whitespace-nowrap shadow-lg">All</button>
-                        <button onclick="setCategory('photo')" class="cat-btn px-5 py-3 rounded-full text-xs font-semibold transition-all glass-pill text-gray-300 hover:text-white hover:bg-white/10 whitespace-nowrap">Photography</button>
-                        <button onclick="setCategory('cinematic')" class="cat-btn px-5 py-3 rounded-full text-xs font-semibold transition-all glass-pill text-gray-300 hover:text-white hover:bg-white/10 whitespace-nowrap">Cinematic</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Prompt Grid Container -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="prompt-grid">
-                <!-- Dirender via JS -->
-            </div>
-        </section>
-
-        <!-- ==================== TAB: STUDIO ==================== -->
-        <section id="studio" class="tab-content hidden animate-fade-in-up">
-            <div class="mb-10 flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
-                <div>
-                    <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-outline text-[10px] mb-4 font-mono shadow-[0_0_10px_rgba(255,26,26,0.1)]">
-                        <i class="fa-solid fa-code text-[8px] text-white"></i> Web Application
-                    </span>
-                    <h2 class="text-4xl md:text-5xl font-display font-bold text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">Ailabs Studio</h2>
-                    <p class="text-gray-300 text-sm mt-3 font-light">Workspace eksklusif dengan UI kaca premium untuk model AI kustom.</p>
-                </div>
-                
-                <a href="https://ai-labs-by-pro.vercel.app/" target="_blank" rel="noopener noreferrer" class="btn-brand px-7 py-3.5 rounded-full text-sm font-bold text-white flex items-center gap-3 shadow-[0_5px_20px_rgba(255,26,26,0.5)]">
-                    Luncurkan Studio <i class="fa-solid fa-rocket text-xs"></i>
-                </a>
-            </div>
-
-            <!-- Iframe Container - Premium Glass Wrapper -->
-            <div class="bento-card p-2 md:p-3 w-full h-[75vh] min-h-[400px] md:min-h-[600px] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
-                <div class="w-full h-full rounded-xl overflow-hidden bg-black relative border border-white/5 shadow-inner">
-                    <iframe 
-                        src="https://ai-labs-by-pro.vercel.app/" 
-                        class="w-full h-full border-0" 
-                        title="Ailabs Studio App"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowfullscreen>
-                    </iframe>
-                </div>
-            </div>
-        </section>
-
-        <!-- ==================== TAB 4: ABOUT ==================== -->
-        <section id="about" class="tab-content hidden animate-fade-in-up">
-            <div class="max-w-4xl mx-auto mb-16 relative z-10 flex flex-col items-center text-center">
-                <span class="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest text-gray-400 font-mono mb-6 bg-white/5 px-4 py-1.5 rounded-full border border-white/10 shadow-[0_0_10px_rgba(255,255,255,0.05)]">
-                    <i class="fa-solid fa-circle text-brand text-[6px] text-glow animate-pulse"></i> Manifesto
-                </span>
-                <h2 class="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-white mb-10 leading-tight drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">
-                    Merancang <br>Masa Depan <span class="text-brand text-glow font-style-italic">Kecerdasan.</span>
-                </h2>
-                
-                <div class="bento-card p-8 md:p-12 text-left relative overflow-hidden group w-full">
-                    <!-- Cahaya ambient dalam card -->
-                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand/10 blur-[80px] group-hover:bg-brand/20 transition-all duration-700 pointer-events-none"></div>
-                    <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-blue-500/10 blur-[80px] group-hover:bg-blue-500/20 transition-all duration-700 pointer-events-none"></div>
-                    
-                    <i class="fa-solid fa-quote-left text-4xl text-white/10 mb-6 block drop-shadow-md"></i>
-                    
-                    <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed mb-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] relative z-10">
-                        Kami mendesain dan men-deploy solusi AI dengan arsitektur profesional dan estetika kelas atas. Setiap baris kode yang ditulis bertujuan untuk meningkatkan pengalaman pengguna di dunia nyata secara elegan.
-                    </p>
-                    
-                    <p class="text-base md:text-lg text-gray-300 font-light leading-relaxed drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] relative z-10">
-                        <strong class="text-white font-medium">Bangpro membangun aplikasi ini dengan tujuan awal untuk mempermudah pekerjaan.</strong> Sistem ini telah ditanamkan <span class="text-brand font-mono text-sm tracking-widest bg-brand/10 px-2 py-0.5 rounded border border-brand/20 shadow-[inset_0_0_5px_rgba(255,26,26,0.2)]">workflow</span> khusus yang dirancang untuk secara otomatis menghasilkan output dengan standar kualitas profesional secara konsisten.
-                    </p>
-                    
-                    <div class="mt-8 pt-6 border-t border-white/10 flex items-center justify-between relative z-10">
-                        <div class="flex items-center gap-3">
-                            <div class="w-11 h-11 rounded-full border border-white/20 overflow-hidden shadow-[0_0_15px_rgba(255,26,26,0.4)] bg-white/5 relative group/ava">
-                                <div class="absolute inset-0 bg-brand/20 opacity-0 group-hover/ava:opacity-100 transition-opacity duration-300"></div>
-                                <img src="https://i.ibb.co.com/QFfgpMLt/b9e80abcdf9d.jpg" alt="Bangpro Lead Architect" class="w-full h-full object-cover">
-                            </div>
-                            <div>
-                                <h3 class="text-sm font-bold text-white mb-0.5">Bangpro</h3>
-                                <p class="text-[10px] text-brand uppercase tracking-widest font-mono text-glow">Lead Architect</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Infinite Scroll Brands - Glassy style -->
-            <div class="glass-pill py-5 overflow-hidden border-x-0 rounded-none border-y-white/10 relative">
-                <div class="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#020202] to-transparent z-10"></div>
-                <div class="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-[#020202] to-transparent z-10"></div>
-                
-                <div class="flex whitespace-nowrap opacity-50 gap-16 items-center w-max animate-[scroll_30s_linear_infinite] hover:opacity-100 transition-opacity duration-500">
-                    <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest">Infrastruktur Terpercaya</span>
-                    <i class="fa-brands fa-microsoft text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <i class="fa-brands fa-aws text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <i class="fa-brands fa-google text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <i class="fa-brands fa-meta text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <i class="fa-brands fa-apple text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <i class="fa-brands fa-nvidia text-3xl drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
-                    <span class="text-[10px] font-mono text-gray-400 uppercase tracking-widest mx-8">Infrastruktur Terpercaya</span>
-                    <i class="fa-brands fa-microsoft text-3xl"></i>
-                    <i class="fa-brands fa-aws text-3xl"></i>
-                    <i class="fa-brands fa-google text-3xl"></i>
-                    <i class="fa-brands fa-meta text-3xl"></i>
-                    <i class="fa-brands fa-apple text-3xl"></i>
-                    <i class="fa-brands fa-nvidia text-3xl"></i>
-                </div>
-            </div>
-            <style>
-                @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-            </style>
-        </section>
-
-        <!-- ==================== TAB 5: CONTACT ==================== -->
-        <section id="contact" class="tab-content hidden animate-fade-in-up">
-            <div class="text-center mb-12 relative z-10">
-                <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-outline text-[10px] mb-4 font-mono shadow-[0_0_10px_rgba(255,26,26,0.1)]">
-                    <i class="fa-solid fa-satellite-dish text-[8px] text-white animate-pulse"></i> Saluran Komunikasi
-                </span>
-                <h2 class="text-4xl md:text-5xl font-display font-bold text-white drop-shadow-[0_5px_15px_rgba(0,0,0,0.8)]">Hubungi Tim Kami</h2>
-                <p class="text-gray-400 mt-3 text-sm md:text-base font-light">Pilih dan hubungi arsitek atau konsultan kami yang siap membantu Anda.</p>
-            </div>
-            
-            <div id="admin-profile-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto min-h-[300px]">
-                <!-- Loading State / Fallback UI saat data ditarik -->
-                <div class="col-span-full flex flex-col items-center justify-center gap-4 bento-card p-16">
-                    <div class="relative w-12 h-12">
-                        <div class="absolute inset-0 border-4 border-brand/30 border-t-brand rounded-full animate-spin"></div>
-                    </div>
-                    <p class="text-xs font-mono tracking-widest uppercase text-gray-400 shadow-[0_0_10px_rgba(255,255,255,0.1)]">Sinkronisasi Data Tim...</p>
-                </div>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="border-t border-white/10 bg-[#020202]/80 backdrop-blur-md py-8 relative z-10 mt-auto">
-        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-gray-500 font-mono uppercase tracking-widest">
-            <div class="flex items-center gap-4">
-                <div class="flex items-center gap-2">
-                    <div class="p-1 rounded-md bg-white/5 border border-white/10">
-                        <img src="https://i.ibb.co.com/FLfrC2X8/logo.jpg" alt="Ailabs Logo" class="h-7 w-7 rounded shadow-inner object-cover grayscale opacity-70">
-                    </div>
-                    <div class="w-9 h-9 rounded-full border border-brand/40 overflow-hidden shadow-[0_0_10px_rgba(255,26,26,0.3)] bg-white/5">
-                        <img src="https://i.ibb.co.com/QFfgpMLt/b9e80abcdf9d.jpg" alt="Bangpro" class="w-full h-full object-cover">
-                    </div>
-                </div>
-                <span>&copy; 2026 Ailabs Corp. <br>Designed by Bangpro.</span>
-            </div>
-            <div class="flex gap-6">
-                <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
-                <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
-                <a href="#" class="hover:text-white hover:text-glow transition-all"><i class="fa-brands fa-github text-lg"></i></a>
-                <a href="#" class="hover:text-[#0077b5] hover:drop-shadow-[0_0_8px_rgba(0,119,181,0.8)] transition-all"><i class="fa-brands fa-linkedin text-lg"></i></a>
-            </div>
-        </div>
-    </footer>
-
-    <!-- TAB NAVIGATION LOGIC -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            const tabContents = document.querySelectorAll('.tab-content');
-            const navMenuLinks = document.querySelectorAll('#nav-menu .tab-btn');
+        const audioBtn = document.getElementById('audio-toggle');
+        let isPlaying = false;
+        let loop;
 
-            function switchTab(targetId) {
-                // Hide all contents
-                tabContents.forEach(content => {
-                    content.classList.add('hidden');
-                    content.classList.remove('active');
-                });
+        audioBtn.addEventListener('click', async () => {
+            if (!isPlaying) {
+                // Meminta izin browser untuk memulai Audio Context
+                await Tone.start();
+                isPlaying = true;
+                audioBtn.innerText = "🔊 Suara Nyala";
+                audioBtn.style.backgroundColor = "#c93a40"; // Merah seperti tubuhnya
                 
-                // Reset styling for navbar buttons
-                navMenuLinks.forEach(btn => {
-                    btn.classList.remove('text-white', 'text-brand', 'text-brand-light', 'text-glow', 'scale-105');
-                    btn.classList.add('text-gray-400');
-                });
-
-                // Show target content
-                const targetContent = document.getElementById(targetId);
-                if(targetContent) {
-                    targetContent.classList.remove('hidden');
-                    void targetContent.offsetWidth; 
-                    targetContent.classList.add('active');
-                }
-
-                // Highlight active nav button
-                const activeNavBtn = document.querySelector(`#nav-menu .tab-btn[data-target="${targetId}"]`);
-                if(activeNavBtn) {
-                    activeNavBtn.classList.remove('text-gray-400');
-                    if(targetId === 'studio') {
-                        activeNavBtn.classList.add('text-brand', 'text-glow', 'scale-105');
-                    } else {
-                        activeNavBtn.classList.add('text-white', 'text-glow', 'scale-105');
-                    }
-                }
-
-                // Close mobile menu
-                const mobileMenu = document.getElementById('mobile-menu');
-                mobileMenu.classList.add('max-h-0', 'opacity-0');
-                mobileMenu.classList.remove('max-h-[400px]', 'opacity-100');
+                // Kita perlu me-restart animasi agar sinkron sempurna dengan siklus suara (3 detik)
+                const animatedElements = document.querySelectorAll('.char-left, .char-right, .char-left .mask, .char-right .mask, .char-left .arm-right, .char-right .arm-left');
+                animatedElements.forEach(el => el.style.animation = 'none');
+                void document.body.offsetHeight; // Memaksa browser untuk merender ulang secara instan (reflow)
+                animatedElements.forEach(el => el.style.animation = '');
                 
-                window.scrollTo({top: 0, behavior: 'smooth'});
+                // Suara "Bonk" untuk pukulan kepala (Membrane Synth menciptakan suara seperti drum/ketukan)
+                const bonkSynth = new Tone.MembraneSynth({
+                    pitchDecay: 0.1,
+                    octaves: 3,
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 }
+                }).toDestination();
+
+                // Suara "Wush" untuk ayunan tongkat (Noise Synth menciptakan suara desisan angin)
+                const whooshSynth = new Tone.NoiseSynth({
+                    noise: { type: "pink" },
+                    envelope: { attack: 0.05, decay: 0.1, sustain: 0, release: 0.1 }
+                }).toDestination();
+                whooshSynth.volume.value = -12; // Kecilkan sedikit volume suara anginnya
+
+                Tone.Transport.stop();
+                Tone.Transport.cancel();
+
+                // Loop sepanjang 3 detik, persis sama dengan durasi animasi CSS kita
+                loop = new Tone.Loop((time) => {
+                    // Karakter Kanan memukul (Titik puncak (BAAAM) animasi CSS ada di 20% dari 3 detik = 0.6 detik)
+                    whooshSynth.triggerAttackRelease("16n", time + 0.35); // Angin berayun duluan
+                    bonkSynth.triggerAttackRelease("G2", "8n", time + 0.6); // Suara pantulan kepala (Pitch G2)
+
+                    // Karakter Kiri memukul (Titik puncak (BAAAM) animasi CSS ada di 70% dari 3 detik = 2.1 detik)
+                    whooshSynth.triggerAttackRelease("16n", time + 1.85); // Angin berayun
+                    bonkSynth.triggerAttackRelease("C2", "8n", time + 2.1); // Suara pantulan kepala (Pitch C2, beda nada)
+                }, 3).start(0);
+
+                Tone.Transport.start();
+            } else {
+                // Matikan Suara jika tombol diklik lagi
+                isPlaying = false;
+                audioBtn.innerText = "🔇 Aktifkan Suara";
+                audioBtn.style.backgroundColor = "#1a2930";
+                Tone.Transport.stop();
             }
-
-            // Attach event listeners
-            tabBtns.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const targetId = btn.getAttribute('data-target');
-                    if(targetId) switchTab(targetId);
-                });
-            });
-
-            // Mobile Menu Toggle
-            document.getElementById('mobile-menu-btn').addEventListener('click', () => {
-                const menu = document.getElementById('mobile-menu');
-                menu.classList.toggle('max-h-0');
-                menu.classList.toggle('opacity-0');
-                menu.classList.toggle('max-h-[400px]');
-                menu.classList.toggle('opacity-100');
-            });
-            
-            // Initialize default tab
-            switchTab('home');
         });
-    </script>
-
-    <!-- GOOGLE APPS SCRIPT LOGIC (GALLERY) -->
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbw0eDyFffDTeq1J3mgLuiqZkEiOIZ1UZdSZtApb0DeXRdzvtqyq_NQq3eMxB6AHjHuOaA/exec';
-        let promptDatabase = [];
-        
-        async function fetchPromptsFromSheets() {
-            const grid = document.getElementById('prompt-grid');
-            grid.innerHTML = `
-                <div class="col-span-full py-16 text-center flex flex-col items-center justify-center glass-pill">
-                    <div class="relative w-16 h-16 mb-4">
-                        <div class="absolute inset-0 border-4 border-brand/30 border-t-brand rounded-full animate-spin"></div>
-                    </div>
-                    <p class="text-xs font-mono tracking-widest uppercase text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]">Sinkronisasi Enkripsi Data...</p>
-                </div>
-            `;
-
-            try {
-                const response = await fetch(SCRIPT_URL);
-                
-                const textData = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(textData);
-                } catch (parseError) {
-                    throw new Error("HTML_RETURNED");
-                }
-                
-                const sheetData = Array.isArray(data) ? data : (data.data || []); 
-
-                promptDatabase = sheetData.map((item, index) => {
-                    const cat = (item.category || item.Category || 'photo').toLowerCase();
-                    // Sesuaikan badge kategori
-                    let colorClass = "text-white bg-white/10 border border-white/20";
-                    if(cat.includes('cinematic')) colorClass = "text-[#ffb3b3] bg-[#ff1a1a]/20 border border-[#ff1a1a]/30 shadow-[inset_0_1px_2px_rgba(255,26,26,0.5)]";
-                    else if(cat.includes('motion') || cat.includes('video')) colorClass = "text-blue-200 bg-blue-500/20 border border-blue-500/30 shadow-[inset_0_1px_2px_rgba(59,130,246,0.5)]";
-
-                    let imageLink = item.mediaUrl || item.mediaurl || null;
-
-                    return {
-                        id: item.id || 'p' + index,
-                        title: item.title || item.Title || 'Untitled Archive',
-                        category: cat,
-                        tagColor: colorClass,
-                        filename: item.filename || 'ai_core.sys',
-                        text: item.prompt || item.Prompt || item.text || '',
-                        image: imageLink,
-                        likes: item.likes || Math.floor(Math.random() * 500) + 10 
-                    };
-                });
-                renderPromptGrid();
-            } catch (error) {
-                console.warn("API Galery terkunci atau error, memuat data cadangan (dummy)...");
-                // Menampilkan dummy data agar UI tidak kosong/rusak
-                promptDatabase = [
-                    { id: 'dummy1', title: 'Cyberpunk Cityscape', category: 'cinematic', tagColor: 'text-[#ffb3b3] bg-[#ff1a1a]/20 border border-[#ff1a1a]/30 shadow-[inset_0_1px_2px_rgba(255,26,26,0.5)]', filename: 'cyber_city.sys', text: 'A highly detailed cinematic shot of a futuristic cyberpunk city, neon lights, rainy night, reflections on wet asphalt, 8k resolution, unreal engine 5.', image: 'https://images.unsplash.com/photo-1605806616949-1e87b487cb2a?q=80&w=800', likes: 245 },
-                    { id: 'dummy2', title: 'Macro Photography Eye', category: 'photo', tagColor: 'text-white bg-white/10 border border-white/20', filename: 'macro_eye.raw', text: 'Extreme macro photography of a human eye, glowing blue iris, intricate details, cinematic lighting, shot on 100mm macro lens.', image: 'https://images.unsplash.com/photo-1549692520-acc6669e2f0c?q=80&w=800', likes: 189 }
-                ];
-                renderPromptGrid();
-            }
-        }
-
-        let currentFilter = 'all';
-        let searchQuery = '';
-
-        function renderPromptGrid() {
-            const grid = document.getElementById('prompt-grid');
-            grid.innerHTML = '';
-
-            let filtered = promptDatabase.filter(item => {
-                const matchesCat = currentFilter === 'all' || item.category === currentFilter;
-                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || item.text.toLowerCase().includes(searchQuery.toLowerCase());
-                return matchesCat && matchesSearch;
-            });
-
-            if (filtered.length === 0) {
-                grid.innerHTML = `
-                    <div class="col-span-full py-16 text-center text-gray-400 font-light glass-pill">
-                        <i class="fa-solid fa-folder-open text-4xl mb-4 opacity-30"></i>
-                        <p>Arsip tidak ditemukan dalam database.</p>
-                    </div>`;
-                return;
-            }
-
-            filtered.forEach(item => {
-                const imageHTML = item.image 
-                    ? `<div class="w-full h-48 sm:h-56 mb-5 rounded-xl overflow-hidden border border-white/10 relative group/img bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
-                           <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent z-10 pointer-events-none"></div>
-                           <img src="${item.image}" alt="${item.title}" onerror="this.style.display='none'; this.parentElement.style.display='none';" class="w-full h-full object-cover transition-all duration-700 scale-100 group-hover/img:scale-110">
-                       </div>` 
-                    : '';
-
-                grid.innerHTML += `
-                    <div class="prompt-editor flex flex-col justify-between bento-card p-5 group/card">
-                        <div class="prompt-header flex justify-between items-center mb-5 relative z-10">
-                            <div class="flex items-center gap-3">
-                                <div class="flex gap-1.5 p-1.5 bg-black/40 rounded-full border border-white/10 shadow-inner">
-                                    <div class="w-2.5 h-2.5 rounded-full bg-red-500/80 shadow-[0_0_5px_rgba(239,68,68,0.8)]"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-500/80 shadow-[0_0_5px_rgba(234,179,8,0.8)]"></div>
-                                    <div class="w-2.5 h-2.5 rounded-full bg-green-500/80 shadow-[0_0_5px_rgba(34,197,94,0.8)]"></div>
-                                </div>
-                                <span class="text-[10px] font-mono text-gray-400 uppercase tracking-wider">${item.filename}</span>
-                            </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-[10px] text-gray-300 font-mono"><i class="fa-solid fa-heart text-[#ff1a1a] drop-shadow-[0_0_5px_rgba(255,26,26,0.8)]"></i> ${item.likes}</span>
-                                <button onclick="copyToClipboard('${item.id}', this)" class="text-xs font-bold text-white transition-all flex items-center gap-1.5 glass-pill px-4 py-2 hover:bg-white/10 hover:shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-                                    <i class="fa-regular fa-copy"></i> Salin
-                                </button>
-                            </div>
-                        </div>
-                        <div class="prompt-body flex-grow flex flex-col relative z-10">
-                            ${imageHTML}
-                            <h4 class="text-white font-bold text-base mb-3 flex items-center justify-between drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                                <span class="line-clamp-1">${item.title}</span>
-                                <span class="text-[9px] uppercase tracking-widest px-2.5 py-1 rounded-md ${item.tagColor}">${item.category}</span>
-                            </h4>
-                            <div class="relative group/text">
-                                <div class="absolute inset-0 bg-brand/5 blur-md rounded-xl opacity-0 group-hover/text:opacity-100 transition-opacity"></div>
-                                <p id="${item.id}" class="relative z-10 text-gray-300 font-mono text-xs leading-relaxed select-all bg-black/40 backdrop-blur-md p-4 rounded-xl border border-white/10 border-t-white/20 shadow-inner line-clamp-4 hover:line-clamp-none transition-all cursor-text focus:outline-brand">
-                                    ${item.text}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        function filterPrompts() {
-            searchQuery = document.getElementById('prompt-search').value;
-            renderPromptGrid();
-        }
-
-        function setCategory(cat) {
-            currentFilter = cat;
-            document.querySelectorAll('.cat-btn').forEach(btn => {
-                btn.className = "cat-btn px-5 py-3 rounded-full text-xs font-semibold transition-all glass-pill text-gray-300 hover:text-white hover:bg-white/10 whitespace-nowrap";
-            });
-            event.target.className = "cat-btn px-5 py-3 rounded-full text-xs font-bold transition-all btn-brand text-white whitespace-nowrap shadow-lg";
-            renderPromptGrid();
-        }
-
-        function copyToClipboard(elementId, btnElement) {
-            const textToCopy = document.getElementById(elementId).innerText.trim();
-            const textarea = document.createElement('textarea');
-            textarea.value = textToCopy;
-            textarea.style.position = 'fixed';
-            textarea.style.opacity = '0';
-            document.body.appendChild(textarea);
-            textarea.select();
-            
-            try {
-                document.execCommand('copy');
-                const originalHTML = btnElement.innerHTML;
-                const originalClasses = btnElement.className;
-                
-                btnElement.innerHTML = `<i class="fa-solid fa-check text-green-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.8)]"></i> Tersalin`;
-                btnElement.className = "text-xs font-bold text-white transition-all flex items-center gap-1.5 px-4 py-2 rounded-full border border-green-500/50 bg-green-500/20 shadow-[0_0_15px_rgba(74,222,128,0.3)]";
-                
-                setTimeout(() => { 
-                    btnElement.innerHTML = originalHTML; 
-                    btnElement.className = originalClasses;
-                }, 2000);
-            } catch (err) {
-                console.error('Gagal menyalin teks:', err);
-            } finally {
-                document.body.removeChild(textarea);
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchPromptsFromSheets();
-            fetchAdminData(); // Inisiasi sinkronisasi profil admin
-        });
-    </script>
-
-    <!-- GOOGLE APPS SCRIPT LOGIC (ADMIN CONTACT) -->
-    <script>
-        const ADMIN_API_URL = 'https://script.google.com/macros/s/AKfycbw0T7iuPaKqb0SOvv7e8x4xDTO0XZz2zdox7TQeuWjZCF18KqNRAaBFX4QRMMweA1EaZQ/exec';
-
-        async function fetchAdminData() {
-            const container = document.getElementById('admin-profile-container');
-            
-            try {
-                const response = await fetch(ADMIN_API_URL, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' },
-                    cache: 'no-store' 
-                });
-                
-                const textData = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(textData);
-                } catch (parseError) {
-                    throw new Error("HTML_RETURNED");
-                }
-                
-                const sheetData = Array.isArray(data) ? data : (data.data || []);
-                
-                container.innerHTML = '';
-                container.classList.remove('min-h-[300px]');
-
-                if (sheetData.length === 0) throw new Error("EMPTY_DATA");
-
-                const normalizeKeys = (obj) => {
-                    let result = {};
-                    for (let key in obj) { result[key.toLowerCase().trim()] = obj[key]; }
-                    return result;
-                };
-
-                sheetData.forEach((admin, index) => {
-                    const adminData = normalizeKeys(admin);
-                    const name = adminData.nama || adminData.name || 'Admin Ailabs';
-                    const photo = adminData.foto || adminData.photo || adminData.image || adminData.gambar || `https://placehold.co/400x400/1a1a1a/ff1a1a?text=${name.charAt(0)}`;
-                    const role = adminData.role || adminData.posisi || adminData.jabatan || 'Tim Eksekutif';
-                    const bio = adminData.bio || adminData.deskripsi || adminData.description || 'Menjembatani ide cemerlang Anda dengan arsitektur kecerdasan buatan kelas dunia.';
-                    const email = adminData.email || '';
-                    const whatsapp = adminData.whatsapp || adminData.wa || adminData.phone || adminData.nohp || '';
-
-                    let phoneStr = String(whatsapp).replace(/[^0-9]/g, '');
-                    if (phoneStr.startsWith('0')) phoneStr = '62' + phoneStr.substring(1);
-                    const waLink = phoneStr ? `https://wa.me/${phoneStr}` : '#';
-                    const delay = index * 100;
-
-                    const emailBtn = email ? `
-                        <a href="mailto:${email}" class="glass-pill p-3 text-white hover:bg-white/10 transition-all flex items-center justify-center shadow-lg hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]" title="Email ${name}">
-                            <i class="fa-regular fa-envelope text-lg"></i>
-                        </a>` : '';
-
-                    container.innerHTML += `
-                        <div class="bento-card p-6 md:p-8 flex flex-col items-center text-center relative overflow-hidden group animate-fade-in-up" style="animation-delay: ${delay}ms;">
-                            <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[150px] bg-gradient-to-b from-brand/10 to-transparent blur-[40px] pointer-events-none group-hover:from-brand/20 transition-all duration-700"></div>
-                            <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border border-white/20 p-1 mb-5 relative group/photo shadow-[0_10px_20px_rgba(0,0,0,0.6)] backdrop-blur-sm bg-white/5">
-                                <div class="absolute inset-0 bg-brand/30 rounded-full blur-xl -z-10 group-hover/photo:blur-2xl group-hover/photo:bg-brand/50 transition-all duration-700"></div>
-                                <img src="${photo}" alt="${name}" onerror="this.src='https://placehold.co/400x400/1a1a1a/ff1a1a?text=${name.charAt(0)}'" class="w-full h-full rounded-full object-cover">
-                            </div>
-                            <h3 class="text-2xl font-display font-bold mb-1 text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)] relative z-10">${name}</h3>
-                            <p class="text-[10px] text-brand uppercase tracking-widest font-mono mb-4 text-glow relative z-10">${role}</p>
-                            <p class="text-gray-300 text-xs md:text-sm font-light leading-relaxed mb-8 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] line-clamp-3 hover:line-clamp-none transition-all flex-grow relative z-10">${bio}</p>
-                            <div class="flex gap-3 w-full mt-auto relative z-10">
-                                ${emailBtn}
-                                <a href="${waLink}" target="_blank" class="btn-brand px-6 py-3 rounded-full text-white font-bold flex items-center justify-center gap-2 flex-grow shadow-[0_5px_15px_rgba(255,26,26,0.3)] text-sm">
-                                    <i class="fa-brands fa-whatsapp text-lg"></i> Chat WA
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                });
-            } catch (error) {
-                console.warn("API Contact terkunci, memuat data cadangan (dummy)...");
-                container.innerHTML = `
-                    <div class="bento-card p-6 md:p-8 flex flex-col items-center text-center relative overflow-hidden group animate-fade-in-up col-start-1 md:col-start-2">
-                        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[150px] bg-gradient-to-b from-brand/10 to-transparent blur-[40px] pointer-events-none group-hover:from-brand/20 transition-all duration-700"></div>
-                        <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border border-white/20 p-1 mb-5 relative group/photo shadow-[0_10px_20px_rgba(0,0,0,0.6)] backdrop-blur-sm bg-white/5">
-                            <img src="https://i.ibb.co.com/QFfgpMLt/b9e80abcdf9d.jpg" alt="Bangpro" class="w-full h-full rounded-full object-cover">
-                        </div>
-                        <h3 class="text-2xl font-display font-bold mb-1 text-white relative z-10">Bangpro</h3>
-                        <p class="text-[10px] text-brand uppercase tracking-widest font-mono mb-4 text-glow relative z-10">Lead Architect</p>
-                        <p class="text-gray-300 text-xs font-light mb-8 relative z-10">Data contoh. Harap perbarui setelan Google Sheet Contact Anda.</p>
-                        <div class="flex gap-3 w-full mt-auto relative z-10">
-                            <a href="#" class="btn-brand px-6 py-3 rounded-full text-white font-bold flex items-center justify-center gap-2 flex-grow text-sm"><i class="fa-brands fa-whatsapp"></i> Chat WA</a>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-    </script>
-
-    <!-- GOOGLE APPS SCRIPT LOGIC (BANGPRO LABS) -->
-    <script>
-        // MASUKKAN LINK API SPREADSHEET BARU ANDA DI SINI NANTI
-        const LABS_API_URL = 'https://script.google.com/macros/s/AKfycbygO1DpXxUdEyUejgLvQ3kd1gxO_mEYyWw9kDqtpWlZ2KBI0vNxPJw2iPYr2qOyZ2I/exec'; 
-
-        // Fungsi pembantu untuk mengubah link Google Drive menjadi Direct Download (BYPASS KOMPRESI)
-        function convertDriveLinkToEmbed(url) {
-            if (!url) return '';
-            try {
-                // Format standar: drive.google.com/file/d/ID_VIDEO/view
-                if (url.includes('drive.google.com/file/d/')) {
-                    const match = url.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
-                    if (match && match[1]) {
-                        // KEMBALI MENGGUNAKAN IFRAME PREVIEW GOOGLE DRIVE
-                        return `https://drive.google.com/file/d/${match[1]}/preview`;
-                    }
-                } 
-                // Format alternatif: drive.google.com/open?id=ID_VIDEO
-                else if (url.includes('drive.google.com/open?id=')) {
-                    const urlObj = new URL(url);
-                    const id = urlObj.searchParams.get('id');
-                    if (id) {
-                        return `https://drive.google.com/file/d/${id}/preview`;
-                    }
-                }
-            } catch (e) {
-                console.error("Gagal memproses URL video:", e);
-            }
-            return url;
-        }
-
-        // SISTEM AUTO-FORMATTER CERDAS UNTUK MEMPERCANTIK TEKS PROMPT
-        function formatPromptText(text) {
-            if (!text) return 'Tidak ada teks.';
-            
-            // Mengamankan HTML tags asli bawaan user agar tidak error
-            let safeText = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-            return safeText
-                // 1. Auto-Bold & Styling Mewah untuk "scene 1", "scene 2", dst.
-                .replace(/(scene\s+\d+)/gi, '<span class="text-brand font-bold uppercase tracking-widest text-sm block mt-6 mb-2 border-l-2 border-brand pl-2 bg-brand/10 py-1 shadow-[inset_0_0_10px_rgba(255,26,26,0.1)]">$1</span>')
-                
-                // 2. Auto-Bold untuk kata "Konsep" atau "Elemen dasar"
-                .replace(/(Konsep|Elemen dasar.*?:)/gi, '<strong class="text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">$1</strong>')
-                
-                // 3. Styling khusus untuk judul di antara ## Teks ##
-                .replace(/##\s*(.*?)\s*##/g, '<span class="text-brand-light font-bold block mt-4 mb-2 p-2.5 bg-brand/5 rounded-md border border-brand/20 shadow-inner">$1</span>')
-                
-                // 4. Styling khusus untuk catatan seperti #notes
-                .replace(/(#notes.*?)$/gim, '<span class="text-yellow-400/80 text-[10px] italic block mt-1"><i class="fa-solid fa-circle-info mr-1"></i> $1</span>')
-                
-                // 5. Fitur Markdown Manual: Jika Anda mengetik **tebal** di sheet, akan jadi tebal
-                .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>');
-        }
-
-        // FUNGSI UNTUK LAZY LOADING VIDEO (MEMUTAR FILE ASLI)
-        window.loadDriveVideo = function(containerId, videoUrl) {
-            const container = document.getElementById(containerId);
-            if(container) {
-                // Baik link dari YouTube maupun Google Drive Preview, kita gunakan iframe
-                container.innerHTML = `
-                    <iframe 
-                        src="${videoUrl}" 
-                        class="absolute inset-0 w-full h-full animate-fade-in-up bg-black shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] border-0"
-                        allow="autoplay; encrypted-media" 
-                        allowfullscreen>
-                    </iframe>
-                `;
-            }
-        };
-
-        async function fetchLabsData() {
-            const container = document.getElementById('labs-container');
-            
-            // Jika Anda belum menaruh URL API, kita tampilkan Dummy Data untuk Preview UI-nya
-            if (LABS_API_URL === 'URL_API_SPREADSHEET_BANGPRO_LABS_ANDA_DISINI') {
-                renderLabsData([
-                    {
-                        "Link Video": "https://www.youtube.com/embed/ScMzIvxBSi4", // Dummy
-                        "Prompt Image": "A highly detailed cinematic shot of a futuristic glassmorphism AI robot, glowing red neon eyes, hyperrealistic, 8k resolution, volumetric lighting, unreal engine 5 render.",
-                        "Motion Prompt": "Camera pans slowly from bottom to top, revealing the glowing robot, ambient dust particles floating in the air, smooth cinematic movement."
-                    },
-                    {
-                        "Link Video": "https://www.youtube.com/embed/ScMzIvxBSi4", // Dummy
-                        "Prompt Image": "Professional UI/UX design of a tech dashboard, dark mode, glossy glass panels, glowing red accents, holographic data charts, modern typography.",
-                        "Motion Prompt": "Holographic elements spin slowly, glass panels reflect the environment, subtle breathing animation on the buttons."
-                    }
-                ]);
-                return;
-            }
-
-            try {
-                const response = await fetch(LABS_API_URL, { redirect: 'follow' });
-                
-                const textData = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(textData);
-                } catch (parseError) {
-                    throw new Error("HTML_RETURNED");
-                }
-                
-                const sheetData = Array.isArray(data) ? data : (data.data || []);
-                renderLabsData(sheetData);
-            } catch (error) {
-                console.warn("Error fetching labs data, loading fallback:", error);
-                
-                // Fallback UI (Mencegah web blank / rusak)
-                const dummyData = [
-                    {
-                        "Link Video": "https://www.youtube.com/embed/ScMzIvxBSi4",
-                        "judul": "Modul Contoh (Akses API Terkunci)",
-                        "Prompt Image": "scene 1 Data Cadangan\n##\nKonsep Ini adalah data contoh. API Anda mengembalikan halaman HTML (Google Login).\n##\nElemen dasar: Untuk memperbaiki, buka Apps Script > Deploy > Kelola Deployment > Edit > Siapa yang memiliki akses: Siapa saja (Anyone).",
-                        "Motion Prompt": "scene 1 Data Cadangan\n##\nKonsep Pastikan Anda memilih 'Siapa saja', BUKAN 'Siapa saja yang memiliki Akun Google'.\n##\n#notes Jangan lupa simpan ulang / Deploy ulang dan pastikan link API tetap sama."
-                    }
-                ];
-                
-                renderLabsData(dummyData);
-            }
-        }
-
-        function renderLabsData(labsData) {
-            const container = document.getElementById('labs-container');
-            container.innerHTML = ''; // Bersihkan loading
-
-            if (labsData.length === 0) {
-                 container.innerHTML = `
-                    <div class="w-full flex flex-col items-center text-gray-400 bento-card p-12">
-                        <i class="fa-solid fa-photo-film text-4xl mb-4 opacity-50"></i>
-                        <p class="text-sm font-mono">Belum ada modul yang tersedia.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const normalizeKeys = (obj) => {
-                let result = {};
-                for (let key in obj) {
-                    result[key.toLowerCase().trim()] = obj[key];
-                }
-                return result;
-            };
-
-            labsData.forEach((item, index) => {
-                const data = normalizeKeys(item);
-                
-                // Ekstraksi 3 Kolom Sesuai Permintaan Anda (dengan antisipasi huruf besar/kecil)
-                const videoUrl = data.linkvideo || data['link video'] || data.video || '';
-                const promptImage = data.promptimage || data['prompt image'] || '';
-                const motionPrompt = data.motionprompt || data['motion prompt'] || '';
-                
-                // Memformat teks agar rapi, tebal, dan profesional menggunakan Auto-Formatter
-                const formattedPromptImage = formatPromptText(promptImage);
-                const formattedMotionPrompt = formatPromptText(motionPrompt);
-                
-                // Buat judul otomatis karena di sheet tidak ada kolom judul
-                const judul = data.judul || data.title || `Modul Session 0${index + 1}`;
-
-                // Ubah link Drive ke format Embed
-                const embedVideoUrl = convertDriveLinkToEmbed(videoUrl);
-                const delay = index * 150;
-                
-                // ID Unik untuk setiap container video
-                const videoContainerId = `vid-container-${index}`;
-
-                container.innerHTML += `
-                    <div class="bento-card p-4 md:p-6 flex flex-col md:flex-row gap-6 items-stretch animate-fade-in-up group relative overflow-hidden" style="animation-delay: ${delay}ms;">
-                        <!-- Cahaya hiasan di card -->
-                        <div class="absolute -right-20 -bottom-20 w-48 h-48 bg-brand/10 blur-[60px] group-hover:bg-brand/20 transition-all duration-700 pointer-events-none"></div>
-                        
-                        <!-- Kolom Video (Kiri) -->
-                        <div class="w-full md:w-[45%] relative rounded-xl overflow-hidden bg-[#050505] border border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex-shrink-0 group-hover:border-brand/30 transition-colors duration-500 min-h-[250px] flex">
-                            <!-- Video Container (Lazy Load) -->
-                            <div class="relative w-full h-full min-h-[250px]" id="${videoContainerId}"> 
-                                ${embedVideoUrl ? `
-                                    <!-- THUMBNAIL PLACEHOLDER -->
-                                    <div class="absolute inset-0 w-full h-full flex flex-col items-center justify-center cursor-pointer group/vid" onclick="loadDriveVideo('${videoContainerId}', '${embedVideoUrl}')">
-                                        <!-- Efek cahaya hover di dalam thumbnail -->
-                                        <div class="absolute inset-0 bg-brand/5 opacity-0 group-hover/vid:opacity-100 transition-opacity duration-700 blur-xl"></div>
-                                        
-                                        <!-- Tombol Play Premium -->
-                                        <div class="w-16 h-16 rounded-full border border-white/20 bg-black/60 flex items-center justify-center backdrop-blur-md group-hover/vid:border-brand group-hover/vid:bg-brand/20 group-hover/vid:shadow-[0_0_30px_rgba(255,26,26,0.5)] transition-all duration-300 relative z-10 scale-95 group-hover/vid:scale-110">
-                                            <i class="fa-solid fa-play text-white/80 ml-1 text-2xl group-hover/vid:text-white group-hover/vid:drop-shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-all"></i>
-                                        </div>
-                                        
-                                        <!-- Teks Bantuan -->
-                                        <span class="text-[10px] font-mono text-gray-500 mt-4 uppercase tracking-widest relative z-10 group-hover/vid:text-gray-300 transition-colors">
-                                            Muat Video <i class="fa-solid fa-bolt text-brand/70 ml-1"></i>
-                                        </span>
-                                    </div>
-                                ` : `
-                                    <div class="absolute inset-0 flex items-center justify-center text-gray-500 text-sm font-mono bg-black">
-                                        <i class="fa-solid fa-video-slash mr-2"></i> Video tidak tersedia
-                                    </div>
-                                `}
-                            </div>
-                        </div>
-
-                        <!-- Kolom Text Prompt (Kanan) -->
-                        <div class="w-full md:w-[55%] flex flex-col justify-center relative z-10 py-1">
-                            <span class="text-[10px] text-brand uppercase tracking-widest font-mono mb-1 text-glow inline-block">BANGpro Labs</span>
-                            <h3 class="text-2xl font-display font-bold text-white mb-5 drop-shadow-[0_2px_5px_rgba(0,0,0,0.8)] leading-tight">
-                                ${judul}
-                            </h3>
-                            
-                            <!-- Kotak Prompt Image -->
-                            <div class="mb-5">
-                                <div class="flex justify-between items-center mb-2 px-1">
-                                    <span class="text-[10px] text-gray-300 font-mono uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-image text-brand drop-shadow-[0_0_5px_rgba(255,26,26,0.8)]"></i> Prompt Image</span>
-                                    <button onclick="copyToClipboard('img-prompt-${index}', this)" class="text-[10px] glass-pill px-3 py-1 text-white hover:bg-white/10 font-bold flex items-center gap-1.5 shadow-md"><i class="fa-regular fa-copy"></i> Salin</button>
-                                </div>
-                                <div class="relative group/text">
-                                    <div id="img-prompt-${index}" class="text-gray-300 font-mono text-xs bg-black/60 p-4 rounded-xl border border-white/10 border-t-white/20 shadow-inner max-h-[250px] overflow-y-auto select-all focus:outline-brand leading-relaxed whitespace-pre-wrap">${formattedPromptImage || 'Tidak ada teks prompt.'}</div>
-                                </div>
-                            </div>
-
-                            <!-- Kotak Motion Prompt -->
-                            <div>
-                                <div class="flex justify-between items-center mb-2 px-1">
-                                    <span class="text-[10px] text-gray-300 font-mono uppercase tracking-widest flex items-center gap-1.5"><i class="fa-solid fa-video text-blue-400 drop-shadow-[0_0_5px_rgba(96,165,250,0.8)]"></i> Motion Prompt</span>
-                                    <button onclick="copyToClipboard('mot-prompt-${index}', this)" class="text-[10px] glass-pill px-3 py-1 text-white hover:bg-white/10 font-bold flex items-center gap-1.5 shadow-md"><i class="fa-regular fa-copy"></i> Salin</button>
-                                </div>
-                                <div class="relative group/text">
-                                    <div id="mot-prompt-${index}" class="text-gray-300 font-mono text-xs bg-black/60 p-4 rounded-xl border border-white/10 border-t-white/20 shadow-inner max-h-[350px] overflow-y-auto select-all focus:outline-brand leading-relaxed whitespace-pre-wrap">${formattedMotionPrompt || 'Tidak ada teks motion prompt.'}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-
-        // Jalankan fetch saat halaman dimuat
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchLabsData();
-        });
-    </script>
-
-    <!-- THREE.JS LIBRARY -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        function initRobot3D() {
-            const container = document.getElementById('bot-3d-container');
-            if(!container || container.children.length > 0) return;
-
-            const width = container.clientWidth || 500;
-            const height = container.clientHeight || 600;
-
-            const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-            camera.position.z = 12;
-
-            const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-            renderer.setSize(width, height);
-            
-            /* Optimasi HP: Batasi Pixel Ratio ke 1.5x. 
-               Mencegah GPU HP bekerja terlalu berat pada layar resolusi super tinggi, 
-               sehingga animasi 3D tetap sangat smooth dan HP tidak panas. */
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-            
-            // Tambahkan tone mapping agar lighting lebih dramatis dan glossy
-            renderer.toneMapping = THREE.ACESFilmicToneMapping;
-            renderer.toneMappingExposure = 1.2;
-            container.appendChild(renderer.domElement);
-
-            // Material yang sangat glossy (kaca gelap/obsidian)
-            const blackGlossMaterial = new THREE.MeshPhysicalMaterial({
-                color: 0x010101, 
-                metalness: 0.9, 
-                roughness: 0.05,
-                clearcoat: 1.0, 
-                clearcoatRoughness: 0.02, 
-                reflectivity: 1,
-                envMapIntensity: 2.0
-            });
-            const matteBlackMaterial = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.9 });
-            
-            // Material neon bercahaya
-            const neonRedMaterial = new THREE.MeshBasicMaterial({ color: 0xff1a1a });
-            const glowRedMaterial = new THREE.MeshBasicMaterial({ 
-                color: 0xff4d4d,
-                transparent: true,
-                opacity: 0.8
-            });
-
-            const botGroup = new THREE.Group();
-            const headGroup = new THREE.Group();
-
-            // Head & Screen
-            const headGeo = new THREE.SphereGeometry(2, 64, 64);
-            const head = new THREE.Mesh(headGeo, blackGlossMaterial);
-            head.scale.set(1.4, 1.1, 1.2);
-            headGroup.add(head);
-
-            const screenGeo = new THREE.SphereGeometry(1.9, 64, 64);
-            const screen = new THREE.Mesh(screenGeo, matteBlackMaterial);
-            screen.scale.set(1.3, 0.9, 1.25);
-            screen.position.z = 0.1;
-            headGroup.add(screen);
-
-            // Eyes & Smile
-            const eyeGeo = new THREE.TorusGeometry(0.25, 0.06, 16, 32, Math.PI);
-            const eyeL = new THREE.Mesh(eyeGeo, neonRedMaterial);
-            eyeL.position.set(-0.8, 0.3, 2.3);
-            eyeL.rotation.z = Math.PI / 8;
-            headGroup.add(eyeL);
-
-            const eyeR = new THREE.Mesh(eyeGeo, neonRedMaterial);
-            eyeR.position.set(0.8, 0.3, 2.3);
-            eyeR.rotation.z = -Math.PI / 8;
-            headGroup.add(eyeR);
-
-            const smileGeo = new THREE.TorusGeometry(0.5, 0.06, 16, 32, Math.PI);
-            const smile = new THREE.Mesh(smileGeo, neonRedMaterial);
-            smile.position.set(0, -0.3, 2.35);
-            smile.rotation.z = Math.PI;
-            headGroup.add(smile);
-
-            // Ears & Antenna
-            const earGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.4, 32);
-            const earL = new THREE.Mesh(earGeo, blackGlossMaterial);
-            earL.rotation.z = Math.PI / 2; earL.position.set(-2.8, 0, 0);
-            headGroup.add(earL);
-            
-            const earR = new THREE.Mesh(earGeo, blackGlossMaterial);
-            earR.rotation.z = Math.PI / 2; earR.position.set(2.8, 0, 0);
-            headGroup.add(earR);
-
-            const antennaGeo = new THREE.CylinderGeometry(0.05, 0.05, 1.5, 16);
-            const antenna = new THREE.Mesh(antennaGeo, blackGlossMaterial);
-            antenna.position.set(2.8, 1, 0); antenna.rotation.z = -0.2;
-            headGroup.add(antenna);
-
-            const bulbGeo = new THREE.SphereGeometry(0.25, 32, 32);
-            const bulb = new THREE.Mesh(bulbGeo, glowRedMaterial);
-            bulb.position.set(2.8, 1.8, 0); bulb.rotation.z = -0.2;
-            headGroup.add(bulb);
-
-            // Body
-            const bodyGeo = new THREE.SphereGeometry(1.6, 64, 64);
-            const body = new THREE.Mesh(bodyGeo, blackGlossMaterial);
-            body.scale.set(1.1, 1.1, 1.1);
-            body.position.y = -2.5;
-            botGroup.add(body);
-
-            // Chest Logo (Arc Reactor Style)
-            const chestLogoGroup = new THREE.Group();
-            const ringGeo = new THREE.TorusGeometry(0.5, 0.04, 32, 64);
-            const ring1 = new THREE.Mesh(ringGeo, neonRedMaterial);
-            const ring2 = new THREE.Mesh(ringGeo, neonRedMaterial);
-            ring2.rotation.x = Math.PI / 2; ring2.rotation.y = Math.PI / 4;
-            const ring3 = new THREE.Mesh(ringGeo, neonRedMaterial);
-            ring3.rotation.x = Math.PI / 2; ring3.rotation.y = -Math.PI / 4;
-            
-            const coreGeo = new THREE.SphereGeometry(0.18, 32, 32);
-            const core = new THREE.Mesh(coreGeo, glowRedMaterial);
-
-            chestLogoGroup.add(ring1, ring2, ring3, core);
-            chestLogoGroup.position.set(0, -2.5, 1.7);
-            botGroup.add(chestLogoGroup);
-
-            // Arms
-            const armGeo = new THREE.CylinderGeometry(0.4, 0.3, 2, 32);
-            const armL = new THREE.Mesh(armGeo, blackGlossMaterial);
-            armL.position.set(-2, -2.5, 0); armL.rotation.z = 0.5;
-            botGroup.add(armL);
-
-            const armRGroup = new THREE.Group();
-            const armR = new THREE.Mesh(armGeo, blackGlossMaterial);
-            armR.position.set(0, -1, 0);
-            armRGroup.add(armR);
-            const fingerGeo = new THREE.CylinderGeometry(0.1, 0.1, 0.6, 16);
-            const finger = new THREE.Mesh(fingerGeo, blackGlossMaterial);
-            finger.position.set(0, 0.3, 0.2);
-            armRGroup.add(finger);
-            armRGroup.position.set(2, -1.8, 0.5);
-            armRGroup.rotation.z = -2.5; armRGroup.rotation.x = -0.5;
-            botGroup.add(armRGroup);
-
-            // Legs
-            const legGeo = new THREE.CylinderGeometry(0.5, 0.5, 1, 32);
-            const legL = new THREE.Mesh(legGeo, blackGlossMaterial);
-            legL.position.set(-0.8, -4.5, 0); botGroup.add(legL);
-            const legR = new THREE.Mesh(legGeo, blackGlossMaterial);
-            legR.position.set(0.8, -4.5, 0); botGroup.add(legR);
-
-            botGroup.add(headGroup);
-            botGroup.position.y = 1;
-            scene.add(botGroup);
-
-            // LIGHTING YANG BIKIN GLOSSY & ELEGAN
-            scene.add(new THREE.AmbientLight(0xffffff, 0.3)); // Kurangi ambient agar shadow kuat
-            
-            // Key Light (Cahaya Utama Putih/Biru pucat)
-            const dirLight = new THREE.DirectionalLight(0xe6f2ff, 2.5);
-            dirLight.position.set(10, 15, 15); 
-            scene.add(dirLight);
-            
-            // Fill Light (Lembut dari bawah)
-            const fillLight = new THREE.DirectionalLight(0xffffff, 0.5);
-            fillLight.position.set(-10, -10, 10);
-            scene.add(fillLight);
-
-            // Rim Light Kiri (Merah)
-            const rimLightRed = new THREE.DirectionalLight(0xff1a1a, 3);
-            rimLightRed.position.set(-15, 5, -10); 
-            scene.add(rimLightRed);
-
-            // Rim Light Kanan (Biru untuk kontras profesional)
-            const rimLightBlue = new THREE.DirectionalLight(0x4da6ff, 2);
-            rimLightBlue.position.set(15, 5, -10); 
-            scene.add(rimLightBlue);
-
-            // Point light dari dada/wajah (Glow efek)
-            const redGlow = new THREE.PointLight(0xff1a1a, 2, 10);
-            redGlow.position.set(0, -2, 3); 
-            scene.add(redGlow);
-
-            let mouseX = 0, mouseY = 0, targetX = 0, targetY = 0;
-            const windowHalfX = window.innerWidth / 2;
-            const windowHalfY = window.innerHeight / 2;
-
-            document.addEventListener('mousemove', (event) => {
-                mouseX = (event.clientX - windowHalfX);
-                mouseY = (event.clientY - windowHalfY);
-            });
-
-            /* Optimasi Interaksi HP: Robot akan menatap arah usapan jari Anda */
-            document.addEventListener('touchmove', (event) => {
-                if(event.touches.length > 0) {
-                    mouseX = (event.touches[0].clientX - windowHalfX);
-                    mouseY = (event.touches[0].clientY - windowHalfY);
-                }
-            }, { passive: true }); // passive: true mencegah lag saat scrolling
-
-            window.addEventListener('resize', () => {
-                const newWidth = container.clientWidth || 500;
-                const newHeight = container.clientHeight || 600;
-                camera.aspect = newWidth / newHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(newWidth, newHeight);
-            });
-
-            const clock = new THREE.Clock();
-            function animate() {
-                requestAnimationFrame(animate);
-                const time = clock.getElapsedTime();
-
-                // Animasi dada
-                chestLogoGroup.rotation.y = time * 1.5;
-                chestLogoGroup.rotation.z = time * 0.8;
-                core.scale.setScalar(1 + Math.sin(time * 5) * 0.1);
-                redGlow.intensity = 2 + Math.sin(time * 5) * 0.5; // Denyut cahaya dada
-
-                // Float animasi
-                botGroup.position.y = 1 + Math.sin(time * 1.5) * 0.3;
-
-                // Rotasi ikuti mouse
-                targetX = mouseX * 0.001; targetY = mouseY * 0.001;
-                headGroup.rotation.y += 0.05 * (targetX - headGroup.rotation.y);
-                headGroup.rotation.x += 0.05 * (targetY - headGroup.rotation.x);
-                botGroup.rotation.y += 0.02 * (targetX * 0.5 - botGroup.rotation.y);
-
-                // Denyut antena
-                bulb.material.opacity = 0.6 + Math.sin(time * 8) * 0.4;
-
-                renderer.render(scene, camera);
-            }
-            animate();
-        }
-
-        if (document.readyState === 'complete') {
-            initRobot3D();
-        } else {
-            window.addEventListener('load', initRobot3D);
-            document.addEventListener('DOMContentLoaded', initRobot3D);
-        }
-    </script>
-
-    <!-- PWA Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => console.log('Ailabs PWA Engine Ready.'))
-                    .catch(err => console.log('Ailabs PWA Engine Failed.', err));
-            });
-        }
     </script>
 </body>
 </html>
