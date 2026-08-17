@@ -2,8 +2,16 @@
 <html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ailabs - Advanced AI Solutions</title>
+    
+    <!-- PWA / Native App Meta Tags -->
+    <meta name="theme-color" content="#020202">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://i.ibb.co.com/FLfrC2X8/logo.jpg">
+    <link rel="manifest" href="manifest.json">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +51,19 @@
             background-color: #020202;
             color: #ffffff;
             overflow-x: hidden;
+            
+            /* Optimasi Native App */
+            -webkit-tap-highlight-color: transparent; /* Hilangkan kedip biru saat tombol ditekan */
+            -webkit-touch-callout: none; /* Hilangkan menu popup saat tahan lama di gambar */
+            user-select: none; /* Teks tidak bisa diblok sembarangan seperti aplikasi asli */
+            padding-top: env(safe-area-inset-top); /* Proteksi Poni/Notch HP */
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        /* Izinkan blok/copy teks HANYA untuk elemen input dan teks prompt */
+        .select-all, input, textarea {
+            user-select: text !important;
+            -webkit-user-select: text !important;
         }
 
         /* Ambient Glow & 3D Container */
@@ -76,26 +97,17 @@
             }
         }
 
-        /* Ambient Light Animations (Cahaya-Cahaya Elegan) */
-        .ambient-light {
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(100px);
-            z-index: -2;
-            opacity: 0.5;
-            animation: orbFloat 15s infinite alternate ease-in-out;
-            pointer-events: none;
-            /* Optimasi Mobile: Akselerasi Hardware agar scroll mulus */
-            will-change: transform; 
-            transform: translateZ(0); 
+        @media (max-width: 768px) {
+            #bot-3d-container {
+                top: 40%;
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0.4; /* Sedikit transparan agar teks Home di HP tetap sangat jelas dibaca */
+            }
         }
 
-        @keyframes orbFloat {
-            0% { transform: translate(0, 0) scale(1); }
-            33% { transform: translate(40px, -60px) scale(1.2); }
-            66% { transform: translate(-30px, 40px) scale(0.8); }
-            100% { transform: translate(0, 0) scale(1); }
-        }
+        /* Sembunyikan scrollbar bawaan pada area scroll horizontal di HP */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* PREMIUM GLASSMORPHISM & GLOSSY EFFECTS */
         .glass-pill {
@@ -240,9 +252,9 @@
 
     <!-- Ambient Background / Cahaya Elegan -->
     <div class="fixed inset-0 z-[-2] pointer-events-none overflow-hidden">
-        <div class="ambient-light w-[600px] h-[600px] bg-brand/20 top-[-10%] left-[-10%]"></div>
-        <div class="ambient-light w-[500px] h-[500px] bg-blue-600/10 bottom-[-10%] right-[-5%] animation-delay-2000"></div>
-        <div class="ambient-light w-[400px] h-[400px] bg-purple-600/10 top-[40%] left-[40%] animation-delay-4000"></div>
+        <div class="absolute w-[600px] h-[600px] bg-brand/20 top-[-10%] left-[-10%] rounded-full blur-[120px]"></div>
+        <div class="absolute w-[500px] h-[500px] bg-blue-600/10 bottom-[-10%] right-[-5%] rounded-full blur-[120px] animation-delay-2000"></div>
+        <div class="absolute w-[400px] h-[400px] bg-purple-600/10 top-[40%] left-[40%] rounded-full blur-[120px] animation-delay-4000"></div>
     </div>
     
     <!-- Grid pattern halus (Opsional untuk kesan profesional teknis) -->
@@ -252,7 +264,7 @@
 
     <!-- NAVBAR -->
     <nav class="fixed w-full z-50 top-4 px-4 md:px-8">
-        <div class="max-w-7xl mx-auto flex justify-between items-center glass-pill px-5 py-3 shadow-lg shadow-black/50">
+        <div class="max-w-screen-2xl mx-auto flex justify-between items-center glass-pill px-5 py-3 shadow-lg shadow-black/50">
             
             <div class="flex items-center gap-3 cursor-pointer tab-btn group" data-target="home">
                 <img src="https://i.ibb.co.com/FLfrC2X8/logo.jpg" alt="Ailabs Logo" class="h-9 w-9 rounded-full border border-brand/50 shadow-[0_0_15px_rgba(255,26,26,0.8)] object-cover group-hover:scale-110 transition-transform duration-300">
@@ -292,10 +304,10 @@
         </div>
     </nav>
 
-    <main class="flex-grow pt-32 pb-12 relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <main class="flex-grow pt-32 pb-12 relative z-10 w-full max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- ==================== TAB 1: HOME ==================== -->
-        <section id="home" class="tab-content active min-h-[75vh] flex items-center relative">
+        <section id="home" class="tab-content active min-h-[85vh] flex items-center relative">
             
             <!-- 3D Bot Container -->
             <div id="bot-3d-container"></div>
@@ -309,7 +321,7 @@
                         </span>
                     </div>
 
-                    <h1 class="text-5xl md:text-7xl lg:text-[5.5rem] font-display font-bold leading-[1.1] tracking-tight mb-8 animate-fade-in-up delay-100 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
+                    <h1 class="text-4xl sm:text-5xl md:text-7xl lg:text-[5.5rem] font-display font-bold leading-[1.1] tracking-tight mb-8 animate-fade-in-up delay-100 drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
                         Your AI <br>
                         <span class="inline-block h-[1.05em] overflow-hidden align-top text-white relative">
                             <span class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-20deg] animate-[shine_3s_infinite]"></span>
@@ -329,11 +341,11 @@
                         </p>
                     </div>
 
-                    <div class="flex flex-wrap gap-4 mb-16 animate-fade-in-up delay-300 pointer-events-auto">
-                        <button class="tab-btn glass-pill px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition-all border border-white/20 shadow-lg" data-target="services">
+                    <div class="flex flex-wrap gap-4 mb-16 animate-fade-in-up delay-300 pointer-events-auto w-full">
+                        <button class="tab-btn glass-pill px-7 py-3.5 text-sm font-semibold text-white hover:bg-white/10 transition-all border border-white/20 shadow-lg w-full sm:w-auto" data-target="services">
                             BANGpro labs
                         </button>
-                        <button class="tab-btn btn-brand px-7 py-3.5 rounded-full text-sm font-semibold text-white" data-target="gallery">
+                        <button class="tab-btn btn-brand px-7 py-3.5 rounded-full text-sm font-semibold text-white w-full sm:w-auto" data-target="gallery">
                             Lihat Galery Prompt
                         </button>
                     </div>
@@ -437,7 +449,7 @@
             </div>
 
             <!-- Iframe Container - Premium Glass Wrapper -->
-            <div class="bento-card p-2 md:p-3 w-full h-[75vh] min-h-[600px] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
+            <div class="bento-card p-2 md:p-3 w-full h-[75vh] min-h-[400px] md:min-h-[600px] shadow-[0_20px_50px_rgba(0,0,0,0.8)]">
                 <div class="w-full h-full rounded-xl overflow-hidden bg-black relative border border-white/5 shadow-inner">
                     <iframe 
                         src="https://ai-labs-by-pro.vercel.app/" 
@@ -542,7 +554,7 @@
 
     <!-- FOOTER -->
     <footer class="border-t border-white/10 bg-[#020202]/80 backdrop-blur-md py-8 relative z-10 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-gray-500 font-mono uppercase tracking-widest">
+        <div class="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6 text-[10px] text-gray-500 font-mono uppercase tracking-widest">
             <div class="flex items-center gap-4">
                 <div class="flex items-center gap-2">
                     <div class="p-1 rounded-md bg-white/5 border border-white/10">
@@ -1376,6 +1388,17 @@
         } else {
             window.addEventListener('load', initRobot3D);
             document.addEventListener('DOMContentLoaded', initRobot3D);
+        }
+    </script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('Ailabs PWA Engine Ready.'))
+                    .catch(err => console.log('Ailabs PWA Engine Failed.', err));
+            });
         }
     </script>
 </body>
