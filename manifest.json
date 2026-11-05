@@ -1,11 +1,13 @@
 {
-  "name": "Ai Labs",
-  "short_name": "Ai Labs",
-  "description": "AI Labs - A curated platform for AI tools, prompts, and creativity.",
+  "name": "Ailabs",
+  "short_name": "Ailabs",
+  "description": "Ailabs - Pintu Masuk, Studio, Labs, dan Galery.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#0a0a0f",
-  "theme_color": "#0a0a0f",
+  "orientation": "portrait",
+  "theme_color": "#020202",
+  "background_color": "#020202",
   "icons": [
     {
       "src": "icons/icon-192.png",
